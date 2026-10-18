@@ -25,7 +25,8 @@ body{margin:0;background:var(--night);color:var(--white);font-family:var(--f-bod
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 main{position:relative;z-index:1;max-width:900px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 .wordmark{width:min(220px,56%);filter:drop-shadow(0 4px 14px rgba(0,0,0,.6))}
-h1{font-family:var(--f-head);font-weight:400;font-size:clamp(40px,11vw,60px);line-height:.95;margin:0;letter-spacing:.06em;color:var(--white)}
+@font-face{font-family:"Mostwasted";src:url(fonts/Mostwasted.ttf) format("truetype");font-display:swap}
+h1{font-family:"Mostwasted",var(--f-head);font-weight:400;letter-spacing:0 !important;font-size:clamp(40px,11vw,60px);line-height:.95;margin:0;letter-spacing:.06em;color:var(--white)}
 h1::after{content:"";display:block;width:64px;height:3px;margin:10px auto 0;border-radius:2px;background:var(--split)}
 .stage{position:relative;width:100%;height:min(64vh,540px);min-height:360px}
 .stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
@@ -35,22 +36,28 @@ h1::after{content:"";display:block;width:64px;height:3px;margin:10px auto 0;bord
 .loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-head);font-size:24px;letter-spacing:.2em;color:var(--muted)}
 .hint{display:flex;gap:10px 22px;justify-content:center;flex-wrap:wrap;margin:0;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .hint b{color:var(--white);font-weight:700}
-.odds{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:460px;margin-top:6px}
-.odds div{border:1px solid var(--line);border-radius:12px;padding:10px 4px 8px;background:color-mix(in srgb,var(--steel) 80%,transparent);backdrop-filter:blur(6px)}
+.odds{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:520px;margin-top:6px}
+.odds div{border:1px dashed rgba(255,255,255,.18);border-radius:6px;transition:transform .2s;padding:10px 4px 8px;background:color-mix(in srgb,var(--steel) 80%,transparent);backdrop-filter:blur(6px)}
 .odds b{display:block;font-family:var(--f-head);font-weight:400;font-size:28px;line-height:1;color:var(--white)}
-.odds span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.odds span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.odds div:nth-child(odd){transform:rotate(-2deg)}.odds div:nth-child(even){transform:rotate(1.5deg)}.odds div:hover{transform:translateY(-3px) rotate(0)}
 .odds .jp{border:1px solid transparent;background:linear-gradient(var(--steel),var(--steel)) padding-box,var(--split) border-box}
-.odds .jp b{font-size:22px;line-height:1.27;color:var(--gold)}
+.odds .jp b{font-family:"Mostwasted",var(--f-head);font-size:22px;line-height:1.27;color:var(--gold)}
 .result{width:100%;max-width:460px;box-sizing:border-box;border-radius:18px;padding:22px 18px;display:flex;flex-direction:column;gap:10px;
   background:linear-gradient(var(--steel),#0d111a) padding-box,var(--split) border-box;border:1.5px solid transparent;
   box-shadow:0 24px 50px rgba(0,0,0,.55);animation:pop .55s cubic-bezier(.2,1.5,.4,1)}
 @keyframes pop{from{transform:translateY(16px) scale(.92);opacity:0}}
-.result h2{margin:0;font-family:var(--f-tag);font-weight:400;font-size:28px;line-height:1.15;color:var(--white)}
+.result{position:relative;overflow:hidden;padding-top:30px;text-align:center}
+.result::before{content:"";position:absolute;inset:0 0 auto;height:10px;background:repeating-linear-gradient(-45deg,var(--red) 0 10px,var(--white) 10px 20px,var(--blue) 20px 30px,var(--white) 30px 40px);animation:pole 1.6s linear infinite}
+@keyframes pole{to{background-position:56.6px 0}}
+.code{position:relative}.code::before,.code::after{content:"";position:absolute;top:-14px;width:26px;height:26px;border-radius:50%;background:var(--night)}.code::before{left:-13px}.code::after{right:-13px}
+.result h2{margin:2px 0 4px;font-family:"Mostwasted",var(--f-tag);font-weight:400;font-size:clamp(30px,8.5vw,40px);line-height:1;color:var(--white);
+  text-shadow:0 2px 10px rgba(0,0,0,.6);transform:rotate(-2deg)}
 .result p{margin:0;font-size:16px;color:#c3c9d6}
 .result p b{color:var(--white)}
-.bono{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;border:1px dashed #ffc83d;background:rgba(255,200,61,.08)}
+.bono{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:4px;border:2px solid #ffc83d;background:rgba(255,200,61,.07);transform:rotate(-1.2deg);box-shadow:4px 4px 0 rgba(255,200,61,.25)}
 .bono b{color:#ffc83d;font-size:18px}.bono span{font-size:14px;color:#c3c9d6}
-.code{font-family:var(--f-head);font-size:40px;letter-spacing:.16em;color:var(--white);user-select:all;padding:8px 0;border-block:1px dashed rgba(255,255,255,.18)}
+.code{font-family:var(--f-head);font-size:46px;letter-spacing:.16em;color:var(--white);user-select:all;padding:12px 0 6px;margin:4px -18px;border-top:2px dashed rgba(255,255,255,.22);background:linear-gradient(transparent 60%,rgba(255,255,255,.04))}
 button{font:700 15px var(--f-body);letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(255,255,255,.14);border-radius:99px;padding:11px 22px;cursor:pointer;
   background:var(--white);color:var(--night);transition:transform .15s,background .2s}
 button:active{transform:scale(.96)}
@@ -59,14 +66,14 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 .demo{background:transparent;color:var(--muted);font-size:12px;border:0;text-decoration:underline}
 #gate{position:fixed;inset:0;z-index:15;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;text-align:center;background:var(--night)}
 #gate[hidden]{display:none}
-#gate h2{margin:0;font-family:var(--f-tag);font-weight:400;font-size:30px;color:var(--white)}
+#gate h2{margin:0;font-family:"Mostwasted",var(--f-tag);text-shadow:0 2px 10px rgba(0,0,0,.6);font-weight:400;font-size:30px;color:var(--white)}
 #gate p{margin:0;font-size:16px;color:#c3c9d6;max-width:320px}
 #gate input{font:600 22px var(--f-body);letter-spacing:.08em;text-align:center;width:min(300px,80vw);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:var(--steel);color:var(--white)}
 #gateErr{min-height:20px;color:#ff6b6b;font-size:14px}
 #flash{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;background:radial-gradient(circle,#fff,color-mix(in srgb,var(--gold) 50%,transparent) 40%,transparent 75%)}
 #flash.on{animation:flash 1.1s ease-out}
 @keyframes flash{10%{opacity:1}100%{opacity:0}}
-.rar{align-self:center;font-family:var(--f-head);font-size:16px;letter-spacing:.2em;padding:5px 14px;border-radius:99px;color:#fff;background:#3a4152}
+.rar{align-self:center;font-family:var(--f-head);font-size:16px;letter-spacing:.2em;padding:5px 14px;border-radius:4px;transform:rotate(3deg);box-shadow:0 0 0 2px var(--night),0 0 0 3px currentColor;color:#fff;background:#3a4152}
 .rar.r10{background:var(--blue)}.rar.r15{background:linear-gradient(90deg,var(--blue),var(--red))}
 .rar.rJP{color:var(--night);background:linear-gradient(90deg,#ffc83d,#fff3b0,#ffc83d);box-shadow:0 0 18px color-mix(in srgb,var(--gold) 60%,transparent)}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:5;width:100%;height:100%}
@@ -77,10 +84,17 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 #intro{position:fixed;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:22px;background:var(--night);transition:opacity .6s,visibility .6s}
 #intro.out{opacity:0;visibility:hidden}
 #intro img{width:min(240px,60vw);opacity:0;animation:inUp .7s .25s cubic-bezier(.2,.8,.2,1) forwards}
-.pole{width:22px;height:120px;border-radius:11px;position:relative;overflow:hidden;box-shadow:0 0 0 3px #d9dde5,0 0 0 4px #000,0 0 30px color-mix(in srgb,var(--blue) 50%,transparent)}
+.barber{display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 0 22px color-mix(in srgb,var(--blue) 45%,transparent));opacity:0;animation:inUp .6s cubic-bezier(.2,.8,.2,1) forwards}
+.barber i{display:block;background:linear-gradient(90deg,#6b717d,#f4f6fa 45%,#9aa1ad 60%,#4a4f59)}
+.barber .ball{width:20px;height:20px;border-radius:50%;margin-bottom:-2px;background:radial-gradient(circle at 35% 30%,#fff,#c3c8d1 45%,#5a606b)}
+.barber .cap{width:42px;height:12px;border-radius:6px 6px 3px 3px}
+.barber .cap.b{border-radius:3px 3px 6px 6px}
+.barber .base{width:30px;height:8px;border-radius:0 0 8px 8px}
+.pole{width:30px;height:110px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
 .pole::before{content:"";position:absolute;left:0;right:0;top:-51px;bottom:0;will-change:transform;
   background:repeating-linear-gradient(-45deg,var(--red) 0 10px,#fff 10px 18px,var(--blue) 18px 28px,#fff 28px 36px);animation:pole .6s linear infinite}
 .pole::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.45),transparent 40%,rgba(255,255,255,.35) 55%,transparent 70%,rgba(0,0,0,.4))}
+#intro .tagline{margin:-8px 0 0;font-family:var(--f-head);font-size:15px;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);opacity:0;animation:inUp .7s .6s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes pole{to{transform:translateY(51px)}}
 @keyframes inUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 #dim{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .5s;background:radial-gradient(circle at 50% 42%,transparent 18%,rgba(0,0,0,.88) 60%)}
@@ -93,7 +107,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 <body>
 
 <div class="bg"></div>
-<div id="intro" aria-hidden="true"><div class="pole"></div><img src="wordmark.png" alt=""></div>
+<div id="intro" aria-hidden="true"><div class="barber"><i class="ball"></i><i class="cap"></i><div class="pole"></div><i class="cap b"></i><i class="base"></i></div><img src="wordmark.png" alt=""><p class="tagline">Barbershop · Desde 2020</p></div>
 <div id="dim"></div>
 <svg id="razor" viewBox="0 0 120 60" aria-hidden="true"><defs><linearGradient id="bl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#b9c0cc"/><stop offset="1" stop-color="#eef1f6"/></linearGradient></defs>
 <path d="M6 46 L58 20 Q66 16 70 22 L74 28 Q76 33 70 35 L14 52 Q6 54 6 46Z" fill="url(#bl)" stroke="#6b7386" stroke-width="1"/><path d="M10 49 L66 32" stroke="#fff" stroke-width="1.2" opacity=".9"/>
@@ -112,6 +126,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
     <div><b>10%</b><span>off</span></div>
     <div><b>15%</b><span>off</span></div>
     <div class="jp"><b>CORTE</b><span>gratis</span></div>
+    <div><b>+1</b><span>otro ticket</span></div>
   </div>
   <a href="https://wa.me/5492920605208?text=Hola!%20Quiero%20la%20promo%20de%202%20cortes%20por%20%2432.000%20(vengo%20con%20un%20amigo)" target="_blank" rel="noopener" style="display:block;margin:14px auto 0;max-width:420px;padding:14px 16px;border:1px solid var(--gold);border-radius:14px;text-align:center;color:var(--white);text-decoration:none;background:rgba(255,200,61,.08)"><b style="color:var(--gold);font-size:17px">👥 Traé un amigo: 2 cortes por $32.000</b><br><span style="font-size:13px;color:var(--muted)">$16.000 cada uno · Válido si vienen los dos juntos · Turnos con 2 hs de anticipación mínimo</span></a>
   <a href="https://instagram.com/lasvegashaircuts" target="_blank" rel="noopener" aria-label="Seguir a Las Vegas Barbería en Instagram" style="display:flex;align-items:center;gap:14px;margin:14px auto 0;max-width:420px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;color:var(--white);text-decoration:none;background:var(--steel)"><span style="flex:none;width:62px;height:62px;border-radius:50%;padding:3px;background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)"><img src="logo.png" alt="" width="56" height="56" style="display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid var(--steel);box-sizing:border-box"></span><span style="flex:1;min-width:0;text-align:left"><b style="display:block;font-size:16px">lasvegashaircuts</b><span style="display:block;font-size:12.5px;color:var(--muted);line-height:1.35;margin-top:2px">LAS VEGAS • NOS ENCARGAMOS DE TU BELLEZA</span></span><span style="flex:none;padding:8px 14px;border-radius:8px;background:#0095f6;color:#fff;font-size:14px;font-weight:700">Seguir</span></a>
@@ -267,24 +282,45 @@ function makeBoard(){
   for(let i=8;i>0;i--){const j=Math.floor(rnd()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
   return list;
 }
+// bolitas metálicas con brillo holográfico; cada premio tiene su color
+const BALL={ "5":["#d8fff6","#3fc9b0","#0d4a44"], "10":["#dbe9ff","#4d84ff","#14285e"], "15":["#ffe0f2","#e0559e","#5a1238"],
+  CUT:["#fff6c2","#e8b02a","#5c3a02"], EXTRA:["#f0e0ff","#9b5cff","#33115e"] };
 function drawBall(ctx,cx,cy,r,k){
-  const cut=k==="CUT",g=ctx.createRadialGradient(cx-r*.35,cy-r*.4,r*.1,cx,cy,r);
-  (cut?["#fff6c2","#ffc83d","#a86f0a"]:["#ffffff","#cfd5e1","#6b7385"]).forEach((c,i)=>g.addColorStop(i/2,c));
-  ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=12;ctx.shadowOffsetY=5;
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();
-  ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.lineWidth=3;ctx.strokeStyle="rgba(255,255,255,.55)";ctx.stroke();
-  ctx.fillStyle=ctx.strokeStyle=cut?"#2a1d00":"#2a3140";
-  if(cut){ctx.lineCap="round";ctx.lineWidth=r*.13;
-    for(const d of [-1,1]){ctx.beginPath();ctx.arc(cx+d*r*.3,cy+r*.4,r*.17,0,7);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(cx+d*r*.3,cy+r*.23);ctx.lineTo(cx-d*r*.32,cy-r*.55);ctx.stroke()}}
-  else{ctx.textAlign="center";ctx.font=`${r*(k==="10"||k==="15"?.95:1.1)}px "Bebas Neue",Impact,sans-serif`;
-    ctx.fillText(k==="EXTRA"?"+1":k+"%",cx,cy+r*.36)}
+  const cut=k==="CUT",[hi,mid,lo]=BALL[k];
+  ctx.save();ctx.shadowColor="rgba(0,0,0,.65)";ctx.shadowBlur=r*.5;ctx.shadowOffsetY=r*.22;
+  let g=ctx.createRadialGradient(cx-r*.35,cy-r*.45,r*.05,cx,cy,r*1.05);
+  g.addColorStop(0,hi);g.addColorStop(.45,mid);g.addColorStop(1,lo);
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();ctx.restore();
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.clip();
+  if(ctx.createConicGradient){const h=ctx.createConicGradient(k.length*1.3,cx,cy);   // reflejo holográfico
+    ["#ff7ad9","#7af0ff","#b7ff7a","#ffe27a","#c08bff","#ff7ad9"].forEach((c,i,a)=>h.addColorStop(i/(a.length-1),c));
+    ctx.globalCompositeOperation="overlay";ctx.globalAlpha=.35;ctx.fillStyle=h;ctx.fillRect(cx-r,cy-r,r*2,r*2)}
+  ctx.globalCompositeOperation="source-over";ctx.globalAlpha=1;
+  g=ctx.createLinearGradient(cx,cy-r,cx,cy+r);g.addColorStop(0,"rgba(255,255,255,0)");g.addColorStop(.75,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.45)");
+  ctx.fillStyle=g;ctx.fillRect(cx-r,cy-r,r*2,r*2);
+  g=ctx.createRadialGradient(cx-r*.38,cy-r*.5,0,cx-r*.38,cy-r*.5,r*.45);g.addColorStop(0,"rgba(255,255,255,.95)");g.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.fillStyle=g;ctx.fillRect(cx-r,cy-r,r*2,r*2);ctx.restore();
+  ctx.lineWidth=r*.07;ctx.strokeStyle="rgba(255,255,255,.6)";ctx.beginPath();ctx.arc(cx,cy,r*.97,0,7);ctx.stroke();   // bisel
+  ctx.lineWidth=r*.04;ctx.strokeStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.arc(cx,cy,r*.72,0,7);ctx.stroke();
+  // símbolo grabado: sombra oscura + luz clara desplazada
+  const ink=(dx,dy,c)=>{ctx.fillStyle=ctx.strokeStyle=c;
+    if(cut){ctx.lineCap="round";ctx.lineWidth=r*.12;
+      for(const d of [-1,1]){ctx.beginPath();ctx.arc(cx+dx+d*r*.26,cy+dy+r*.32,r*.15,0,7);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(cx+dx+d*r*.26,cy+dy+r*.17);ctx.lineTo(cx+dx-d*r*.28,cy+dy-r*.45);ctx.stroke()}}
+    else{ctx.textAlign="center";ctx.font=`${r*(k==="EXTRA"?1:.82)}px "Bebas Neue",Impact,sans-serif`;
+      ctx.fillText(k==="EXTRA"?"+1":k+"%",cx+dx,cy+dy+r*.3)}};
+  ink(0,r*.04,"rgba(255,255,255,.55)");ink(0,0,"rgba(15,18,26,.85)");
+  ctx.textAlign="center";ctx.fillStyle=cut?"#ffd66b":k==="EXTRA"?"#cfa8ff":"#e8ecf3";
+  ctx.font=`700 ${r*.42}px "Barlow Condensed",sans-serif`;
+  ctx.fillText(cut?"CORTE GRATIS":k==="EXTRA"?"OTRO TICKET":"DESCUENTO",cx,cy+r*1.55)
 }
+let balls=[];
 function drawBoard(ctx,R,list,head){
-  ctx.textAlign="center";ctx.fillStyle="#f4f6fa";ctx.font=`${R.h*.085}px "Permanent Marker",cursive`;
-  ctx.fillText("¡3 IGUALES Y GANÁS!",R.x+R.w/2,R.y+R.h*.1);
-  const gy=R.y+R.h*.16,ch=(R.h*.82)/3,cw=Math.min(R.w/3,ch*1.35),r=Math.min(ch,cw)*.4;
-  list.forEach((k,i)=>drawBall(ctx,R.x+R.w/2+((i%3)-1)*cw,gy+ch*(Math.floor(i/3)+.5),r,k));
+  ctx.textAlign="center";ctx.fillStyle="#f4f6fa";ctx.font=`${R.h*.09}px "Bebas Neue",Impact,sans-serif`;
+  ctx.fillText("3 IGUALES = PREMIO",R.x+R.w/2,R.y+R.h*.1);
+  const gy=R.y+R.h*.16,ch=(R.h*.82)/3,cw=Math.min(R.w/3,ch*1.35),r=Math.min(ch,cw)*.32;
+  balls=list.map((k,i)=>({k,x:R.x+R.w/2+((i%3)-1)*cw,y:gy+ch*(Math.floor(i/3)+.42),r}));
+  balls.forEach(b=>drawBall(ctx,b.x,b.y,b.r,b.k));
 }
 
 function drawBase(){
@@ -321,7 +357,7 @@ function drawBase(){
     engrave("★ EDICIÓN LIMITADA ★",CW/2,420,54,head,"center");
     engrave("Nº "+state.serial+"/5000",R.x,R.y+R.h+80,48,head);
     engrave("VÁLIDO 30 DÍAS",R.x+R.w,R.y+R.h+80,48,head,"right");
-    engrave("BARBERSHOP · 1 POR PERSONA",CW/2,R.y+R.h+160,40,`700 40px "Barlow Condensed"`.replace(/^700 40px /,""),"center");
+    engrave("BARBERSHOP · DESDE 2020 · 1 POR PERSONA",CW/2,R.y+R.h+160,40,`700 40px "Barlow Condensed"`.replace(/^700 40px /,""),"center");
     const S0=lay.stub;if(logo)logoPlate(S0.x+90,S0.y+75,300);
     engrave("ADMIT ONE",S0.x+420,S0.y+200,110,head);
     engrave("TICKET HOLOGRÁFICO ◆ SERIE VIP",S0.x+424,S0.y+260,40,head);
@@ -495,7 +531,12 @@ function scratch(p){
   lastP=p;dirty=true;if(++moves%15===0)check();
 }
 function check(){if(revealed)return;const R=lay.rect,d=coat.getContext("2d").getImageData(R.x,R.y,R.w,R.h).data;let n=0,c=0;
-  for(let i=3;i<d.length;i+=4*37){n++;if(d[i]<40)c++}progress=c/n/.75;if(c/n>.75)suspense()}
+  for(let i=3;i<d.length;i+=4*37){n++;if(d[i]<40)c++}progress=c/n/.75;
+  // se destapa todo cuando se ven las 3 bolitas ganadoras o las 9
+  const x=coat.getContext("2d"),seen=balls.filter(b=>{const s=Math.round(b.r*1.2),q=x.getImageData(Math.round(b.x-s/2),Math.round(b.y-s/2),s,s).data;
+    let m=0,o=0;for(let i=3;i<q.length;i+=4*5){m++;if(q[i]<40)o++}return o/m>.5}),cnt={};
+  seen.forEach(b=>cnt[b.k]=(cnt[b.k]||0)+1);
+  if(c/n>.75||seen.length===9||Object.values(cnt).some(v=>v>=3))suspense()}
 function drumroll(){if(!ac||muted)return;const t0=ac.currentTime;
   for(let i=0;i<22;i++){const t=t0+i*.055,src=ac.createBufferSource(),g=ac.createGain(),lp=ac.createBiquadFilter();
     src.buffer=noise.buffer;lp.type="lowpass";lp.frequency.value=420;g.gain.setValueAtTime(.05+i*.012,t);g.gain.exponentialRampToValueAtTime(.001,t+.07);
@@ -523,7 +564,7 @@ function showResult(){const b=$("resultBox");b.className="result";b.hidden=false
    ${state.redeemed?`<p><b>Este ticket ya fue canjeado.</b></p>`:`<p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>`}
    <div class="code" id="code">${state.code}</div><button id="copy">Copiar código</button>
    <p style="font-size:13px;color:var(--muted)">Sacale captura de pantalla para no perderlo.</p>
-   ${state.test?`<button id="again">Probar otro ticket (modo prueba)</button>`:""}`+share;
+   ${state.test?`<button id="again">Probar otro ticket (modo prueba)</button><a class="demo" href="admin.html" style="align-self:center">← Volver al panel de control</a>`:""}`+share;
   if(state.test)$("again").onclick=()=>location.reload();
   $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(state.code);$("copy").textContent="Copiado"}catch(e){getSelection().selectAllChildren($("code"))}}}
 if(state.done)showResult();
