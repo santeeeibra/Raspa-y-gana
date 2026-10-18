@@ -134,22 +134,23 @@ import * as THREE from "three";
 /* ---------- premio ---------- */
 const PRIZES=[
   {id:"NO",big:"¡CASI!",lbl:"ESTA VEZ NO HUBO PREMIO",w:20,none:true},
-  {id:"5",big:"5%",lbl:"DE DESCUENTO",w:40},
-  {id:"10",big:"10%",lbl:"DE DESCUENTO",w:24},
-  {id:"15",big:"15%",lbl:"DE DESCUENTO",w:13.6},
-  {id:"JP",big:"CORTE GRATIS",lbl:"¡PREMIO MAYOR!",w:2.4,jackpot:true},
+  {id:"EXTRA",big:"+1",lbl:"INTENTO MÁS",w:10,extra:true},
+  {id:"5",big:"5%",lbl:"DE DESCUENTO",w:35},
+  {id:"10",big:"10%",lbl:"DE DESCUENTO",w:21},
+  {id:"15",big:"15%",lbl:"DE DESCUENTO",w:11.9},
+  {id:"JP",big:"CORTE GRATIS",lbl:"¡PREMIO MAYOR!",w:2.1,jackpot:true},
 ];
 const KEY="lv-raspa-v2",$=id=>document.getElementById(id);
 const store={get(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}},
   set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}};
 /* El premio lo sortea el servidor (Supabase): un ticket por celular, el navegador no puede cambiarlo */
 const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
-async function claim(ph){const r=await fetch(SB+"/rest/v1/rpc/claim_ticket",{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify({p_phone:ph})});if(!r.ok)throw new Error(r.status);return r.json()}
+async function claim(ph,fn="claim_ticket"){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify({p_phone:ph})});if(!r.ok){let m="";try{m=(await r.json()).message}catch(e){}throw new Error(m||r.status)}return r.json()}
 function askPhone(){return new Promise(res=>{const g=$("gate"),f=$("gateForm"),e=$("gateErr");g.hidden=false;
   f.onsubmit=async ev=>{ev.preventDefault();const ph=f.phone.value.replace(/\D/g,"");
     if(ph.length<8||ph.length>15){e.textContent="Ingresá un número válido";return}
     e.textContent="";f.btn.disabled=true;
-    try{const t=await claim(ph);g.hidden=true;res({ph,t})}catch(x){e.textContent="No pudimos conectar. Probá de nuevo.";f.btn.disabled=false}}})}
+    try{const t=await claim(ph);g.hidden=true;res({ph,t})}catch(x){e.textContent=/limite_diario/.test(x.message)?"Ya se sacó un ticket hoy desde esta conexión. ¡Volvé mañana!":"No pudimos conectar. Probá de nuevo.";f.btn.disabled=false}}})}
 const saved=store.get();let got=null;
 if(saved&&saved.phone){try{got={ph:saved.phone,t:await claim(saved.phone)}}catch(e){}}
 if(!got)got=await askPhone();
@@ -452,15 +453,20 @@ function reveal(){revealed=true;mode=null;state.done=true;store.set({phone:state
   spin=Math.PI*2*(prize.jackpot?2:1);burst(prize.none?0:prize.jackpot?420:180);showResult();
   setTimeout(()=>$("resultBox").scrollIntoView({behavior:"smooth",block:"center"}),900)}
 function showResult(){const b=$("resultBox");b.className="result";b.hidden=false;
-  const rar=prize.none?"":`<div class="rar r${prize.id}">${{"5":"★ COMÚN","10":"★★ RARA","15":"★★★ ÉPICA","JP":"★★★★ LEGENDARIA"}[prize.id]}</div>`;
-  const title=prize.none?"Esta vez no hubo premio":prize.jackpot?"¡Ganaste un corte gratis!":"¡Ganaste "+prize.big+" de descuento!";
+  const rar=prize.none||prize.extra?"":`<div class="rar r${prize.id}">${{"5":"★ COMÚN","10":"★★ RARA","15":"★★★ ÉPICA","JP":"★★★★ LEGENDARIA"}[prize.id]}</div>`;
+  const title=prize.extra?"¡Ganaste un intento más!":prize.none?"Esta vez no hubo premio":prize.jackpot?"¡Ganaste un corte gratis!":"¡Ganaste "+prize.big+" de descuento!";
   const bono=`<div class="bono"><b>Bono de bienvenida: 25% OFF</b><span>en tu primer corte${prize.none?" · ¡tu premio de consuelo!":""}</span></div>`;
+  const share=`<a class="guia-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("Te regalo un ticket de Raspá y Ganá de Las Vegas Barbería. Podés ganar hasta un corte gratis: "+location.origin+location.pathname)}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:10px"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v12M7.5 7.5 12 3l4.5 4.5"/></svg>Pasale un ticket a un amigo</a>`;
+  if(prize.extra&&!state.redeemed){
+    b.innerHTML=`<h2>${title}</h2><p>Raspá otro ticket ahora mismo. El nuevo ticket ya no puede darte otro intento.</p><button id="extra">Raspar otro ticket</button>`+share;
+    $("extra").onclick=async()=>{const x=$("extra");x.disabled=true;x.textContent="Cargando…";
+      try{await claim(state.phone,"use_extra");store.set({phone:state.phone,done:false});location.reload()}catch(e){x.disabled=false;x.textContent="No pudimos conectar. Probá de nuevo."}};
+    return}
   b.innerHTML=`${rar}<h2>${title}</h2>${prize.none?"<p>Pero no te vas con las manos vacías:</p>":""}${bono}
    ${state.redeemed?`<p><b>Este ticket ya fue canjeado.</b></p>`:`<p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>`}
    <div class="code" id="code">${state.code}</div><button id="copy">Copiar código</button>
    <p style="font-size:13px;color:var(--muted)">Sacale captura de pantalla para no perderlo.</p>
-   ${state.test?`<button id="again">Probar otro ticket (modo prueba)</button>`:""}
-   <a class="guia-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("Te regalo un ticket de Raspá y Ganá de Las Vegas Barbería. Podés ganar hasta un corte gratis: "+location.origin+location.pathname)}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:10px"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v12M7.5 7.5 12 3l4.5 4.5"/></svg>Pasale un ticket a un amigo</a>`;
+   ${state.test?`<button id="again">Probar otro ticket (modo prueba)</button>`:""}`+share;
   if(state.test)$("again").onclick=()=>location.reload();
   $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(state.code);$("copy").textContent="Copiado"}catch(e){getSelection().selectAllChildren($("code"))}}}
 if(state.done)showResult();
