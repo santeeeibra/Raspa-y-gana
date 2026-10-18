@@ -459,9 +459,23 @@ function onTilt(ev){if(ev.beta==null)return;tiltX=THREE.MathUtils.clamp((ev.beta
 function askTilt(){if(tiltAsked)return;tiltAsked=true;const D=window.DeviceOrientationEvent;
   if(D&&typeof D.requestPermission==="function")D.requestPermission().then(r=>{if(r==="granted")addEventListener("deviceorientation",onTilt)}).catch(()=>{});
   else addEventListener("deviceorientation",onTilt)}
-cv.addEventListener("pointerdown",ev=>{audioOn();if(introT<1)return;cv.setPointerCapture(ev.pointerId);const p=hitUV(ev);
-  mode=!revealed&&inRect(p)?"scratch":"rotate";lastXY={x:ev.clientX,y:ev.clientY};lastP=null;if(mode==="scratch"){scratch(p);razorAt(ev,true)}});
-cv.addEventListener("pointermove",ev=>{if(!mode)return;
+/* zoom: rueda (PC), pellizco (celular), doble toque/clic para volver; con zoom, arrastrar con 2 dedos / clic derecho / Shift mueve el ticket */
+let zoom=1,zoomS=1,panX=0,panY=0,pinch=null;const ptrs=new Map();
+const setZoom=z=>{zoom=THREE.MathUtils.clamp(z,1,4);if(zoom===1){panX=panY=0}};
+const panBy=(dx,dy)=>{const k=2*camera.position.z*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/zoom/stage.clientHeight,lim=Math.max(TW,TH)*.5*(1-1/zoom)+.2;
+  panX=THREE.MathUtils.clamp(panX-dx*k,-lim,lim);panY=THREE.MathUtils.clamp(panY+dy*k,-lim,lim)};
+cv.addEventListener("wheel",ev=>{ev.preventDefault();setZoom(zoom*Math.exp(-ev.deltaY*.0015))},{passive:false});
+cv.addEventListener("dblclick",()=>setZoom(1));
+cv.addEventListener("pointerdown",ev=>{ptrs.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+  if(ptrs.size===2){const [p,q]=[...ptrs.values()];mode="pinch";rz.classList.remove("on");lastP=null;pinch={d:Math.hypot(p.x-q.x,p.y-q.y),z:zoom,mx:(p.x+q.x)/2,my:(p.y+q.y)/2};return}
+  if(ptrs.size>2)return;
+  audioOn();if(introT<1)return;cv.setPointerCapture(ev.pointerId);const p=hitUV(ev);
+  mode=ev.button===2||ev.shiftKey?"pan":!revealed&&inRect(p)?"scratch":"rotate";lastXY={x:ev.clientX,y:ev.clientY};lastP=null;if(mode==="scratch"){scratch(p);razorAt(ev,true)}});
+cv.addEventListener("pointermove",ev=>{if(ptrs.has(ev.pointerId))ptrs.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+  if(mode==="pinch"&&pinch&&ptrs.size===2){const [p,q]=[...ptrs.values()],mx=(p.x+q.x)/2,my=(p.y+q.y)/2;
+    setZoom(pinch.z*Math.hypot(p.x-q.x,p.y-q.y)/pinch.d);if(zoom>1)panBy(mx-pinch.mx,my-pinch.my);pinch.mx=mx;pinch.my=my;return}
+  if(!mode)return;
+  if(mode==="pan"){if(zoom>1)panBy(ev.clientX-lastXY.x,ev.clientY-lastXY.y);lastXY={x:ev.clientX,y:ev.clientY};return}
   if(mode==="rotate"){const dx=ev.clientX-lastXY.x,dy=ev.clientY-lastXY.y;tRotY+=dx*.012;tRotX=THREE.MathUtils.clamp(tRotX+dy*.008,-.7,.7);vel=dx*.012}
   else{const p=hitUV(ev);razorAt(ev,!!p);if(p){scratch(p);
     for(let i=0;i<3;i++)parts.push({x:ev.clientX,y:ev.clientY,vx:(Math.random()-.5)*4,vy:-Math.random()*3,life:45,c:Math.random()<.5?"#f4f6fa":"#9aa2b4",s:3+Math.random()*5,r:Math.random()*6,curl:1});
@@ -470,7 +484,9 @@ cv.addEventListener("pointermove",ev=>{if(!mode)return;
 const rz=$("razor");let rzA=0;
 function razorAt(ev,on){rz.classList.toggle("on",on);if(!on)return;const dx=ev.clientX-(lastXY?lastXY.x:ev.clientX);rzA+=(THREE.MathUtils.clamp(dx*1.5,-25,25)-rzA)*.3;
   rz.style.transform=`translate(${ev.clientX-11}px,${ev.clientY-49}px) rotate(${rzA}deg)`}
-const end=()=>{rz.classList.remove("on");askTilt();if(mode==="scratch")check();mode=null;lastP=null;idleAt=performance.now()};
+cv.addEventListener("contextmenu",ev=>ev.preventDefault());
+const end=ev=>{ptrs.delete(ev.pointerId);if(mode==="pinch"){if(ptrs.size<2){pinch=null;mode=null;lastP=null}return}
+  rz.classList.remove("on");askTilt();if(mode==="scratch")check();mode=null;lastP=null;idleAt=performance.now()};
 cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
 
 function scratch(p){
@@ -528,6 +544,7 @@ renderer.setAnimationLoop(now=>{
   // cada tanto, si nadie lo toca, da una vuelta lenta para lucir el cromo
   if(!mode&&introT>=1&&now>nextTurn&&now-idleAt>4000){slow=Math.PI*2;nextTurn=now+12000}
   if(slow>0){const s=Math.min(slow,.025+.03*Math.sin(slow/2));tRotY+=s;slow-=s}
+  zoomS+=(zoom-zoomS)*.18;if(Math.abs(zoom-zoomS)<.001)zoomS=zoom;camera.zoom=zoomS;camera.position.x=panX;camera.position.y=panY;camera.updateProjectionMatrix();
   rotX+=(tRotX-rotX)*.12;rotY+=(tRotY-rotY)*.12;
   pivot.rotation.set(rotX+tiltX,rotY+tiltY,0);pivot.position.y=reduce?0:Math.sin(t*1.4)*.04;pivot.position.z+=((tense?.35:0)-pivot.position.z)*.08;
   // presentación: el ticket sube desde abajo girando y se frena suave
