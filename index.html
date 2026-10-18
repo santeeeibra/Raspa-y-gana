@@ -564,7 +564,7 @@ function showResult(){const b=$("resultBox");b.className="result";b.hidden=false
    ${state.redeemed?`<p><b>Este ticket ya fue canjeado.</b></p>`:`<p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>`}
    <div class="code" id="code">${state.code}</div><button id="copy">Copiar código</button>
    <p style="font-size:13px;color:var(--muted)">Sacale captura de pantalla para no perderlo.</p>
-   ${state.test?`<button id="again">Probar otro ticket (modo prueba)</button>`:""}`+share;
+   ${state.test?`<button id="again">Probar otro ticket (modo prueba)</button><a class="demo" href="admin.html" style="align-self:center">← Volver al panel de control</a>`:""}`+share;
   if(state.test)$("again").onclick=()=>location.reload();
   $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(state.code);$("copy").textContent="Copiado"}catch(e){getSelection().selectAllChildren($("code"))}}}
 if(state.done)showResult();
