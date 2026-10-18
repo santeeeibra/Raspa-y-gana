@@ -165,6 +165,13 @@ function laser(mask,X,Y,w,h){
   a.drawImage(shaped(mask,rc,w,h),X,Y);
   bm.save();bm.filter="blur(2px)";bm.drawImage(shaped(mask,"#000",w,h),X,Y);bm.restore();
   m.drawImage(shaped(mask,"rgb(0,20,255)",w,h),X,Y)}                 // fondo del surco: espejo pulido
+function bevelFrame(x,y,w,h,r){        // marco grabado con surco arcoíris
+  a.lineWidth=6;a.strokeStyle="rgba(20,24,32,.8)";rr(a,x-2,y-2,w,h,r);a.stroke();
+  a.strokeStyle="rgba(255,255,255,.9)";rr(a,x+2,y+2,w,h,r);a.stroke();
+  a.lineWidth=4;a.strokeStyle=rainbow(a,x,y,w,h);rr(a,x,y,w,h,r);a.stroke();
+  bm.lineWidth=8;bm.strokeStyle="#000";rr(bm,x,y,w,h,r);bm.stroke()}
+function logoPlate(x,y,s){a.save();rr(a,x,y,s,s,24);a.clip();a.drawImage(chromeLogo(s),x,y,s,s);
+  a.globalAlpha=.25;a.globalCompositeOperation="overlay";a.fillStyle=rainbow(a,x,y,s,s);a.fillRect(x,y,s,s);a.restore();bevelFrame(x,y,s,s,24)}
 function logoMask(size){const c=document.createElement("canvas");c.width=c.height=size;const x=c.getContext("2d");
   x.drawImage(logo,0,0,size,size);const d=x.getImageData(0,0,size,size),p=d.data;
   for(let i=0;i<p.length;i+=4){const l=.3*p[i]+.59*p[i+1]+.11*p[i+2];p[i+3]=l>110?255:l>70?(l-70)*6:0}
@@ -216,13 +223,13 @@ function drawBase(){
     engrave("Nº "+state.serial+"/5000",R.x,R.y+R.h+80,48,head);
     engrave("VÁLIDO 30 DÍAS",R.x+R.w,R.y+R.h+80,48,head,"right");
     engrave("BARBERSHOP · 1 POR PERSONA",CW/2,R.y+R.h+160,40,`700 40px "Barlow Condensed"`.replace(/^700 40px /,""),"center");
-    const S0=lay.stub;if(logo)laser(logoMask(300),S0.x+90,S0.y+75,300,300);
+    const S0=lay.stub;if(logo)logoPlate(S0.x+90,S0.y+75,300);
     engrave("ADMIT ONE",S0.x+420,S0.y+200,110,head);
     engrave("TICKET HOLOGRÁFICO ◆ SERIE VIP",S0.x+424,S0.y+260,40,head);
     for(let i=0,x=S0.x+424;x<S0.x+S0.w-90;i++){const bw=[4,8,3,12,5][i%5];a.fillStyle="#3f4550";a.fillRect(x,S0.y+300,bw,80);x+=bw+[6,4,9,5][i%4]}
   }else{
     if(wordmark){const ww=560,wh=ww*wordmark.height/wordmark.width;laser(wordmark,90,80,ww,wh)}
-    if(logo){laser(logoMask(400),95,320,400,400);
+    if(logo){logoPlate(95,320,400);
       a.strokeStyle="#4a505b";a.lineWidth=4;rr(a,95,320,400,400,30);a.stroke()}
     engrave("★ EDICIÓN LIMITADA ★",R.x+R.w,190,60,head,"right");
     engrave("Nº "+state.serial+"/5000",95,840,52,head);
@@ -235,7 +242,7 @@ function drawBase(){
 
   // zona del premio (debajo de la capa)
   const pg=a.createRadialGradient(R.x+R.w/2,R.y+R.h/2,20,R.x+R.w/2,R.y+R.h/2,R.w*.7);
-  pg.addColorStop(0,"#1b2f6e");pg.addColorStop(1,"#070b1d");
+  pg.addColorStop(0,"#3a414f");pg.addColorStop(.6,"#1a1f29");pg.addColorStop(1,"#0c0f15");   // grafito pulido, mismo metal del ticket
   for(const ctx of [a,e]){ctx.fillStyle=pg;rr(ctx,R.x,R.y,R.w,R.h,24);ctx.fill();
     ctx.textAlign="center";ctx.shadowColor="rgba(255,200,61,.7)";ctx.shadowBlur=30;
     if(prize.jackpot){ctx.fillStyle="#fff";ctx.font=`${R.w*.17}px ${head}`;ctx.fillText("CORTE",R.x+R.w/2,R.y+R.h*.45);ctx.fillText("GRATIS",R.x+R.w/2,R.y+R.h*.45+R.w*.16)}
@@ -243,7 +250,10 @@ function drawBase(){
     ctx.shadowBlur=0;ctx.fillStyle="#f4f6fa";ctx.font=`${R.w*.065}px "Permanent Marker",cursive`;
     ctx.fillText(prize.lbl,R.x+R.w/2,R.y+R.h*(prize.jackpot?.88:.82))}
   m.fillStyle="rgb(0,150,0)";rr(m,R.x,R.y,R.w,R.h,24);m.fill();      // sin metal: se ve el color real
-  a.strokeStyle="#4a505b";a.lineWidth=5;rr(a,R.x-8,R.y-8,R.w+16,R.h+16,30);a.stroke();
+  a.save();rr(a,R.x,R.y,R.w,R.h,24);a.clip();a.globalAlpha=.22;a.globalCompositeOperation="screen";a.fillStyle=rainbow(a,R.x,R.y,R.w,R.h);a.fillRect(R.x,R.y,R.w,R.h);
+    a.globalAlpha=.06;a.globalCompositeOperation="source-over";a.strokeStyle="#fff";a.lineWidth=8;for(let k=R.x-R.h;k<R.x+R.w;k+=40){a.beginPath();a.moveTo(k,R.y);a.lineTo(k+R.h*.6,R.y+R.h);a.stroke()}a.restore();
+  m.fillStyle="rgb(0,60,255)";rr(m,R.x,R.y,R.w,R.h,24);m.fill();   // metálico y pulido: refleja como el resto
+  bevelFrame(R.x-8,R.y-8,R.w+16,R.h+16,30);
 }
 function drawCoat(){
   const R=lay.rect,c=coat.getContext("2d"),cm=coatMR.getContext("2d"),ce=coatE.getContext("2d");
