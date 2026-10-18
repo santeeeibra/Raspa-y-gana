@@ -35,10 +35,10 @@ h1::after{content:"";display:block;width:64px;height:3px;margin:10px auto 0;bord
 .loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-head);font-size:24px;letter-spacing:.2em;color:var(--muted)}
 .hint{display:flex;gap:10px 22px;justify-content:center;flex-wrap:wrap;margin:0;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .hint b{color:var(--white);font-weight:700}
-.odds{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:460px;margin-top:6px}
+.odds{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:520px;margin-top:6px}
 .odds div{border:1px solid var(--line);border-radius:12px;padding:10px 4px 8px;background:color-mix(in srgb,var(--steel) 80%,transparent);backdrop-filter:blur(6px)}
 .odds b{display:block;font-family:var(--f-head);font-weight:400;font-size:28px;line-height:1;color:var(--white)}
-.odds span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.odds span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .odds .jp{border:1px solid transparent;background:linear-gradient(var(--steel),var(--steel)) padding-box,var(--split) border-box}
 .odds .jp b{font-size:22px;line-height:1.27;color:var(--gold)}
 .result{width:100%;max-width:460px;box-sizing:border-box;border-radius:18px;padding:22px 18px;display:flex;flex-direction:column;gap:10px;
@@ -112,6 +112,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
     <div><b>10%</b><span>off</span></div>
     <div><b>15%</b><span>off</span></div>
     <div class="jp"><b>CORTE</b><span>gratis</span></div>
+    <div><b>+1</b><span>otro ticket</span></div>
   </div>
   <a href="https://wa.me/5492920605208?text=Hola!%20Quiero%20la%20promo%20de%202%20cortes%20por%20%2432.000%20(vengo%20con%20un%20amigo)" target="_blank" rel="noopener" style="display:block;margin:14px auto 0;max-width:420px;padding:14px 16px;border:1px solid var(--gold);border-radius:14px;text-align:center;color:var(--white);text-decoration:none;background:rgba(255,200,61,.08)"><b style="color:var(--gold);font-size:17px">👥 Traé un amigo: 2 cortes por $32.000</b><br><span style="font-size:13px;color:var(--muted)">$16.000 cada uno · Válido si vienen los dos juntos · Turnos con 2 hs de anticipación mínimo</span></a>
   <a href="https://instagram.com/lasvegashaircuts" target="_blank" rel="noopener" aria-label="Seguir a Las Vegas Barbería en Instagram" style="display:flex;align-items:center;gap:14px;margin:14px auto 0;max-width:420px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;color:var(--white);text-decoration:none;background:var(--steel)"><span style="flex:none;width:62px;height:62px;border-radius:50%;padding:3px;background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)"><img src="logo.png" alt="" width="56" height="56" style="display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid var(--steel);box-sizing:border-box"></span><span style="flex:1;min-width:0;text-align:left"><b style="display:block;font-size:16px">lasvegashaircuts</b><span style="display:block;font-size:12.5px;color:var(--muted);line-height:1.35;margin-top:2px">LAS VEGAS • NOS ENCARGAMOS DE TU BELLEZA</span></span><span style="flex:none;padding:8px 14px;border-radius:8px;background:#0095f6;color:#fff;font-size:14px;font-weight:700">Seguir</span></a>
@@ -269,22 +270,26 @@ function makeBoard(){
 }
 function drawBall(ctx,cx,cy,r,k){
   const cut=k==="CUT",g=ctx.createRadialGradient(cx-r*.35,cy-r*.4,r*.1,cx,cy,r);
-  (cut?["#fff6c2","#ffc83d","#a86f0a"]:["#ffffff","#cfd5e1","#6b7385"]).forEach((c,i)=>g.addColorStop(i/2,c));
+  (cut?["#fff6c2","#ffc83d","#a86f0a"]:k==="EXTRA"?["#d6e4ff","#5b8cff","#1d3a8a"]:["#ffffff","#cfd5e1","#6b7385"]).forEach((c,i)=>g.addColorStop(i/2,c));
   ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=12;ctx.shadowOffsetY=5;
   ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();
   ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.lineWidth=3;ctx.strokeStyle="rgba(255,255,255,.55)";ctx.stroke();
-  ctx.fillStyle=ctx.strokeStyle=cut?"#2a1d00":"#2a3140";
+  ctx.fillStyle=ctx.strokeStyle=cut?"#2a1d00":k==="EXTRA"?"#fff":"#2a3140";
   if(cut){ctx.lineCap="round";ctx.lineWidth=r*.13;
     for(const d of [-1,1]){ctx.beginPath();ctx.arc(cx+d*r*.3,cy+r*.4,r*.17,0,7);ctx.stroke();
       ctx.beginPath();ctx.moveTo(cx+d*r*.3,cy+r*.23);ctx.lineTo(cx-d*r*.32,cy-r*.55);ctx.stroke()}}
   else{ctx.textAlign="center";ctx.font=`${r*(k==="10"||k==="15"?.95:1.1)}px "Bebas Neue",Impact,sans-serif`;
     ctx.fillText(k==="EXTRA"?"+1":k+"%",cx,cy+r*.36)}
+  // etiqueta debajo de cada bolita para que se entienda el premio
+  ctx.textAlign="center";ctx.fillStyle=cut?"#ffc83d":k==="EXTRA"?"#9fbcff":"#e8ecf3";
+  ctx.font=`700 ${r*.42}px "Barlow Condensed",sans-serif`;
+  ctx.fillText(cut?"CORTE GRATIS":k==="EXTRA"?"OTRO TICKET":"DESCUENTO",cx,cy+r*1.5)
 }
 function drawBoard(ctx,R,list,head){
   ctx.textAlign="center";ctx.fillStyle="#f4f6fa";ctx.font=`${R.h*.085}px "Permanent Marker",cursive`;
   ctx.fillText("¡3 IGUALES Y GANÁS!",R.x+R.w/2,R.y+R.h*.1);
-  const gy=R.y+R.h*.16,ch=(R.h*.82)/3,cw=Math.min(R.w/3,ch*1.35),r=Math.min(ch,cw)*.4;
-  list.forEach((k,i)=>drawBall(ctx,R.x+R.w/2+((i%3)-1)*cw,gy+ch*(Math.floor(i/3)+.5),r,k));
+  const gy=R.y+R.h*.16,ch=(R.h*.82)/3,cw=Math.min(R.w/3,ch*1.35),r=Math.min(ch,cw)*.32;
+  list.forEach((k,i)=>drawBall(ctx,R.x+R.w/2+((i%3)-1)*cw,gy+ch*(Math.floor(i/3)+.42),r,k));
 }
 
 function drawBase(){
