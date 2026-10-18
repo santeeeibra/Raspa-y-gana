@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Canje de tickets · Las Vegas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;700&display=swap">
+<style>
+:root{--night:#07090f;--steel:#141925;--line:rgba(255,255,255,.09);--blue:#2456c2;--red:#e3262a;--white:#f4f6fa;--gold:#ffc83d;--muted:#8c95ab;--ok:#1fa855;
+  --f-head:"Bebas Neue",Impact,sans-serif;--f-body:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(45% 55% at -5% 40%,rgba(36,86,194,.28),transparent 70%),radial-gradient(45% 55% at 105% 40%,rgba(227,38,42,.22),transparent 70%),var(--night);
+  color:var(--white);font-family:var(--f-body);padding:24px max(16px,env(safe-area-inset-left,0px)) 40px}
+main{max-width:460px;margin:0 auto;display:grid;gap:14px;text-align:center}
+h1{font-family:var(--f-head);font-weight:400;font-size:44px;letter-spacing:.06em;margin:0}
+p{margin:0;color:#c3c9d6;font-size:18px}
+form{display:grid;gap:12px}
+input{font:inherit;font-size:24px;text-align:center;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--steel);color:var(--white);letter-spacing:.12em;text-transform:uppercase}
+input[type=password]{text-transform:none}
+button{font-family:var(--f-head);font-size:26px;letter-spacing:.08em;padding:14px;border:0;border-radius:12px;background:var(--blue);color:#fff;cursor:pointer}
+button:disabled{opacity:.5}
+button.go{background:var(--ok)}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-size:20px}
+.card{background:var(--steel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:8px}
+.card .big{font-family:var(--f-head);font-size:48px;color:var(--gold);line-height:1}
+.card .code{font-family:var(--f-head);font-size:28px;letter-spacing:.14em}
+.msg{font-size:20px}.err{color:#ff6b6b}.ok{color:var(--ok)}
+.bono{border:1px dashed var(--gold);border-radius:12px;padding:8px;color:var(--gold)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Canje de tickets</h1>
+  <p>Solo para el personal de la barbería.</p>
+  <form id="pinForm" hidden>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Clave del local" required>
+    <button type="submit">Entrar</button>
+  </form>
+  <div id="app" hidden>
+    <form id="codeForm">
+      <input id="code" autocomplete="off" autocapitalize="characters" placeholder="Código del ticket" required>
+      <button type="submit">Buscar ticket</button>
+    </form>
+    <div id="out"></div>
+    <button class="ghost" id="logout" type="button">Cerrar sesión</button>
+  </div>
+</main>
+<script>
+const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
+const $=id=>document.getElementById(id);
+const PRIZE={NO:{big:"SIN PREMIO",lbl:"Solo corresponde el bono de bienvenida"},EXTRA:{big:"+1 INTENTO",lbl:""},"5":{big:"5% OFF",lbl:"de descuento"},"10":{big:"10% OFF",lbl:"de descuento"},"15":{big:"15% OFF",lbl:"de descuento"},JP:{big:"CORTE GRATIS",lbl:"¡Premio mayor!"}};
+const ERR={clave_incorrecta:"Clave incorrecta.",bloqueado:"Demasiados intentos. Esperá 10 minutos.",no_existe:"No encontramos ese código.",ya_canjeado:"Este ticket ya fue canjeado.",vencido:"Este ticket venció (más de 30 días).",es_intento_extra:"Este código es un intento extra: no se canjea en el local."};
+let pin=sessionStorage.getItem("lv-pin")||"";
+async function rpc(fn,body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok){let m="";try{m=(await r.json()).message}catch(e){}throw new Error(m||"red")}const j=await r.json();if(j&&j.error)throw new Error(j.error);return j}
+const say=(t,c)=>$("out").innerHTML='<p class="msg '+(c||"")+'">'+t+'</p>';
+const fmt=d=>new Date(d).toLocaleString("es-AR",{dateStyle:"short",timeStyle:"short"});
+function show(){$("pinForm").hidden=!!pin;$("app").hidden=!pin}
+show();
+$("pinForm").onsubmit=ev=>{ev.preventDefault();pin=$("pin").value.trim();sessionStorage.setItem("lv-pin",pin);$("pin").value="";show();$("code").focus()};
+$("logout").onclick=()=>{pin="";sessionStorage.removeItem("lv-pin");$("out").innerHTML="";show()};
+function fail(e){const m=ERR[e.message]||"No pudimos conectar. Probá de nuevo.";
+  if(e.message==="clave_incorrecta"||e.message==="bloqueado"){pin="";sessionStorage.removeItem("lv-pin");show()}
+  say(m,"err")}
+$("codeForm").onsubmit=async ev=>{ev.preventDefault();const code=$("code").value.trim();if(!code)return;say("Buscando…");
+  try{const t=await rpc("lookup_ticket",{p_code:code,p_pin:pin}),P=PRIZE[t.prize]||{big:t.prize,lbl:""};
+    let est,btn="";
+    if(t.prize==="EXTRA")est='<p class="msg err">Es un intento extra: no se canjea en el local.</p>';
+    else if(t.redeemed_at)est='<p class="msg err"><b>Este ticket ya fue canjeado</b> el '+fmt(t.redeemed_at)+'.</p>';
+    else if(t.expired)est='<p class="msg err">Ticket vencido (más de 30 días).</p>';
+    else{est='<p class="msg ok">Ticket válido</p>';btn='<button class="go" id="redeem" type="button">Canjear ahora</button>'}
+    $("out").innerHTML='<div class="card"><div class="big">'+P.big+'</div><p>'+P.lbl+'</p>'+(t.prize==="EXTRA"?"":'<div class="bono">+ Bono de bienvenida: 25% OFF en el primer corte</div>')+
+      '<div class="code">'+t.code+'</div><p>Nº '+t.serial+' · emitido '+fmt(t.created_at)+'</p>'+est+btn+'</div>';
+    if(btn)$("redeem").onclick=async()=>{$("redeem").disabled=true;
+      try{const r=await rpc("redeem_ticket",{p_code:t.code,p_pin:pin});$("out").innerHTML='<div class="card"><div class="big">¡CANJEADO!</div><p class="msg ok">'+P.big+' · '+t.code+'</p><p>'+fmt(r.redeemed_at)+'</p></div>';$("code").value="";$("code").focus()}
+      catch(e){fail(e)}}
+  }catch(e){fail(e)}};
+</script>
+</body>
+</html>
