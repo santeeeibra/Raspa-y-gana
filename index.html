@@ -147,6 +147,26 @@ const art=mk(),mr=mk(),em=mk();               // base: color, metal/rugosidad, b
 const coat=mk(),coatMR=mk(),coatE=mk();       // capa a raspar
 const outC=mk(),outM=mk(),outE=mk();          // composición final
 const a=art.getContext("2d"),m=mr.getContext("2d"),e=em.getContext("2d");
+const bumpC=mk(),bm=bumpC.getContext("2d");bm.fillStyle="#fff";bm.fillRect(0,0,CW,CH);  // relieve: negro = hundido
+
+// grabado láser: la forma se hunde en el metal (sombra arriba, brillo abajo) y el fondo del surco es tornasolado
+function rainbow(ctx,x,y,w,h){const g=ctx.createLinearGradient(x,y,x+w,y+h);
+  ["#ff4d6d","#ffb84d","#f7ff6b","#5dff9a","#4dd8ff","#7b6bff","#ff5de1","#ff4d6d"].forEach((c,i,arr)=>g.addColorStop(i/(arr.length-1),c));return g}
+function shaped(mask,fill,w,h){const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");
+  x.drawImage(mask,0,0,w,h);x.globalCompositeOperation="source-in";x.fillStyle=fill;x.fillRect(0,0,w,h);return c}
+function laser(mask,X,Y,w,h){
+  a.drawImage(shaped(mask,"rgba(20,24,32,.85)",w,h),X-3,Y-3);       // pared superior en sombra
+  a.drawImage(shaped(mask,"rgba(255,255,255,.95)",w,h),X+3,Y+3);    // borde inferior que agarra luz
+  const rc=document.createElement("canvas");rc.width=w;rc.height=h;const rx=rc.getContext("2d");
+  rx.fillStyle=rainbow(rx,0,0,w,h);rx.fillRect(0,0,w,h);
+  for(let i=0;i<w*h/90;i++){rx.fillStyle=`rgba(255,255,255,${Math.random()*.5})`;rx.fillRect(Math.random()*w,Math.random()*h,1.5,1.5)}
+  a.drawImage(shaped(mask,rc,w,h),X,Y);
+  bm.save();bm.filter="blur(2px)";bm.drawImage(shaped(mask,"#000",w,h),X,Y);bm.restore();
+  m.drawImage(shaped(mask,"rgb(0,20,255)",w,h),X,Y)}                 // fondo del surco: espejo pulido
+function logoMask(size){const c=document.createElement("canvas");c.width=c.height=size;const x=c.getContext("2d");
+  x.drawImage(logo,0,0,size,size);const d=x.getImageData(0,0,size,size),p=d.data;
+  for(let i=0;i<p.length;i+=4){const l=.3*p[i]+.59*p[i+1]+.11*p[i+2];p[i+3]=l>110?255:l>70?(l-70)*6:0}
+  x.putImageData(d,0,0);return c}
 
 function engrave(text,x,y,size,font,align="left",rot=0){
   for(const [ctx,fill,dy] of [[a,"rgba(255,255,255,.85)",3],[a,"#3f4550",0],[m,"rgb(0,120,255)",0]]){
@@ -175,6 +195,8 @@ function drawBase(){
   // ondas de foil "cosmos" en diagonal
   a.save();a.globalAlpha=.07;a.strokeStyle="#fff";a.lineWidth=10;
   for(let k=-CH;k<CW;k+=46){a.beginPath();a.moveTo(k,0);a.lineTo(k+CH*.6,CH);a.stroke()}a.restore();
+  // velo arcoíris holográfico sobre todo el ticket
+  a.save();a.globalAlpha=.16;a.globalCompositeOperation="overlay";a.fillStyle=rainbow(a,0,0,CW,CH);a.fillRect(0,0,CW,CH);a.restore();
 
   // marcos grabados
   for(const [ins,lw] of [[34,6],[52,2]]){
@@ -187,18 +209,18 @@ function drawBase(){
 
   const R=lay.rect,head='"Bebas Neue",Impact,sans-serif',body='700 1px "Barlow Condensed",sans-serif'.replace("1px","");
   if(vertical){
-    if(wordmark){const ww=720,wh=ww*wordmark.height/wordmark.width;a.drawImage(tinted(wordmark,"#fff",ww,wh),(CW-ww)/2,93,ww,wh);a.drawImage(tinted(wordmark,"#3c424d",ww,wh),(CW-ww)/2,90,ww,wh)}
+    if(wordmark){const ww=720,wh=ww*wordmark.height/wordmark.width;laser(wordmark,(CW-ww)/2,90,ww,wh)}
     engrave("★ EDICIÓN LIMITADA ★",CW/2,420,54,head,"center");
     engrave("Nº "+state.serial+"/5000",R.x,R.y+R.h+80,48,head);
     engrave("VÁLIDO 30 DÍAS",R.x+R.w,R.y+R.h+80,48,head,"right");
     engrave("BARBERSHOP · 1 POR PERSONA",CW/2,R.y+R.h+160,40,`700 40px "Barlow Condensed"`.replace(/^700 40px /,""),"center");
-    const S0=lay.stub;if(logo)a.drawImage(chromeLogo(300),S0.x+90,S0.y+75,300,300);
+    const S0=lay.stub;if(logo)laser(logoMask(300),S0.x+90,S0.y+75,300,300);
     engrave("ADMIT ONE",S0.x+420,S0.y+200,110,head);
     engrave("TICKET HOLOGRÁFICO ◆ SERIE VIP",S0.x+424,S0.y+260,40,head);
     for(let i=0,x=S0.x+424;x<S0.x+S0.w-90;i++){const bw=[4,8,3,12,5][i%5];a.fillStyle="#3f4550";a.fillRect(x,S0.y+300,bw,80);x+=bw+[6,4,9,5][i%4]}
   }else{
-    if(wordmark){const ww=560,wh=ww*wordmark.height/wordmark.width;a.drawImage(tinted(wordmark,"#fff",ww,wh),90,83,ww,wh);a.drawImage(tinted(wordmark,"#3c424d",ww,wh),90,80,ww,wh)}
-    if(logo){a.save();rr(a,95,320,400,400,30);a.clip();a.drawImage(chromeLogo(400),95,320,400,400);a.restore();
+    if(wordmark){const ww=560,wh=ww*wordmark.height/wordmark.width;laser(wordmark,90,80,ww,wh)}
+    if(logo){laser(logoMask(400),95,320,400,400);
       a.strokeStyle="#4a505b";a.lineWidth=4;rr(a,95,320,400,400,30);a.stroke()}
     engrave("★ EDICIÓN LIMITADA ★",R.x+R.w,190,60,head,"right");
     engrave("Nº "+state.serial+"/5000",95,840,52,head);
@@ -277,13 +299,16 @@ const bodyGeo=new THREE.ExtrudeGeometry(shape,{depth:DEPTH,bevelEnabled:true,bev
 bodyGeo.translate(0,0,-DEPTH/2);
 const chrome=new THREE.MeshPhysicalMaterial({color:0xdfe3ea,metalness:1,roughness:.12,iridescence:1,iridescenceIOR:1.5,iridescenceThicknessRange:[150,700],clearcoat:1,clearcoatRoughness:.05,envMapIntensity:1.4});
 const frontMat=new THREE.MeshPhysicalMaterial({map:tC,metalness:1,roughness:1,metalnessMap:tM,roughnessMap:tM,emissive:0xffffff,emissiveMap:tE,emissiveIntensity:.85,
-  iridescence:.9,iridescenceIOR:1.45,iridescenceThicknessRange:[200,650],clearcoat:.8,clearcoatRoughness:.08,envMapIntensity:1.5});
+  bumpMap:tex(bumpC),bumpScale:6,iridescence:1,iridescenceIOR:1.6,iridescenceThicknessRange:[100,1100],clearcoat:.8,clearcoatRoughness:.08,envMapIntensity:1.5});
 // reverso: logo a color sobre cromo
 const back=document.createElement("canvas");back.width=CW;back.height=CH;const bx=back.getContext("2d");
-bx.drawImage(art,0,0);bx.fillStyle="rgba(215,220,228,.92)";bx.fillRect(0,0,CW,CH);
+{const g=bx.createLinearGradient(0,0,CW,CH);g.addColorStop(0,"#e6e9ef");g.addColorStop(.5,"#cfd4dc");g.addColorStop(1,"#eceef3");
+  bx.fillStyle=g;bx.fillRect(0,0,CW,CH);                            // cromo propio y opaco: ya no se ve el frente
+  bx.globalAlpha=.18;bx.globalCompositeOperation="overlay";bx.fillStyle=rainbow(bx,0,0,CW,CH);bx.fillRect(0,0,CW,CH);
+  bx.globalAlpha=1;bx.globalCompositeOperation="source-over"}
 const ls=Math.min(CW,CH)*.62;if(logo){bx.save();rr(bx,(CW-ls)/2,(CH-ls)/2-30,ls,ls,40);bx.clip();bx.drawImage(logo,(CW-ls)/2,(CH-ls)/2-30,ls,ls);bx.restore()}
 bx.fillStyle="#3f4550";bx.textAlign="center";bx.font='56px "Bebas Neue",sans-serif';bx.fillText("LAS VEGAS BARBERÍA · TICKET OFICIAL",CW/2,CH-80);
-const backMat=new THREE.MeshPhysicalMaterial({map:tex(back),metalness:.85,roughness:.22,iridescence:.8,iridescenceThicknessRange:[150,600],clearcoat:1,clearcoatRoughness:.06,envMapIntensity:1.3});
+const backMat=new THREE.MeshPhysicalMaterial({map:tex(back),metalness:.85,roughness:.22,iridescence:1,iridescenceThicknessRange:[100,1100],clearcoat:1,clearcoatRoughness:.06,envMapIntensity:1.3});
 backMat.map.colorSpace=THREE.SRGBColorSpace;
 
 const rotZ=vertical?-Math.PI/2:0;
