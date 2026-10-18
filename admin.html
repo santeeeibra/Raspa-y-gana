@@ -36,8 +36,8 @@ a.card,button.card{display:grid;gap:2px;padding:18px;border-radius:16px;border:1
 // Solo se llega logueándose desde el acceso del local en la página principal (la clave se verifica en el servidor)
 let ok=false;try{ok=!!sessionStorage.getItem("lv-pin")}catch(e){}
 if(!ok)location.replace("index.html");
-document.getElementById("probar").onclick=()=>{try{localStorage.setItem("lv-raspa-v2",JSON.stringify({phone:"2920605208",done:false}))}catch(e){}location.href="index.html"};
-document.getElementById("salir").onclick=()=>{try{sessionStorage.removeItem("lv-pin");localStorage.removeItem("lv-raspa-v2")}catch(e){}location.href="index.html"};
+document.getElementById("probar").onclick=()=>{try{sessionStorage.setItem("lv-test","1");sessionStorage.removeItem("lv-keep")}catch(e){}location.href="index.html"};
+document.getElementById("salir").onclick=()=>{try{sessionStorage.removeItem("lv-pin");sessionStorage.removeItem("lv-test");sessionStorage.removeItem("lv-keep");localStorage.removeItem("lv-raspa-v2")}catch(e){}location.href="index.html"};
 </script>
 </body>
 </html>

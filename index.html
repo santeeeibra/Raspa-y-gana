@@ -124,7 +124,6 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
     <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="11 5555 5555" required>
     <input name="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Clave del local" hidden>
     <button name="btn" type="submit">Ver mi ticket</button>
-    <button type="button" id="staffLink" style="background:none;border:0;color:var(--muted);font:500 14px var(--f-body);text-decoration:underline;cursor:pointer;box-shadow:none">Acceso del local</button>
   </form>
   <div id="gateErr" role="alert"></div>
 </div>
@@ -142,23 +141,26 @@ const PRIZES=[
   {id:"15",big:"15%",lbl:"DE DESCUENTO",w:11.9},
   {id:"JP",big:"CORTE GRATIS",lbl:"¡PREMIO MAYOR!",w:2.1,jackpot:true},
 ];
+let TEST=false;
 const KEY="lv-raspa-v2",$=id=>document.getElementById(id);
 const store={get(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}},
-  set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}};
+  set(v){if(TEST)return;try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}};
 /* El premio lo sortea el servidor (Supabase): un ticket por celular, el navegador no puede cambiarlo */
 const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
 async function claim(ph,fn="claim_ticket",body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body||{p_phone:ph})});if(!r.ok){let m="";try{m=(await r.json()).message}catch(e){}throw new Error(m||r.status)}const j=await r.json();if(j&&j.error)throw new Error(j.error);return j}
 function askPhone(){return new Promise(res=>{const g=$("gate"),f=$("gateForm"),e=$("gateErr");g.hidden=false;
-  $("staffLink").onclick=()=>{f.pin.hidden=!f.pin.hidden;f.btn.textContent=f.pin.hidden?"Ver mi ticket":"Entrar";if(!f.pin.hidden)f.pin.focus()};
   f.onsubmit=async ev=>{ev.preventDefault();const ph=f.phone.value.replace(/\D/g,"");
     if(ph.length<8||ph.length>15){e.textContent="Ingresá un número válido";return}
-    if(!f.pin.hidden){e.textContent="";f.btn.disabled=true;
+    if(!f.pin.hidden&&f.pin.value.trim()){e.textContent="";f.btn.disabled=true;
       try{const r=await claim(null,"staff_login",{p_phone:ph,p_pin:f.pin.value.trim()});sessionStorage.setItem("lv-pin",f.pin.value.trim());location.href="admin.html";return}
       catch(x){e.textContent=/bloqueado/.test(x.message)?"Demasiados intentos. Esperá 10 minutos.":"Número o clave incorrectos";f.btn.disabled=false;return}}
     e.textContent="";f.btn.disabled=true;
-    try{const t=await claim(ph);g.hidden=true;res({ph,t})}catch(x){e.textContent=/limite_diario/.test(x.message)?"Ya se sacó un ticket hoy desde esta conexión. ¡Volvé mañana!":"No pudimos conectar. Probá de nuevo.";f.btn.disabled=false}}})}
+    try{const t=await claim(ph);if(t.needs_pin){f.pin.hidden=false;f.btn.textContent="Entrar";f.btn.disabled=false;e.textContent="Ingresá la clave";f.pin.focus();return}g.hidden=true;res({ph,t})}catch(x){e.textContent=/limite_diario/.test(x.message)?"Ya se sacó un ticket hoy desde esta conexión. ¡Volvé mañana!":"No pudimos conectar. Probá de nuevo.";f.btn.disabled=false}}})}
 const saved=store.get();let got=null;
-if(saved&&saved.phone){try{got={ph:saved.phone,t:await claim(saved.phone)}}catch(e){}}
+const ss=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
+if(ss("lv-test")&&ss("lv-pin")){try{const keep=ss("lv-keep");try{sessionStorage.removeItem("lv-keep")}catch(e){}
+  const t=await claim(null,"claim_test_ticket",{p_pin:ss("lv-pin"),p_fresh:!keep});got={ph:t.phone,t};TEST=true}catch(e){}}
+if(!got&&saved&&saved.phone){try{const t=await claim(saved.phone);if(!t.needs_pin)got={ph:saved.phone,t}}catch(e){}}
 if(!got)got=await askPhone();
 let state={id:got.t.prize,code:got.t.code,serial:got.t.serial,phone:got.ph,redeemed:got.t.redeemed,test:!!got.t.test,done:!got.t.test&&(got.t.redeemed||!!(saved&&saved.phone===got.ph&&saved.done))};
 store.set({phone:state.phone,done:state.done});
@@ -466,7 +468,7 @@ function showResult(){const b=$("resultBox");b.className="result";b.hidden=false
   if(prize.extra&&!state.redeemed){
     b.innerHTML=`<h2>${title}</h2><p>Raspá otro ticket ahora mismo. El nuevo ticket ya no puede darte otro intento.</p><button id="extra">Raspar otro ticket</button>`+share;
     $("extra").onclick=async()=>{const x=$("extra");x.disabled=true;x.textContent="Cargando…";
-      try{await claim(state.phone,"use_extra");store.set({phone:state.phone,done:false});location.reload()}catch(e){x.disabled=false;x.textContent="No pudimos conectar. Probá de nuevo."}};
+      try{await claim(state.phone,"use_extra");store.set({phone:state.phone,done:false});if(state.test)try{sessionStorage.setItem("lv-keep","1")}catch(e){}location.reload()}catch(e){x.disabled=false;x.textContent="No pudimos conectar. Probá de nuevo."}};
     return}
   b.innerHTML=`${rar}<h2>${title}</h2>${prize.none?"<p>Pero no te vas con las manos vacías:</p>":""}${bono}
    ${state.redeemed?`<p><b>Este ticket ya fue canjeado.</b></p>`:`<p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>`}
