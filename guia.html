@@ -233,6 +233,7 @@ async function escanear(){
   cap.disabled = false; camOn = true;
   const ctx = cv.getContext("2d"), dpr = devicePixelRatio || 1;
   let ultimo = null, okDesde = 0, lastT = -1, hecho = false;
+  const frm = document.createElement("canvas"), fctx = frm.getContext("2d");   // copia del cuadro: el detector y el dibujo usan el mismo tamaño
   const finalizar = () => {
     if (hecho || !ultimo) return; hecho = true;
     const {f, giro} = clasificar(ultimo.p, vid.videoWidth, vid.videoHeight);
@@ -248,12 +249,14 @@ async function escanear(){
   (function loop(){
     if (!camOn) return;
     const cw = cam.clientWidth, ch = cam.clientHeight;
-    if (cv.width !== cw*dpr) { cv.width = cw*dpr; cv.height = ch*dpr; }
+    if (cv.width !== Math.round(cw*dpr) || cv.height !== Math.round(ch*dpr)) { cv.width = Math.round(cw*dpr); cv.height = Math.round(ch*dpr); }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cw, ch);
     const vw = vid.videoWidth, vh = vid.videoHeight;
     if (vw && vid.currentTime !== lastT) {
       lastT = vid.currentTime;
-      const r = landmarker.detectForVideo(vid, performance.now()), p = r.faceLandmarks && r.faceLandmarks[0];
+      if (frm.width !== vw || frm.height !== vh) { frm.width = vw; frm.height = vh; }
+      fctx.drawImage(vid, 0, 0, vw, vh);
+      const r = landmarker.detectForVideo(frm, performance.now()), p = r.faceLandmarks && r.faceLandmarks[0];
       ultimo = p ? {p} : null;
     }
     // guía fija: óvalo + línea central + niveles de ojos, nariz y boca
