@@ -101,7 +101,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 <body>
 
 <div class="bg"></div>
-<div id="intro" aria-hidden="true"><div class="barber"><i class="ball"></i><i class="cap"></i><div class="pole"></div><i class="cap b"></i><i class="base"></i></div><img src="wordmark.png" alt=""><p class="tagline">Barbershop · Raspá y Ganá</p></div>
+<div id="intro" aria-hidden="true"><div class="barber"><i class="ball"></i><i class="cap"></i><div class="pole"></div><i class="cap b"></i><i class="base"></i></div><img src="wordmark.png" alt=""><p class="tagline">Barbershop · Desde 2020</p></div>
 <div id="dim"></div>
 <svg id="razor" viewBox="0 0 120 60" aria-hidden="true"><defs><linearGradient id="bl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#b9c0cc"/><stop offset="1" stop-color="#eef1f6"/></linearGradient></defs>
 <path d="M6 46 L58 20 Q66 16 70 22 L74 28 Q76 33 70 35 L14 52 Q6 54 6 46Z" fill="url(#bl)" stroke="#6b7386" stroke-width="1"/><path d="M10 49 L66 32" stroke="#fff" stroke-width="1.2" opacity=".9"/>
@@ -276,28 +276,45 @@ function makeBoard(){
   for(let i=8;i>0;i--){const j=Math.floor(rnd()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
   return list;
 }
+// bolitas metálicas con brillo holográfico; cada premio tiene su color
+const BALL={ "5":["#d8fff6","#3fc9b0","#0d4a44"], "10":["#dbe9ff","#4d84ff","#14285e"], "15":["#ffe0f2","#e0559e","#5a1238"],
+  CUT:["#fff6c2","#e8b02a","#5c3a02"], EXTRA:["#f0e0ff","#9b5cff","#33115e"] };
 function drawBall(ctx,cx,cy,r,k){
-  const cut=k==="CUT",g=ctx.createRadialGradient(cx-r*.35,cy-r*.4,r*.1,cx,cy,r);
-  (cut?["#fff6c2","#ffc83d","#a86f0a"]:k==="EXTRA"?["#d6e4ff","#5b8cff","#1d3a8a"]:["#ffffff","#cfd5e1","#6b7385"]).forEach((c,i)=>g.addColorStop(i/2,c));
-  ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=12;ctx.shadowOffsetY=5;
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();
-  ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.lineWidth=3;ctx.strokeStyle="rgba(255,255,255,.55)";ctx.stroke();
-  ctx.fillStyle=ctx.strokeStyle=cut?"#2a1d00":k==="EXTRA"?"#fff":"#2a3140";
-  if(cut){ctx.lineCap="round";ctx.lineWidth=r*.13;
-    for(const d of [-1,1]){ctx.beginPath();ctx.arc(cx+d*r*.3,cy+r*.4,r*.17,0,7);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(cx+d*r*.3,cy+r*.23);ctx.lineTo(cx-d*r*.32,cy-r*.55);ctx.stroke()}}
-  else{ctx.textAlign="center";ctx.font=`${r*(k==="10"||k==="15"?.95:1.1)}px "Bebas Neue",Impact,sans-serif`;
-    ctx.fillText(k==="EXTRA"?"+1":k+"%",cx,cy+r*.36)}
-  // etiqueta debajo de cada bolita para que se entienda el premio
-  ctx.textAlign="center";ctx.fillStyle=cut?"#ffc83d":k==="EXTRA"?"#9fbcff":"#e8ecf3";
+  const cut=k==="CUT",[hi,mid,lo]=BALL[k];
+  ctx.save();ctx.shadowColor="rgba(0,0,0,.65)";ctx.shadowBlur=r*.5;ctx.shadowOffsetY=r*.22;
+  let g=ctx.createRadialGradient(cx-r*.35,cy-r*.45,r*.05,cx,cy,r*1.05);
+  g.addColorStop(0,hi);g.addColorStop(.45,mid);g.addColorStop(1,lo);
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();ctx.restore();
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.clip();
+  if(ctx.createConicGradient){const h=ctx.createConicGradient(k.length*1.3,cx,cy);   // reflejo holográfico
+    ["#ff7ad9","#7af0ff","#b7ff7a","#ffe27a","#c08bff","#ff7ad9"].forEach((c,i,a)=>h.addColorStop(i/(a.length-1),c));
+    ctx.globalCompositeOperation="overlay";ctx.globalAlpha=.35;ctx.fillStyle=h;ctx.fillRect(cx-r,cy-r,r*2,r*2)}
+  ctx.globalCompositeOperation="source-over";ctx.globalAlpha=1;
+  g=ctx.createLinearGradient(cx,cy-r,cx,cy+r);g.addColorStop(0,"rgba(255,255,255,0)");g.addColorStop(.75,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.45)");
+  ctx.fillStyle=g;ctx.fillRect(cx-r,cy-r,r*2,r*2);
+  g=ctx.createRadialGradient(cx-r*.38,cy-r*.5,0,cx-r*.38,cy-r*.5,r*.45);g.addColorStop(0,"rgba(255,255,255,.95)");g.addColorStop(1,"rgba(255,255,255,0)");
+  ctx.fillStyle=g;ctx.fillRect(cx-r,cy-r,r*2,r*2);ctx.restore();
+  ctx.lineWidth=r*.07;ctx.strokeStyle="rgba(255,255,255,.6)";ctx.beginPath();ctx.arc(cx,cy,r*.97,0,7);ctx.stroke();   // bisel
+  ctx.lineWidth=r*.04;ctx.strokeStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.arc(cx,cy,r*.72,0,7);ctx.stroke();
+  // símbolo grabado: sombra oscura + luz clara desplazada
+  const ink=(dx,dy,c)=>{ctx.fillStyle=ctx.strokeStyle=c;
+    if(cut){ctx.lineCap="round";ctx.lineWidth=r*.12;
+      for(const d of [-1,1]){ctx.beginPath();ctx.arc(cx+dx+d*r*.26,cy+dy+r*.32,r*.15,0,7);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(cx+dx+d*r*.26,cy+dy+r*.17);ctx.lineTo(cx+dx-d*r*.28,cy+dy-r*.45);ctx.stroke()}}
+    else{ctx.textAlign="center";ctx.font=`${r*(k==="EXTRA"?1:.82)}px "Bebas Neue",Impact,sans-serif`;
+      ctx.fillText(k==="EXTRA"?"+1":k+"%",cx+dx,cy+dy+r*.3)}};
+  ink(0,r*.04,"rgba(255,255,255,.55)");ink(0,0,"rgba(15,18,26,.85)");
+  ctx.textAlign="center";ctx.fillStyle=cut?"#ffd66b":k==="EXTRA"?"#cfa8ff":"#e8ecf3";
   ctx.font=`700 ${r*.42}px "Barlow Condensed",sans-serif`;
-  ctx.fillText(cut?"CORTE GRATIS":k==="EXTRA"?"OTRO TICKET":"DESCUENTO",cx,cy+r*1.5)
+  ctx.fillText(cut?"CORTE GRATIS":k==="EXTRA"?"OTRO TICKET":"DESCUENTO",cx,cy+r*1.55)
 }
+let balls=[];
 function drawBoard(ctx,R,list,head){
   ctx.textAlign="center";ctx.fillStyle="#f4f6fa";ctx.font=`${R.h*.09}px "Bebas Neue",Impact,sans-serif`;
   ctx.fillText("3 IGUALES = PREMIO",R.x+R.w/2,R.y+R.h*.1);
   const gy=R.y+R.h*.16,ch=(R.h*.82)/3,cw=Math.min(R.w/3,ch*1.35),r=Math.min(ch,cw)*.32;
-  list.forEach((k,i)=>drawBall(ctx,R.x+R.w/2+((i%3)-1)*cw,gy+ch*(Math.floor(i/3)+.42),r,k));
+  balls=list.map((k,i)=>({k,x:R.x+R.w/2+((i%3)-1)*cw,y:gy+ch*(Math.floor(i/3)+.42),r}));
+  balls.forEach(b=>drawBall(ctx,b.x,b.y,b.r,b.k));
 }
 
 function drawBase(){
@@ -334,7 +351,7 @@ function drawBase(){
     engrave("★ EDICIÓN LIMITADA ★",CW/2,420,54,head,"center");
     engrave("Nº "+state.serial+"/5000",R.x,R.y+R.h+80,48,head);
     engrave("VÁLIDO 30 DÍAS",R.x+R.w,R.y+R.h+80,48,head,"right");
-    engrave("BARBERSHOP · 1 POR PERSONA",CW/2,R.y+R.h+160,40,`700 40px "Barlow Condensed"`.replace(/^700 40px /,""),"center");
+    engrave("BARBERSHOP · DESDE 2020 · 1 POR PERSONA",CW/2,R.y+R.h+160,40,`700 40px "Barlow Condensed"`.replace(/^700 40px /,""),"center");
     const S0=lay.stub;if(logo)logoPlate(S0.x+90,S0.y+75,300);
     engrave("ADMIT ONE",S0.x+420,S0.y+200,110,head);
     engrave("TICKET HOLOGRÁFICO ◆ SERIE VIP",S0.x+424,S0.y+260,40,head);
@@ -508,7 +525,12 @@ function scratch(p){
   lastP=p;dirty=true;if(++moves%15===0)check();
 }
 function check(){if(revealed)return;const R=lay.rect,d=coat.getContext("2d").getImageData(R.x,R.y,R.w,R.h).data;let n=0,c=0;
-  for(let i=3;i<d.length;i+=4*37){n++;if(d[i]<40)c++}progress=c/n/.75;if(c/n>.75)suspense()}
+  for(let i=3;i<d.length;i+=4*37){n++;if(d[i]<40)c++}progress=c/n/.75;
+  // se destapa todo cuando se ven las 3 bolitas ganadoras o las 9
+  const x=coat.getContext("2d"),seen=balls.filter(b=>{const s=Math.round(b.r*1.2),q=x.getImageData(Math.round(b.x-s/2),Math.round(b.y-s/2),s,s).data;
+    let m=0,o=0;for(let i=3;i<q.length;i+=4*5){m++;if(q[i]<40)o++}return o/m>.5}),cnt={};
+  seen.forEach(b=>cnt[b.k]=(cnt[b.k]||0)+1);
+  if(c/n>.75||seen.length===9||Object.values(cnt).some(v=>v>=3))suspense()}
 function drumroll(){if(!ac||muted)return;const t0=ac.currentTime;
   for(let i=0;i<22;i++){const t=t0+i*.055,src=ac.createBufferSource(),g=ac.createGain(),lp=ac.createBiquadFilter();
     src.buffer=noise.buffer;lp.type="lowpass";lp.frequency.value=420;g.gain.setValueAtTime(.05+i*.012,t);g.gain.exponentialRampToValueAtTime(.001,t+.07);
