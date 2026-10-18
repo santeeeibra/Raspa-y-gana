@@ -55,7 +55,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 <script>
 // CAMBIAR: tu número de WhatsApp con código de país, sin + ni espacios (ej: 5491112345678)
-const WHATSAPP = "5490000000000";
+const WHATSAPP = "5492920605208";
+const PRECIO = "$18.000";
 
 const PREGUNTAS = [
   {id:"rostro", t:"¿Qué forma tiene tu cara?", o:[
@@ -118,7 +119,8 @@ function resultado(){
   const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].n}*. Quiero reservar turno 💈`;
   app.innerHTML = `<h2>Tus cortes recomendados</h2>` +
     top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
-    `<a class="cta wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Reservar por WhatsApp</a>
+    `<p class="sub" style="text-align:center;margin-top:8px">Corte <b style="color:var(--gold)">${PRECIO}</b> · incluye ticket Raspá y Ganá de regalo 🎁</p>
+     <a class="cta wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Reservar por WhatsApp</a>
      <a class="cta gift" href="index.html">🎁 Raspá y ganá tu premio</a>
      <button class="back">Volver a empezar</button>`;
   app.querySelector(".back").onclick = () => { paso = 0; resp = {}; pregunta(); };
