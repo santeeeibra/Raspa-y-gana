@@ -107,7 +107,7 @@ $("demo").onclick=()=>{store.clear();location.reload()};
 /* ---------- recursos ---------- */
 const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
 await Promise.all([document.fonts.load('80px "Bebas Neue"'),document.fonts.load('40px "Permanent Marker"'),document.fonts.load('700 30px "Barlow Condensed"')]).catch(()=>{});
-const [logo,wordmark]=await Promise.all([loadImg("logo.jpg"),loadImg("wordmark.png")]);
+const [logo,wordmark]=await Promise.all([loadImg("logo.png"),loadImg("wordmark.png")]);
 
 /* ---------- medidas ---------- */
 const stage=$("stage");
@@ -313,7 +313,7 @@ const chrome=new THREE.MeshPhysicalMaterial({color:0xdfe3ea,metalness:1,roughnes
 const frontMat=new THREE.MeshPhysicalMaterial({map:tC,metalness:1,roughness:1,metalnessMap:tM,roughnessMap:tM,emissive:0xffffff,emissiveMap:tE,emissiveIntensity:.85,
   bumpMap:tex(bumpC),bumpScale:6,iridescence:1,iridescenceIOR:1.6,iridescenceThicknessRange:[100,1100],clearcoat:.8,clearcoatRoughness:.08,envMapIntensity:1.5});
 // reverso: logo a color sobre cromo
-const back=document.createElement("canvas");back.width=CW;back.height=CH;const bx=back.getContext("2d");
+const back=document.createElement("canvas");back.width=CW*2;back.height=CH*2;const bx=back.getContext("2d");bx.scale(2,2);   // reverso al doble de resolución
 {const g=bx.createLinearGradient(0,0,CW,CH);g.addColorStop(0,"#e6e9ef");g.addColorStop(.5,"#cfd4dc");g.addColorStop(1,"#eceef3");
   bx.fillStyle=g;bx.fillRect(0,0,CW,CH);                            // cromo propio y opaco: ya no se ve el frente
   bx.globalAlpha=.18;bx.globalCompositeOperation="overlay";bx.fillStyle=rainbow(bx,0,0,CW,CH);bx.fillRect(0,0,CW,CH);
