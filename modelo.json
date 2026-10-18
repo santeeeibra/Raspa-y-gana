@@ -1,0 +1,319 @@
+{
+ "cortes": {
+  "Buzz Cut / Rapado con fade": {
+   "intercepto": -1.3317,
+   "pesos": {
+    "mant=mucho": -1.2042,
+    "mant=nada": 2.2523,
+    "mant=poco": -1.0688,
+    "objetivo=clasico": 0.6036,
+    "objetivo=juvenil": -0.8925,
+    "objetivo=moda": -0.2799,
+    "objetivo=prolijo": 0.5482,
+    "pelo=lacio": -0.9087,
+    "pelo=ondulado": -1.2289,
+    "pelo=poco": 1.1769,
+    "pelo=rulo": 0.94,
+    "rostro=alargado": -1.0019,
+    "rostro=cuadrado": 1.0368,
+    "rostro=ovalado": 1.2375,
+    "rostro=redondo": -0.2623,
+    "rostro=triangular": -1.0307
+   }
+  },
+  "Caesar": {
+   "intercepto": -0.5464,
+   "pesos": {
+    "mant=mucho": -1.2004,
+    "mant=nada": 1.6133,
+    "mant=poco": -0.4127,
+    "objetivo=clasico": 0.574,
+    "objetivo=juvenil": -0.467,
+    "objetivo=moda": -0.1561,
+    "objetivo=prolijo": 0.0492,
+    "pelo=lacio": -1.1527,
+    "pelo=ondulado": 0.8882,
+    "pelo=poco": 1.0458,
+    "pelo=rulo": -0.7812,
+    "rostro=alargado": 1.3875,
+    "rostro=cuadrado": 0.5037,
+    "rostro=ovalado": -1.0158,
+    "rostro=redondo": -0.051,
+    "rostro=triangular": -0.8244
+   }
+  },
+  "Corte medio con flequillo lateral": {
+   "intercepto": -0.3837,
+   "pesos": {
+    "mant=mucho": -0.3858,
+    "mant=nada": -0.8814,
+    "mant=poco": 1.2686,
+    "objetivo=clasico": 0.4418,
+    "objetivo=juvenil": -0.4979,
+    "objetivo=moda": 0.1581,
+    "objetivo=prolijo": -0.1005,
+    "pelo=lacio": 0.0037,
+    "pelo=ondulado": 0.1265,
+    "pelo=poco": 0.0539,
+    "pelo=rulo": -0.1827,
+    "rostro=alargado": 2.7414,
+    "rostro=cuadrado": -0.8874,
+    "rostro=ovalado": -1.0962,
+    "rostro=redondo": -0.8453,
+    "rostro=triangular": 0.0891
+   }
+  },
+  "Crew Cut": {
+   "intercepto": 0.8119,
+   "pesos": {
+    "mant=mucho": -1.2641,
+    "mant=nada": 1.1062,
+    "mant=poco": 0.1672,
+    "objetivo=clasico": 1.2182,
+    "objetivo=juvenil": -1.6255,
+    "objetivo=moda": -1.4389,
+    "objetivo=prolijo": 1.8556,
+    "pelo=lacio": -0.5648,
+    "pelo=ondulado": -0.6621,
+    "pelo=poco": 0.9815,
+    "pelo=rulo": 0.2548,
+    "rostro=alargado": -0.6476,
+    "rostro=cuadrado": 0.5207,
+    "rostro=ovalado": 0.1541,
+    "rostro=redondo": 0.3198,
+    "rostro=triangular": -0.3376
+   }
+  },
+  "Ivy League": {
+   "intercepto": -1.1196,
+   "pesos": {
+    "mant=mucho": -0.8122,
+    "mant=nada": 0.2458,
+    "mant=poco": 0.5392,
+    "objetivo=clasico": 0.7813,
+    "objetivo=juvenil": -0.7132,
+    "objetivo=moda": -0.8127,
+    "objetivo=prolijo": 0.7174,
+    "pelo=lacio": 0.5588,
+    "pelo=ondulado": 0.0973,
+    "pelo=poco": -0.6541,
+    "pelo=rulo": -0.0293,
+    "rostro=alargado": 0.5787,
+    "rostro=cuadrado": -0.5466,
+    "rostro=ovalado": 0.9933,
+    "rostro=redondo": -0.5644,
+    "rostro=triangular": -0.4882
+   }
+  },
+  "Low Fade + Texturizado": {
+   "intercepto": 0.0676,
+   "pesos": {
+    "mant=mucho": -1.2853,
+    "mant=nada": 0.6529,
+    "mant=poco": 0.6327,
+    "objetivo=clasico": -1.045,
+    "objetivo=juvenil": 0.1599,
+    "objetivo=moda": 1.5687,
+    "objetivo=prolijo": -0.6832,
+    "pelo=lacio": 0.743,
+    "pelo=ondulado": 0.2624,
+    "pelo=poco": 0.1424,
+    "pelo=rulo": -1.1475,
+    "rostro=alargado": -1.5199,
+    "rostro=cuadrado": 0.5532,
+    "rostro=ovalado": -0.4923,
+    "rostro=redondo": 1.1125,
+    "rostro=triangular": 0.3469
+   }
+  },
+  "Mid Fade + Crop francés": {
+   "intercepto": 0.8817,
+   "pesos": {
+    "mant=mucho": -1.2825,
+    "mant=nada": 1.1541,
+    "mant=poco": 0.1389,
+    "objetivo=clasico": -0.6245,
+    "objetivo=juvenil": -1.2736,
+    "objetivo=moda": 0.8447,
+    "objetivo=prolijo": 1.0639,
+    "pelo=lacio": 0.2645,
+    "pelo=ondulado": -1.1894,
+    "pelo=poco": 1.6442,
+    "pelo=rulo": -0.7087,
+    "rostro=alargado": 0.656,
+    "rostro=cuadrado": -0.8001,
+    "rostro=ovalado": -0.1502,
+    "rostro=redondo": -0.484,
+    "rostro=triangular": 0.7888
+   }
+  },
+  "Mohicano": {
+   "intercepto": -1.0947,
+   "pesos": {
+    "mant=mucho": 0.9399,
+    "mant=nada": -1.567,
+    "mant=poco": 0.6127,
+    "objetivo=clasico": -1.3437,
+    "objetivo=juvenil": 2.6105,
+    "objetivo=moda": -0.6023,
+    "objetivo=prolijo": -0.6788,
+    "pelo=lacio": -0.5847,
+    "pelo=ondulado": 0.525,
+    "pelo=poco": -0.6965,
+    "pelo=rulo": 0.7418,
+    "rostro=alargado": -1.5339,
+    "rostro=cuadrado": 0.8234,
+    "rostro=ovalado": 0.762,
+    "rostro=redondo": 1.2798,
+    "rostro=triangular": -1.3458
+   }
+  },
+  "Mullet moderno": {
+   "intercepto": -0.6712,
+   "pesos": {
+    "mant=mucho": 0.674,
+    "mant=nada": 0.1112,
+    "mant=poco": -0.7959,
+    "objetivo=clasico": -1.2877,
+    "objetivo=juvenil": 2.4864,
+    "objetivo=moda": -0.5503,
+    "objetivo=prolijo": -0.6592,
+    "pelo=lacio": -0.6624,
+    "pelo=ondulado": 0.5546,
+    "pelo=poco": -0.547,
+    "pelo=rulo": 0.6441,
+    "rostro=alargado": 0.9916,
+    "rostro=cuadrado": -1.5037,
+    "rostro=ovalado": 1.0126,
+    "rostro=redondo": -1.4233,
+    "rostro=triangular": 0.912
+   }
+  },
+  "Pompadour / Quiff": {
+   "intercepto": 0.0378,
+   "pesos": {
+    "mant=mucho": 2.0329,
+    "mant=nada": -1.6609,
+    "mant=poco": -0.3659,
+    "objetivo=clasico": 0.3576,
+    "objetivo=juvenil": 0.5226,
+    "objetivo=moda": -0.3672,
+    "objetivo=prolijo": -0.5069,
+    "pelo=lacio": 0.8993,
+    "pelo=ondulado": 0.6207,
+    "pelo=poco": -1.7735,
+    "pelo=rulo": 0.2595,
+    "rostro=alargado": -1.6563,
+    "rostro=cuadrado": 0.1524,
+    "rostro=ovalado": 0.099,
+    "rostro=redondo": 1.2432,
+    "rostro=triangular": 0.1678
+   }
+  },
+  "Side Part clásico": {
+   "intercepto": 1.1767,
+   "pesos": {
+    "mant=mucho": 0.5243,
+    "mant=nada": -0.9674,
+    "mant=poco": 0.4556,
+    "objetivo=clasico": 1.4154,
+    "objetivo=juvenil": -1.9888,
+    "objetivo=moda": -1.4052,
+    "objetivo=prolijo": 1.991,
+    "pelo=lacio": 0.6324,
+    "pelo=ondulado": 0.4445,
+    "pelo=poco": -0.0465,
+    "pelo=rulo": -1.0179,
+    "rostro=alargado": 0.6151,
+    "rostro=cuadrado": -0.0547,
+    "rostro=ovalado": -0.5072,
+    "rostro=redondo": -0.4596,
+    "rostro=triangular": 0.4188
+   }
+  },
+  "Slick Back": {
+   "intercepto": -0.3049,
+   "pesos": {
+    "mant=mucho": 2.3808,
+    "mant=nada": -1.1595,
+    "mant=poco": -1.2238,
+    "objetivo=clasico": 0.404,
+    "objetivo=juvenil": -1.0724,
+    "objetivo=moda": 0.4499,
+    "objetivo=prolijo": 0.216,
+    "pelo=lacio": 0.9411,
+    "pelo=ondulado": -0.6621,
+    "pelo=poco": -0.2752,
+    "pelo=rulo": -0.0063,
+    "rostro=alargado": -0.3643,
+    "rostro=cuadrado": 0.5985,
+    "rostro=ovalado": -0.0743,
+    "rostro=redondo": -0.8831,
+    "rostro=triangular": 0.7205
+   }
+  },
+  "Taper + Rulos definidos": {
+   "intercepto": 1.0385,
+   "pesos": {
+    "mant=mucho": -0.0848,
+    "mant=nada": -0.0649,
+    "mant=poco": 0.1664,
+    "objetivo=clasico": 0.8167,
+    "objetivo=juvenil": 1.0314,
+    "objetivo=moda": -0.91,
+    "objetivo=prolijo": -0.9213,
+    "pelo=lacio": -0.972,
+    "pelo=ondulado": 0.0552,
+    "pelo=poco": -0.8594,
+    "pelo=rulo": 1.7929,
+    "rostro=alargado": 0.2441,
+    "rostro=cuadrado": -0.5167,
+    "rostro=ovalado": 0.1887,
+    "rostro=redondo": -0.0809,
+    "rostro=triangular": 0.1815
+   }
+  },
+  "Textured Crop": {
+   "intercepto": 1.3879,
+   "pesos": {
+    "mant=mucho": -1.029,
+    "mant=nada": 0.7842,
+    "mant=poco": 0.2579,
+    "objetivo=clasico": -1.7343,
+    "objetivo=juvenil": 1.0923,
+    "objetivo=moda": 2.0691,
+    "objetivo=prolijo": -1.4139,
+    "pelo=lacio": -0.031,
+    "pelo=ondulado": -0.0469,
+    "pelo=poco": 0.6861,
+    "pelo=rulo": -0.5951,
+    "rostro=alargado": -0.4642,
+    "rostro=cuadrado": 0.141,
+    "rostro=ovalado": -0.6253,
+    "rostro=redondo": 0.4474,
+    "rostro=triangular": 0.5143
+   }
+  },
+  "Undercut": {
+   "intercepto": 0.05,
+   "pesos": {
+    "mant=mucho": 1.9965,
+    "mant=nada": -1.6188,
+    "mant=poco": -0.3722,
+    "objetivo=clasico": -0.5773,
+    "objetivo=juvenil": 0.628,
+    "objetivo=moda": 1.4323,
+    "objetivo=prolijo": -1.4775,
+    "pelo=lacio": 0.8333,
+    "pelo=ondulado": 0.215,
+    "pelo=poco": -0.8786,
+    "pelo=rulo": -0.1643,
+    "rostro=alargado": -0.0263,
+    "rostro=cuadrado": -0.0206,
+    "rostro=ovalado": -0.4859,
+    "rostro=redondo": 0.6512,
+    "rostro=triangular": -0.1129
+   }
+  }
+ }
+}

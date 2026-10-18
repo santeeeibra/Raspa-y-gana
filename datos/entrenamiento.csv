@@ -1,0 +1,81 @@
+﻿rostro;pelo;objetivo;mantenimiento;corte_1;corte_2;corte_3
+ovalado;lacio;prolijo;mucho;Side Part clásico;Slick Back;Pompadour / Quiff
+ovalado;lacio;moda;nada;Textured Crop;Mid Fade + Crop francés;Low Fade + Texturizado
+ovalado;lacio;moda;poco;Textured Crop;Low Fade + Texturizado;Undercut
+ovalado;lacio;moda;mucho;Undercut;Slick Back;Pompadour / Quiff
+ovalado;ondulado;juvenil;nada;Mullet moderno;Textured Crop;Taper + Rulos definidos
+ovalado;ondulado;juvenil;poco;Mohicano;Taper + Rulos definidos;Mullet moderno
+ovalado;ondulado;juvenil;mucho;Mullet moderno;Mohicano;Pompadour / Quiff
+ovalado;ondulado;clasico;poco;Side Part clásico;Taper + Rulos definidos;Ivy League
+ovalado;rulo;juvenil;poco;Taper + Rulos definidos;Mohicano;Mullet moderno
+ovalado;rulo;clasico;nada;Buzz Cut / Rapado con fade;Taper + Rulos definidos;Crew Cut
+ovalado;rulo;clasico;poco;Taper + Rulos definidos;Crew Cut;Ivy League
+ovalado;rulo;clasico;mucho;Taper + Rulos definidos;Pompadour / Quiff;Slick Back
+ovalado;poco;prolijo;nada;Crew Cut;Mid Fade + Crop francés;Buzz Cut / Rapado con fade
+ovalado;poco;prolijo;poco;Crew Cut;Mid Fade + Crop francés;Side Part clásico
+ovalado;poco;prolijo;mucho;Side Part clásico;Crew Cut;Mid Fade + Crop francés
+ovalado;poco;moda;nada;Mid Fade + Crop francés;Textured Crop;Buzz Cut / Rapado con fade
+redondo;lacio;prolijo;poco;Side Part clásico;Crew Cut;Low Fade + Texturizado
+redondo;lacio;moda;nada;Textured Crop;Low Fade + Texturizado;Mid Fade + Crop francés
+redondo;lacio;moda;poco;Textured Crop;Low Fade + Texturizado;Undercut
+redondo;lacio;moda;mucho;Undercut;Pompadour / Quiff;Textured Crop
+redondo;ondulado;juvenil;nada;Textured Crop;Low Fade + Texturizado;Taper + Rulos definidos
+redondo;ondulado;juvenil;poco;Mohicano;Pompadour / Quiff;Textured Crop
+redondo;ondulado;juvenil;mucho;Mohicano;Pompadour / Quiff;Undercut
+redondo;ondulado;clasico;mucho;Pompadour / Quiff;Side Part clásico;Undercut
+redondo;rulo;juvenil;nada;Taper + Rulos definidos;Textured Crop;Mohicano
+redondo;rulo;clasico;nada;Taper + Rulos definidos;Crew Cut;Buzz Cut / Rapado con fade
+redondo;rulo;clasico;poco;Taper + Rulos definidos;Crew Cut;Pompadour / Quiff
+redondo;rulo;clasico;mucho;Pompadour / Quiff;Taper + Rulos definidos;Undercut
+redondo;poco;prolijo;nada;Crew Cut;Mid Fade + Crop francés;Caesar
+redondo;poco;prolijo;poco;Crew Cut;Mid Fade + Crop francés;Side Part clásico
+redondo;poco;prolijo;mucho;Side Part clásico;Crew Cut;Slick Back
+redondo;poco;moda;mucho;Textured Crop;Undercut;Low Fade + Texturizado
+cuadrado;lacio;prolijo;mucho;Side Part clásico;Slick Back;Pompadour / Quiff
+cuadrado;lacio;moda;nada;Textured Crop;Low Fade + Texturizado;Mid Fade + Crop francés
+cuadrado;lacio;moda;poco;Textured Crop;Low Fade + Texturizado;Undercut
+cuadrado;lacio;moda;mucho;Undercut;Slick Back;Pompadour / Quiff
+cuadrado;ondulado;juvenil;nada;Textured Crop;Caesar;Low Fade + Texturizado
+cuadrado;ondulado;juvenil;poco;Mohicano;Textured Crop;Low Fade + Texturizado
+cuadrado;ondulado;juvenil;mucho;Mohicano;Pompadour / Quiff;Undercut
+cuadrado;ondulado;clasico;nada;Crew Cut;Caesar;Side Part clásico
+cuadrado;rulo;juvenil;poco;Mohicano;Taper + Rulos definidos;Textured Crop
+cuadrado;rulo;clasico;nada;Crew Cut;Buzz Cut / Rapado con fade;Taper + Rulos definidos
+cuadrado;rulo;clasico;poco;Taper + Rulos definidos;Crew Cut;Side Part clásico
+cuadrado;rulo;clasico;mucho;Taper + Rulos definidos;Slick Back;Pompadour / Quiff
+cuadrado;poco;prolijo;nada;Crew Cut;Buzz Cut / Rapado con fade;Mid Fade + Crop francés
+cuadrado;poco;prolijo;poco;Crew Cut;Side Part clásico;Mid Fade + Crop francés
+cuadrado;poco;prolijo;mucho;Side Part clásico;Crew Cut;Slick Back
+cuadrado;poco;moda;mucho;Textured Crop;Slick Back;Undercut
+alargado;lacio;prolijo;nada;Mid Fade + Crop francés;Side Part clásico;Ivy League
+alargado;lacio;moda;nada;Mid Fade + Crop francés;Textured Crop;Corte medio con flequillo lateral
+alargado;lacio;moda;poco;Corte medio con flequillo lateral;Textured Crop;Mid Fade + Crop francés
+alargado;lacio;moda;mucho;Undercut;Slick Back;Side Part clásico
+alargado;ondulado;juvenil;nada;Mullet moderno;Textured Crop;Caesar
+alargado;ondulado;juvenil;poco;Corte medio con flequillo lateral;Taper + Rulos definidos;Mullet moderno
+alargado;ondulado;juvenil;mucho;Mullet moderno;Undercut;Taper + Rulos definidos
+alargado;ondulado;clasico;poco;Corte medio con flequillo lateral;Side Part clásico;Caesar
+alargado;rulo;juvenil;mucho;Mullet moderno;Taper + Rulos definidos;Undercut
+alargado;rulo;clasico;nada;Taper + Rulos definidos;Crew Cut;Caesar
+alargado;rulo;clasico;poco;Taper + Rulos definidos;Corte medio con flequillo lateral;Side Part clásico
+alargado;rulo;clasico;mucho;Taper + Rulos definidos;Side Part clásico;Corte medio con flequillo lateral
+alargado;poco;prolijo;nada;Mid Fade + Crop francés;Crew Cut;Caesar
+alargado;poco;prolijo;poco;Mid Fade + Crop francés;Side Part clásico;Corte medio con flequillo lateral
+alargado;poco;prolijo;mucho;Side Part clásico;Mid Fade + Crop francés;Corte medio con flequillo lateral
+alargado;poco;moda;nada;Mid Fade + Crop francés;Textured Crop;Caesar
+triangular;lacio;prolijo;nada;Mid Fade + Crop francés;Side Part clásico;Crew Cut
+triangular;lacio;moda;nada;Textured Crop;Mid Fade + Crop francés;Low Fade + Texturizado
+triangular;lacio;moda;poco;Textured Crop;Low Fade + Texturizado;Mid Fade + Crop francés
+triangular;lacio;moda;mucho;Undercut;Slick Back;Textured Crop
+triangular;ondulado;juvenil;nada;Textured Crop;Mullet moderno;Taper + Rulos definidos
+triangular;ondulado;juvenil;poco;Textured Crop;Taper + Rulos definidos;Mullet moderno
+triangular;ondulado;juvenil;mucho;Mullet moderno;Pompadour / Quiff;Undercut
+triangular;ondulado;clasico;mucho;Side Part clásico;Pompadour / Quiff;Slick Back
+triangular;rulo;juvenil;nada;Taper + Rulos definidos;Mullet moderno;Textured Crop
+triangular;rulo;clasico;nada;Taper + Rulos definidos;Crew Cut;Mid Fade + Crop francés
+triangular;rulo;clasico;poco;Taper + Rulos definidos;Side Part clásico;Corte medio con flequillo lateral
+triangular;rulo;clasico;mucho;Taper + Rulos definidos;Slick Back;Pompadour / Quiff
+triangular;poco;prolijo;nada;Mid Fade + Crop francés;Crew Cut;Textured Crop
+triangular;poco;prolijo;poco;Mid Fade + Crop francés;Side Part clásico;Crew Cut
+triangular;poco;prolijo;mucho;Side Part clásico;Mid Fade + Crop francés;Slick Back
+triangular;poco;moda;poco;Textured Crop;Mid Fade + Crop francés;Low Fade + Texturizado
