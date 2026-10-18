@@ -54,6 +54,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .wa{background:#1fa855}
 .gift{background:linear-gradient(var(--night),var(--night)) padding-box,var(--split) border-box;border:1.5px solid transparent}
 .volver{position:fixed;top:max(10px,env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));z-index:50;display:inline-block;padding:8px 14px;border-radius:99px;background:rgba(20,25,37,.85);border:1px solid rgba(255,255,255,.14);color:#f4f6fa;text-decoration:none;font:700 15px "Barlow Condensed","Arial Narrow",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(6px)}
+.fotos{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin-bottom:12px;border-radius:12px}
+.fotos:empty{display:none}
+.fotos .foto{flex:0 0 100%;margin:0;scroll-snap-align:start}
+.local{display:block;margin:14px auto 0;background:none;border:1px dashed rgba(255,255,255,.3);border-radius:99px;padding:8px 16px;color:var(--gold);font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+.drop{border:2px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:16px;cursor:pointer;margin-top:10px}
+.drop.on{border-color:var(--gold);color:var(--gold)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumbs div{position:relative;width:72px;height:90px}
+.thumbs img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.thumbs button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:14px;line-height:1;padding:0}
 </style>
 </head>
 <body>
@@ -139,6 +149,7 @@ function pregunta(){
     `</div>` + (paso ? `<button class="back">← Volver</button>` : "");
   app.querySelectorAll(".opt").forEach(b => b.onclick = () => { resp[q.id] = b.dataset.v; paso++; paso < PREGUNTAS.length ? pregunta() : resultado(); });
   const back = app.querySelector(".back"); if (back) back.onclick = () => { paso--; pregunta(); };
+  if (PIN && !paso) { app.insertAdjacentHTML("beforeend", `<button class="local">📷 Cargar fotos de cortes</button>`); app.querySelector(".local").onclick = panelFotos; }
 }
 
 function resultado(){
@@ -148,7 +159,7 @@ function resultado(){
                     .sort((a,b) => b.s - a.s).slice(0,3);
   const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].n}*. Quiero reservar turno (sé que es con 2 horas de anticipación mínimo)`;
   app.innerHTML = `<h2>Tus cortes recomendados</h2>` +
-    top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<img class="foto" src="${foto(c.n)}" alt="${c.n}" loading="lazy" onerror="this.remove()"><h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
+    top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<div class="fotos" data-c="${c.n}"></div><h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
     `<p class="sub" style="text-align:center;margin-top:8px">Corte <b style="color:var(--gold)">${PRECIO}</b> · incluye ticket Raspá y Ganá de regalo</p>
      <a class="cta wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Reservar por WhatsApp</a>
      <p class="sub" style="text-align:center;margin-top:6px">👥 <b style="color:var(--gold)">Traé un amigo: 2 cortes por $32.000</b> ($16.000 c/u)</p>
@@ -156,6 +167,48 @@ function resultado(){
      <a class="cta gift" href="index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:8px"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18M12 8v13M12 8S10 3 7.5 4.5 9 8 12 8zm0 0s2-5 4.5-3.5S15 8 12 8z"/></svg>Raspá y ganá tu premio</a>
      <button class="back">Volver a empezar</button>`;
   app.querySelector(".back").onclick = () => { paso = 0; resp = {}; pregunta(); };
+  app.querySelectorAll(".fotos").forEach(async d => {
+    const c = d.dataset.c, f = await fotosDe(c);
+    d.innerHTML = f.length ? f.map(x => `<img class="foto" src="${x.img}" alt="${c}">`).join("")
+                           : `<img class="foto" src="${foto(c)}" alt="${c}" loading="lazy" onerror="this.remove()">`;
+  });
+}
+
+// ---- Fotos de cortes (guardadas en Supabase; solo el local con PIN puede subir/borrar) ----
+const SB="https://fabakotfzxbwyqztrkoy.supabase.co", SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
+let PIN = ""; try { PIN = localStorage.getItem("lv-pin") || "" } catch(e) {}
+async function rpc(fn, body){
+  const r = await fetch(SB+"/rest/v1/rpc/"+fn, {method:"POST", headers:{apikey:SBK, Authorization:"Bearer "+SBK, "Content-Type":"application/json"}, body:JSON.stringify(body)});
+  const j = await r.json(); if (!r.ok || (j && j.error)) throw new Error((j && (j.error || j.message)) || r.status); return j;
+}
+const cache = {};
+const fotosDe = async n => { if (cache[n]) return cache[n]; try { return cache[n] = await rpc("get_corte_fotos", {p_corte:n}) } catch(e) { return [] } };
+async function achicar(file){
+  const bm = await createImageBitmap(file), k = Math.min(1, 900/Math.max(bm.width, bm.height));
+  const c = document.createElement("canvas"); c.width = Math.round(bm.width*k); c.height = Math.round(bm.height*k);
+  c.getContext("2d").drawImage(bm, 0, 0, c.width, c.height); return c.toDataURL("image/jpeg", .8);
+}
+function panelFotos(){
+  bar.style.width = "0";
+  app.innerHTML = `<h2>Fotos de cortes</h2><p class="sub" style="margin:-6px 0 12px">Arrastrá fotos (o tocá el recuadro). Los clientes las ven en sus resultados.</p>` +
+    CORTES.map((c,i) => `<div class="card" data-i="${i}"><h3>${c.n}</h3><div class="thumbs"></div><div class="drop">+ Arrastrá fotos acá o tocá para elegir</div><input type="file" accept="image/*" multiple hidden></div>`).join("") +
+    `<button class="back">← Volver</button>`;
+  app.querySelector(".back").onclick = () => { paso = 0; resp = {}; pregunta(); };
+  app.querySelectorAll(".card").forEach(card => {
+    const n = CORTES[card.dataset.i].n, th = card.querySelector(".thumbs"), dz = card.querySelector(".drop"), inp = card.querySelector("input");
+    const pintar = async () => { const f = await fotosDe(n);
+      th.innerHTML = f.map(x => `<div><img src="${x.img}" alt=""><button data-id="${x.id}" aria-label="Borrar">✕</button></div>`).join("");
+      th.querySelectorAll("button").forEach(b => b.onclick = async () => { if (!confirm("¿Borrar esta foto?")) return;
+        try { await rpc("staff_del_corte_foto", {p_pin:PIN, p_id:+b.dataset.id}); delete cache[n]; pintar() } catch(e) { alert("No se pudo borrar: "+e.message) } }); };
+    const subir = async files => { dz.textContent = "Subiendo…";
+      try { for (const f of files) if (f.type.startsWith("image/")) await rpc("staff_add_corte_foto", {p_pin:PIN, p_corte:n, p_img:await achicar(f)}); }
+      catch(e) { alert("No se pudo subir: "+e.message) }
+      dz.textContent = "+ Arrastrá fotos acá o tocá para elegir"; delete cache[n]; pintar(); };
+    dz.onclick = () => inp.click(); inp.onchange = () => { subir([...inp.files]); inp.value = "" };
+    dz.ondragover = e => { e.preventDefault(); dz.classList.add("on") }; dz.ondragleave = () => dz.classList.remove("on");
+    dz.ondrop = e => { e.preventDefault(); dz.classList.remove("on"); subir([...e.dataTransfer.files]) };
+    pintar();
+  });
 }
 
 pregunta();
