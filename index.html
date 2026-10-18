@@ -122,8 +122,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
   <h2>Ingresá tu celular</h2>
   <p>Hay un solo ticket por número. Así guardamos tu premio para que lo canjees en la barbería.</p>
   <form id="gateForm" style="display:grid;gap:12px;justify-items:center">
-    <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="11 5555 5555" required>
-    <input name="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Clave del local" hidden>
+    <input name="phone" type="tel" inputmode="tel" autocomplete="username tel" placeholder="11 5555 5555" required>
+    <input name="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Clave del local" hidden>
     <button name="btn" type="submit">Ver mi ticket</button>
   </form>
   <div id="gateErr" role="alert"></div>
@@ -153,14 +153,15 @@ function askPhone(){return new Promise(res=>{const g=$("gate"),f=$("gateForm"),e
   f.onsubmit=async ev=>{ev.preventDefault();const ph=f.phone.value.replace(/\D/g,"");
     if(ph.length<8||ph.length>15){e.textContent="Ingresá un número válido";return}
     if(!f.pin.hidden&&f.pin.value.trim()){e.textContent="";f.btn.disabled=true;
-      try{const r=await claim(null,"staff_login",{p_phone:ph,p_pin:f.pin.value.trim()});sessionStorage.setItem("lv-pin",f.pin.value.trim());location.href="admin.html";return}
+      try{const r=await claim(null,"staff_login",{p_phone:ph,p_pin:f.pin.value.trim()});localStorage.setItem("lv-pin",f.pin.value.trim());location.href="admin.html";return}
       catch(x){e.textContent=/bloqueado/.test(x.message)?"Demasiados intentos. Esperá 10 minutos.":"Número o clave incorrectos";f.btn.disabled=false;return}}
     e.textContent="";f.btn.disabled=true;
     try{const t=await claim(ph);if(t.needs_pin){f.pin.hidden=false;f.btn.textContent="Entrar";f.btn.disabled=false;e.textContent="Ingresá la clave";f.pin.focus();return}g.hidden=true;res({ph,t})}catch(x){e.textContent=/limite_diario/.test(x.message)?"Ya se sacó un ticket hoy desde esta conexión. ¡Volvé mañana!":"No pudimos conectar. Probá de nuevo.";f.btn.disabled=false}}})}
 const saved=store.get();let got=null;
 const ss=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
-if(ss("lv-test")&&ss("lv-pin")){try{const keep=ss("lv-keep");try{sessionStorage.removeItem("lv-keep")}catch(e){}
-  const t=await claim(null,"claim_test_ticket",{p_pin:ss("lv-pin"),p_fresh:!keep});got={ph:t.phone,t};TEST=true}catch(e){}}
+const lget=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+if(ss("lv-test")&&lget("lv-pin")){try{const keep=ss("lv-keep");try{sessionStorage.removeItem("lv-keep")}catch(e){}
+  const t=await claim(null,"claim_test_ticket",{p_pin:lget("lv-pin"),p_fresh:!keep});got={ph:t.phone,t};TEST=true}catch(e){}}
 if(!got&&saved&&saved.phone){try{const t=await claim(saved.phone);if(!t.needs_pin)got={ph:saved.phone,t}}catch(e){}}
 if(!got)got=await askPhone();
 let state={id:got.t.prize,code:got.t.code,serial:got.t.serial,phone:got.ph,redeemed:got.t.redeemed,test:!!got.t.test,done:!got.t.test&&(got.t.redeemed||!!(saved&&saved.phone===got.ph&&saved.done))};

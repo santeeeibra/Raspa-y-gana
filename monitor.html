@@ -54,7 +54,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut
   <div class="list" id="lista"></div>
 </main>
 <script>
-let PIN="";try{PIN=sessionStorage.getItem("lv-pin")||""}catch(e){}
+let PIN="";try{PIN=localStorage.getItem("lv-pin")||""}catch(e){}
 if(!PIN)location.replace("index.html");
 const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
 const PR={"5":"5%","10":"10%","15":"15%","JP":"Corte gratis","NO":"Sin premio","EX":"Intento extra","XTRA":"Intento extra"};
@@ -64,7 +64,7 @@ let busy=false;
 async function cargar(){if(busy)return;busy=true;
   try{const r=await fetch(SB+"/rest/v1/rpc/staff_recent_tickets",{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify({p_pin:PIN,p_limit:100})});
     const j=await r.json();
-    if(!r.ok||j.error){if(j.error==="clave_incorrecta"){try{sessionStorage.removeItem("lv-pin")}catch(e){}location.replace("index.html");return}throw new Error(j.error||"error")}
+    if(!r.ok||j.error){if(j.error==="clave_incorrecta"){try{localStorage.removeItem("lv-pin")}catch(e){}location.replace("index.html");return}throw new Error(j.error||"error")}
     document.getElementById("hoy").textContent=j.today;document.getElementById("tot").textContent=j.total;
     document.getElementById("lista").innerHTML=j.tickets.map(t=>{const p=PR[t.prize]||t.prize,no=t.prize==="NO"||t.prize==="EX"||t.prize==="XTRA",ph=String(t.phone).replace(/\D/g,"");
       return '<div class="row"><span class="t">'+fmt(t.created_at)+'</span><a class="ph" href="https://wa.me/54'+ph+'" target="_blank" rel="noopener">'+esc(t.phone)+'</a><span class="pz'+(no?' no':'')+'">'+esc(p)+'</span><span class="st'+(t.redeemed_at?' ok':'')+'">'+(t.redeemed_at?'✓ Canjeado '+fmt(t.redeemed_at):(no?'—':'Sin canjear'))+'</span></div>'}).join("")||'<p>Todavía no hay tickets.</p>';
