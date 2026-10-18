@@ -143,6 +143,16 @@ const CORTES = [
    p:{ovalado:2,redondo:1,cuadrado:2,alargado:2,lacio:2,ondulado:2,poco:3,nada:3,clasico:1}}
 ];
 
+// Modelo entrenado (modelo.json, lo genera entrenar.py). Si no carga, se usa la tabla CORTES de arriba.
+let MODELO = null, TEXTOS = {};
+const AZAR = 0.5; // sacude un poco los puntajes para que no salga siempre lo mismo
+function aplicarTextos(){ CORTES.forEach(c => { const t = TEXTOS[c.n]; if (t) { if (t.nombre) c.nombre = t.nombre; if (t.descripcion) c.d = t.descripcion } }); }
+fetch("modelo.json", {cache:"no-cache"}).then(r => r.ok ? r.json() : Promise.reject()).then(m => {
+  if (!m || !m.cortes || !Object.keys(m.cortes).length) return;
+  Object.keys(m.cortes).forEach(n => { if (!CORTES.some(c => c.n === n)) CORTES.push({n, d:"", p:{}}); });
+  MODELO = m; aplicarTextos();
+}).catch(() => {});
+
 // Foto de cada corte: imagenes/cortes/<nombre-sin-tildes-con-guiones>.jpg
 const foto = n => "imagenes/cortes/" + n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") + ".jpg";
 
@@ -164,7 +174,10 @@ function pregunta(){
 function resultado(){
   bar.style.width = "100%";
   const vals = Object.values(resp);
-  const top = CORTES.map(c => ({...c, s: vals.reduce((a,v) => a + (c.p[v]||0), 0)}))
+  const puntaje = MODELO
+    ? c => { const m = MODELO.cortes[c.n]; return m ? m.intercepto + Object.entries(resp).reduce((a,[k,v]) => a + (m.pesos[k+"="+v]||0), 0) + Math.random()*AZAR : -Infinity }
+    : c => vals.reduce((a,v) => a + (c.p[v]||0), 0);
+  const top = CORTES.map(c => ({...c, s: puntaje(c)}))
                     .sort((a,b) => b.s - a.s).slice(0,3);
   const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].nombre||top[0].n}*. Quiero reservar turno (sé que es con 2 horas de anticipación mínimo)`;
   app.innerHTML = `<h2>Tus cortes recomendados</h2>` +
@@ -296,7 +309,7 @@ async function escanear(){
 }
 
 // ---- Nombres de cortes editables desde el editor ----
-rpc("get_corte_textos", {}).then(m => { CORTES.forEach(c => { const t = m[c.n]; if (t) { if (t.nombre) c.nombre = t.nombre; if (t.descripcion) c.d = t.descripcion } }); }).catch(() => {});
+rpc("get_corte_textos", {}).then(m => { TEXTOS = m || {}; aplicarTextos(); }).catch(() => {});
 
 pregunta();
 </script>
