@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Editor de guía · Las Vegas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@500;700&display=swap">
+<style>
+:root{--night:#07090f;--steel:#141925;--line:rgba(255,255,255,.09);--blue:#2456c2;--red:#e3262a;--white:#f4f6fa;--muted:#8c95ab;--gold:#ffc83d;
+  --f-head:"Bebas Neue",Impact,sans-serif;--f-body:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(45% 55% at -5% 40%,rgba(36,86,194,.28),transparent 70%),radial-gradient(45% 55% at 105% 40%,rgba(227,38,42,.22),transparent 70%),var(--night);
+  color:var(--white);font-family:var(--f-body);font-size:19px;padding:56px max(16px,env(safe-area-inset-left,0px)) 40px}
+main{max-width:520px;margin:0 auto}
+h1{font-family:var(--f-head);font-weight:400;font-size:40px;letter-spacing:.06em;margin:0;text-align:center}
+.sub{color:var(--muted);text-align:center;margin:6px 0 18px}
+.card{background:var(--steel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{font-family:var(--f-head);font-weight:400;font-size:26px;letter-spacing:.04em;margin:0}
+.drop{border:2px dashed rgba(255,255,255,.25);border-radius:12px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;margin-top:10px}
+.drop.on{border-color:var(--gold);color:var(--gold)}
+.thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.thumbs div{position:relative;width:76px;height:95px}
+.thumbs img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.thumbs button{position:absolute;top:-7px;right:-7px;width:26px;height:26px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:14px;padding:0;cursor:pointer}
+#msg{position:sticky;top:8px;z-index:5;text-align:center;padding:10px;border-radius:12px;background:#1fa855;color:#fff;margin-bottom:12px;display:none}
+#msg.err{background:var(--red)}
+.volver{position:fixed;top:max(10px,env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));z-index:50;padding:8px 14px;border-radius:99px;background:rgba(20,25,37,.85);border:1px solid rgba(255,255,255,.14);color:#f4f6fa;text-decoration:none;font:700 15px var(--f-body);letter-spacing:.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<a class="volver" href="admin.html">← Panel</a>
+<main>
+  <h1>Editor de guía</h1>
+  <p class="sub">Agregá fotos de modelos a cada corte. Los clientes las ven en la guía.</p>
+  <div id="msg"></div>
+  <div id="lista"></div>
+</main>
+<script>
+// Solo se entra logueado como local (PIN + número desde la página principal)
+let PIN="";try{PIN=localStorage.getItem("lv-pin")||""}catch(e){}
+if(!PIN)location.replace("index.html");
+const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
+// Mismos nombres que CORTES en guia.html (si agregás un corte allá, agregalo acá también)
+const CORTES=["Low Fade + Texturizado","Mid Fade + Crop francés","Pompadour / Quiff","Side Part clásico","Buzz Cut / Rapado con fade","Taper + Rulos definidos","Mullet moderno","Corte medio con flequillo lateral","Ivy League","Fade + Barba perfilada","Textured Crop","Crew Cut","Undercut","Slick Back","Caesar"];
+const $=id=>document.getElementById(id);
+function aviso(t,err){const m=$("msg");m.textContent=t;m.className=err?"err":"";m.style.display="block";clearTimeout(aviso.t);aviso.t=setTimeout(()=>m.style.display="none",err?8000:2500)}
+async function rpc(fn,body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(!r.ok||(j&&j.error))throw new Error((j&&(j.error||j.message))||("error "+r.status));return j}
+async function achicar(file){
+  const url=URL.createObjectURL(file);
+  const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error("no se pudo leer la imagen"));i.src=url});
+  const k=Math.min(1,900/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");
+  c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+  URL.revokeObjectURL(url);return c.toDataURL("image/jpeg",.8)}
+$("lista").innerHTML=CORTES.map(n=>`<div class="card"><h3>${n}</h3><div class="thumbs"></div><div class="drop">+ Arrastrá fotos acá o tocá para elegir</div><input type="file" accept="image/*" multiple hidden></div>`).join("");
+document.querySelectorAll(".card").forEach((card,i)=>{
+  const n=CORTES[i],th=card.querySelector(".thumbs"),dz=card.querySelector(".drop"),inp=card.querySelector("input"),txt=dz.textContent;
+  async function pintar(){let f=[];try{f=await rpc("get_corte_fotos",{p_corte:n})}catch(e){aviso("No se pudieron leer las fotos: "+e.message,1)}
+    th.innerHTML=f.map(x=>`<div><img src="${x.img}" alt=""><button data-id="${x.id}" aria-label="Borrar">✕</button></div>`).join("");
+    th.querySelectorAll("button").forEach(b=>b.onclick=async()=>{if(!confirm("¿Borrar esta foto?"))return;
+      try{await rpc("staff_del_corte_foto",{p_pin:PIN,p_id:+b.dataset.id});aviso("Foto borrada");pintar()}catch(e){aviso("No se pudo borrar: "+e.message,1)}})}
+  async function subir(files){files=files.filter(f=>f.type.startsWith("image/"));if(!files.length)return aviso("Elegí una imagen (jpg o png)",1);
+    let ok=0;for(const f of files){dz.textContent="Subiendo "+(ok+1)+" de "+files.length+"…";
+      try{await rpc("staff_add_corte_foto",{p_pin:PIN,p_corte:n,p_img:await achicar(f)});ok++}catch(e){aviso("No se pudo subir: "+e.message,1)}}
+    dz.textContent=txt;if(ok)aviso(ok+" foto(s) agregada(s) a "+n);pintar()}
+  dz.onclick=()=>inp.click();inp.onchange=()=>{subir([...inp.files]);inp.value=""};
+  dz.ondragover=e=>{e.preventDefault();dz.classList.add("on")};dz.ondragleave=()=>dz.classList.remove("on");
+  dz.ondrop=e=>{e.preventDefault();dz.classList.remove("on");subir([...e.dataTransfer.files])};
+  pintar()});
+</script>
+</body>
+</html>
