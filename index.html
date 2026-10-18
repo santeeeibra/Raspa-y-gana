@@ -59,6 +59,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .rar.r10{background:var(--blue)}.rar.r15{background:linear-gradient(90deg,#7b2ff7,#e3262a)}
 .rar.rJP{color:var(--night);background:linear-gradient(90deg,#ffc83d,#fff3b0,#ffc83d);box-shadow:0 0 18px var(--gold)}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:5;width:100%;height:100%}
+.guia-btn{display:block;margin:22px auto 0;max-width:340px;text-align:center;text-decoration:none;font-family:var(--f-head);font-size:26px;letter-spacing:.05em;color:var(--white);padding:12px 18px;border:2px solid var(--gold);border-radius:12px}
 </style>
 </head>
 <body>
@@ -77,6 +78,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
     <div><b>15%</b><span>off</span></div>
     <div class="jp"><b>CORTE</b><span>gratis</span></div>
   </div>
+  <a class="guia-btn" href="guia.html">💈 Descubrí tu corte ideal</a>
   <button class="demo" id="demo" hidden>Modo prueba: jugar de nuevo</button>
 </main>
 
@@ -356,7 +358,8 @@ function showResult(){const b=$("resultBox");b.className="result";b.hidden=false
   b.innerHTML=`<div class="rar r${prize.id}">${{"5":"★ COMÚN","10":"★★ RARA","15":"★★★ ÉPICA","JP":"★★★★ LEGENDARIA"}[prize.id]}</div><h2>${prize.jackpot?"¡Ganaste un corte gratis!":"¡Ganaste "+prize.big+" de descuento!"}</h2>
    <p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>
    <div class="code" id="code">${state.code}</div><button id="copy">Copiar código</button>
-   <p style="font-size:13px;color:#4a505b">Sacale captura de pantalla para no perderlo.</p>`;
+   <p style="font-size:13px;color:#4a505b">Sacale captura de pantalla para no perderlo.</p>
+   <a class="guia-btn" style="background:#1fa855;border-color:#1fa855" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("💈 Te regalo un ticket de Raspá y Ganá de Las Vegas Barbería. Podés ganar hasta un corte gratis: "+location.origin+location.pathname)}">📲 Pasale un ticket a un amigo</a>`;
   $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(state.code);$("copy").textContent="Copiado"}catch(e){getSelection().selectAllChildren($("code"))}}}
 if(state.done)showResult();
 
