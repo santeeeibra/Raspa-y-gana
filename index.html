@@ -122,7 +122,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
   <p>Hay un solo ticket por número. Así guardamos tu premio para que lo canjees en la barbería.</p>
   <form id="gateForm" style="display:grid;gap:12px;justify-items:center">
     <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="11 5555 5555" required>
+    <input name="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Clave del local" hidden>
     <button name="btn" type="submit">Ver mi ticket</button>
+    <button type="button" id="staffLink" style="background:none;border:0;color:var(--muted);font:500 14px var(--f-body);text-decoration:underline;cursor:pointer;box-shadow:none">Acceso del local</button>
   </form>
   <div id="gateErr" role="alert"></div>
 </div>
@@ -145,10 +147,14 @@ const store={get(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){ret
   set(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}};
 /* El premio lo sortea el servidor (Supabase): un ticket por celular, el navegador no puede cambiarlo */
 const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
-async function claim(ph,fn="claim_ticket"){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify({p_phone:ph})});if(!r.ok){let m="";try{m=(await r.json()).message}catch(e){}throw new Error(m||r.status)}return r.json()}
+async function claim(ph,fn="claim_ticket",body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body||{p_phone:ph})});if(!r.ok){let m="";try{m=(await r.json()).message}catch(e){}throw new Error(m||r.status)}const j=await r.json();if(j&&j.error)throw new Error(j.error);return j}
 function askPhone(){return new Promise(res=>{const g=$("gate"),f=$("gateForm"),e=$("gateErr");g.hidden=false;
+  $("staffLink").onclick=()=>{f.pin.hidden=!f.pin.hidden;f.btn.textContent=f.pin.hidden?"Ver mi ticket":"Entrar";if(!f.pin.hidden)f.pin.focus()};
   f.onsubmit=async ev=>{ev.preventDefault();const ph=f.phone.value.replace(/\D/g,"");
     if(ph.length<8||ph.length>15){e.textContent="Ingresá un número válido";return}
+    if(!f.pin.hidden){e.textContent="";f.btn.disabled=true;
+      try{const r=await claim(null,"staff_login",{p_phone:ph,p_pin:f.pin.value.trim()});sessionStorage.setItem("lv-pin",f.pin.value.trim());location.href="admin.html";return}
+      catch(x){e.textContent=/bloqueado/.test(x.message)?"Demasiados intentos. Esperá 10 minutos.":"Número o clave incorrectos";f.btn.disabled=false;return}}
     e.textContent="";f.btn.disabled=true;
     try{const t=await claim(ph);g.hidden=true;res({ph,t})}catch(x){e.textContent=/limite_diario/.test(x.message)?"Ya se sacó un ticket hoy desde esta conexión. ¡Volvé mañana!":"No pudimos conectar. Probá de nuevo.";f.btn.disabled=false}}})}
 const saved=store.get();let got=null;
