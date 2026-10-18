@@ -112,13 +112,13 @@ const PREGUNTAS = [
 const CORTES = [
   {n:"Low Fade + Texturizado", d:"Degradado bajo con arriba texturizado y desordenado. Moderno y fácil.",
    p:{ovalado:2,redondo:2,cuadrado:2,triangular:1,lacio:2,ondulado:2,moda:3,juvenil:1,poco:2,nada:1}},
-  {n:"Mid Fade + Crop francés", d:"Flequillo corto hacia adelante. Disimula entradas y frentes amplias.",
+  {n:"Mid Fade + Crop francés", d:"Flequillo corto y prolijo hacia adelante, con la parte de arriba más lisa. Disimula entradas y frentes amplias.",
    p:{ovalado:2,redondo:1,cuadrado:2,alargado:2,triangular:2,lacio:2,poco:3,moda:2,nada:3}},
-  {n:"Pompadour / Quiff", d:"Volumen arriba con costados cortos. Alarga y estiliza la cara.",
-   p:{redondo:3,cuadrado:2,ovalado:2,lacio:2,ondulado:2,prolijo:2,juvenil:2,mucho:3}},
+  {n:"Pompadour / Quiff", d:"Volumen arriba peinado hacia atrás y costados cortos. Suma altura: ideal para caras redondas o cuadradas.",
+   p:{redondo:3,cuadrado:2,ovalado:2,triangular:1,lacio:2,ondulado:2,prolijo:2,juvenil:2,mucho:3}},
   {n:"Side Part clásico", d:"Raya al costado con tijera. Elegante, ideal para el trabajo.",
-   p:{ovalado:2,cuadrado:3,redondo:1,triangular:2,lacio:3,ondulado:1,prolijo:3,clasico:3,poco:2}},
-  {n:"Buzz Cut / Rapado con fade", d:"Máquina pareja con degradado. Cero mantenimiento, resalta la mandíbula.",
+   p:{ovalado:2,cuadrado:3,redondo:2,triangular:2,lacio:3,ondulado:1,prolijo:3,clasico:3,poco:2}},
+  {n:"Buzz Cut / Rapado con fade", d:"Máquina pareja con degradado. Cero mantenimiento, resalta la simetría y los rasgos.",
    p:{ovalado:3,cuadrado:3,poco:3,rulo:1,nada:3,juvenil:1,clasico:1}},
   {n:"Taper + Rulos definidos", d:"Costados limpios en degradado y rulos con volumen arriba.",
    p:{rulo:4,ondulado:2,ovalado:2,redondo:1,alargado:1,moda:2,juvenil:2,poco:1,nada:1}},
@@ -126,19 +126,19 @@ const CORTES = [
    p:{ondulado:2,rulo:2,lacio:1,ovalado:2,triangular:1,alargado:1,juvenil:4,moda:1,poco:1}},
   {n:"Corte medio con flequillo lateral", d:"Más largo en los costados: equilibra caras alargadas.",
    p:{alargado:4,triangular:2,lacio:2,ondulado:2,clasico:1,moda:1,poco:2,prolijo:1}},
-  {n:"Ivy League", d:"Versión prolija del crew cut, apenas más largo arriba.",
+  {n:"Ivy League", d:"Versión más larga del crew cut: alcanza para raya al costado o peinado hacia atrás. Prolijo y clásico.",
    p:{cuadrado:2,ovalado:2,alargado:1,lacio:2,poco:1,prolijo:3,clasico:2,nada:2,}},
-  {n:"Fade + Barba perfilada", d:"Degradado con barba marcada: da forma a caras redondas o mentón fino.",
+  {n:"Fade + Barba perfilada", d:"Degradado con barba perfilada, que suma volumen en la mandíbula. Va bien en caras redondas o de mentón fino.",
    p:{redondo:3,triangular:3,alargado:1,moda:2,prolijo:1,poco:2,lacio:1,rulo:1}},
   {n:"Textured Crop", d:"Corto y desflecado arriba con flequillo hacia adelante. Muy de moda y fácil de peinar.",
-   p:{ovalado:2,redondo:2,cuadrado:2,lacio:3,ondulado:2,moda:3,juvenil:2,poco:3,nada:2}},
-  {n:"Crew Cut", d:"Corto arriba y degradado a los costados. Clásico, práctico y siempre prolijo.",
+   p:{ovalado:2,redondo:2,cuadrado:2,triangular:2,lacio:3,ondulado:2,moda:3,juvenil:2,poco:3,nada:2}},
+  {n:"Crew Cut", d:"Corto arriba (se peina hacia arriba) y degradado a los costados. Clásico, práctico y siempre prolijo.",
    p:{ovalado:2,cuadrado:3,lacio:2,prolijo:3,clasico:3,poco:3,nada:3}},
   {n:"Undercut", d:"Costados muy cortos y arriba largo, con contraste marcado. Para peinar hacia atrás o al costado.",
-   p:{ovalado:2,cuadrado:2,alargado:1,lacio:3,ondulado:2,moda:3,juvenil:2,mucho:3}},
+   p:{ovalado:2,cuadrado:2,redondo:2,alargado:1,lacio:3,ondulado:2,moda:3,juvenil:2,mucho:3}},
   {n:"Slick Back", d:"Peinado hacia atrás con degradado. Look elegante y con personalidad.",
    p:{ovalado:2,cuadrado:3,triangular:2,lacio:3,ondulado:1,prolijo:2,clasico:2,moda:2,mucho:2}},
-  {n:"Caesar", d:"Corte corto con flequillo recto y parejo. Ideal para disimular entradas y mantener todo simple.",
+  {n:"Caesar", d:"Corto y parejo con flequillo recto y corto. Simple, sin textura; ideal para disimular entradas.",
    p:{ovalado:2,redondo:1,cuadrado:2,alargado:2,lacio:2,ondulado:2,poco:3,nada:3,clasico:1}}
 ];
 
@@ -244,7 +244,7 @@ async function escanear(){
 function aviso(t){ let m = app.querySelector(".aviso"); if (!m) { m = document.createElement("p"); m.className = "sub aviso"; m.style.cssText = "text-align:center;color:var(--gold);margin-top:10px"; app.querySelector("#cap").after(m); } m.textContent = t; }
 
 // ---- Nombres de cortes editables desde el editor ----
-rpc("get_corte_nombres", {}).then(m => { CORTES.forEach(c => { if (m[c.n]) c.nombre = m[c.n] }); }).catch(() => {});
+rpc("get_corte_textos", {}).then(m => { CORTES.forEach(c => { const t = m[c.n]; if (t) { if (t.nombre) c.nombre = t.nombre; if (t.descripcion) c.d = t.descripcion } }); }).catch(() => {});
 
 pregunta();
 </script>
