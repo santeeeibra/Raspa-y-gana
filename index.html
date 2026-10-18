@@ -66,6 +66,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 
 <div class="bg"></div>
 <canvas id="fx"></canvas><div id="flash"></div>
+<label id="hapt" aria-hidden="true" style="position:fixed;left:-99px;opacity:0"><input type="checkbox" switch></label>
+<button id="mute" aria-label="Sonido" style="position:fixed;top:12px;right:12px;z-index:7;padding:8px 10px;font-size:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)">🔊</button>
 <main>
   <img class="wordmark" src="wordmark.png" alt="Las Vegas Barbería">
   <h1>Raspá y Ganá</h1>
@@ -341,15 +343,37 @@ function hitUV(ev){const r=renderer.domElement.getBoundingClientRect();ndc.set((
   ray.setFromCamera(ndc,camera);const h=ray.intersectObject(front)[0];return h?{x:h.uv.x*CW,y:(1-h.uv.y)*CH}:null}
 const inRect=p=>{const R=lay.rect;return p&&p.x>R.x&&p.x<R.x+R.w&&p.y>R.y&&p.y<R.y+R.h};
 const cv=renderer.domElement;
-cv.addEventListener("pointerdown",ev=>{if(introT<1)return;cv.setPointerCapture(ev.pointerId);const p=hitUV(ev);
+function haptic(ms){try{if(navigator.vibrate)return navigator.vibrate(ms)}catch(e){}$("hapt").click()}
+
+/* ---------- sonido ---------- */
+let ac,noise,scrG,muted=false;try{muted=localStorage.getItem("muted")==="1"}catch(e){}
+$("mute").textContent=muted?"🔇":"🔊";
+$("mute").onclick=()=>{muted=!muted;$("mute").textContent=muted?"🔇":"🔊";try{localStorage.setItem("muted",muted?"1":"0")}catch(e){}if(scrG)scrG.gain.value=0};
+function audioOn(){if(ac){ac.resume();return}try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+  const b=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  noise=ac.createBufferSource();noise.buffer=b;noise.loop=true;
+  const bp=ac.createBiquadFilter();bp.type="bandpass";bp.frequency.value=2600;bp.Q.value=.8;
+  scrG=ac.createGain();scrG.gain.value=0;noise.connect(bp).connect(scrG).connect(ac.destination);noise.start()}
+function scratchSound(speed){if(!ac||muted)return;scrG.gain.setTargetAtTime(Math.min(.35,speed*.012),ac.currentTime,.02);scrG.gain.setTargetAtTime(0,ac.currentTime+.06,.08)}
+function ding(big){if(!ac||muted)return;const notes=big?[523,659,784,1047,1319]:[659,784,1047];
+  notes.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+i*.09;o.type="triangle";o.frequency.value=f;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.25,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+.9);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+1)})}
+
+/* ---------- inclinación del celular: el holograma cambia de color al moverlo ---------- */
+let tiltX=0,tiltY=0,tiltAsked=false;
+function onTilt(ev){if(ev.beta==null)return;tiltX=THREE.MathUtils.clamp((ev.beta-45)/45,-1,1)*.25;tiltY=THREE.MathUtils.clamp(ev.gamma/40,-1,1)*.35}
+function askTilt(){if(tiltAsked)return;tiltAsked=true;const D=window.DeviceOrientationEvent;
+  if(D&&typeof D.requestPermission==="function")D.requestPermission().then(r=>{if(r==="granted")addEventListener("deviceorientation",onTilt)}).catch(()=>{});
+  else addEventListener("deviceorientation",onTilt)}
+cv.addEventListener("pointerdown",ev=>{audioOn();if(introT<1)return;cv.setPointerCapture(ev.pointerId);const p=hitUV(ev);
   mode=!revealed&&inRect(p)?"scratch":"rotate";lastXY={x:ev.clientX,y:ev.clientY};lastP=null;if(mode==="scratch")scratch(p)});
 cv.addEventListener("pointermove",ev=>{if(!mode)return;
   if(mode==="rotate"){const dx=ev.clientX-lastXY.x,dy=ev.clientY-lastXY.y;tRotY+=dx*.012;tRotX=THREE.MathUtils.clamp(tRotX+dy*.008,-.7,.7);vel=dx*.012}
   else{const p=hitUV(ev);if(p){scratch(p);
     for(let i=0;i<2;i++)parts.push({x:ev.clientX,y:ev.clientY,vx:(Math.random()-.5)*3,vy:-Math.random()*2,life:40,c:Math.random()<.5?"#e9ecf2":"#9aa2b4",s:4,r:Math.random()*6});
-    if(moves%10===0)try{navigator.vibrate?.(8)}catch(e){}}}
+    scratchSound(Math.hypot(ev.clientX-lastXY.x,ev.clientY-lastXY.y));if(moves%10===0)haptic(8)}}
   lastXY={x:ev.clientX,y:ev.clientY};idleAt=performance.now()});
-const end=()=>{if(mode==="scratch")check();mode=null;lastP=null;idleAt=performance.now()};
+const end=()=>{askTilt();if(mode==="scratch")check();mode=null;lastP=null;idleAt=performance.now()};
 cv.addEventListener("pointerup",end);cv.addEventListener("pointercancel",end);
 
 function scratch(p){
@@ -361,7 +385,7 @@ function check(){if(revealed)return;const R=lay.rect,d=coat.getContext("2d").get
   for(let i=3;i<d.length;i+=4*37){n++;if(d[i]<40)c++}progress=c/n/.75;if(c/n>.75)reveal()}
 function reveal(){revealed=true;mode=null;state.done=true;store.set(state);
   for(const c of [coat,coatMR,coatE])c.getContext("2d").clearRect(0,0,CW,CH);dirty=true;
-  flash=1;$("flash").classList.add("on");try{navigator.vibrate?.([30,40,80])}catch(e){}
+  flash=1;$("flash").classList.add("on");haptic([30,40,80]);setTimeout(()=>haptic(60),180);if(prize.jackpot)setTimeout(()=>haptic(60),360);ding(prize.jackpot);
   spin=Math.PI*2*(prize.jackpot?2:1);burst(prize.jackpot?420:180);showResult();
   setTimeout(()=>$("resultBox").scrollIntoView({behavior:"smooth",block:"center"}),900)}
 function showResult(){const b=$("resultBox");b.className="result";b.hidden=false;
@@ -389,14 +413,14 @@ renderer.setAnimationLoop(now=>{
   if(!mode&&introT>=1&&now>nextTurn&&now-idleAt>4000){slow=Math.PI*2;nextTurn=now+12000}
   if(slow>0){const s=Math.min(slow,.025+.03*Math.sin(slow/2));tRotY+=s;slow-=s}
   rotX+=(tRotX-rotX)*.12;rotY+=(tRotY-rotY)*.12;
-  pivot.rotation.set(rotX,rotY,0);pivot.position.y=reduce?0:Math.sin(t*1.4)*.04;
+  pivot.rotation.set(rotX+tiltX,rotY+tiltY,0);pivot.position.y=reduce?0:Math.sin(t*1.4)*.04;
   // presentación: el ticket sube desde abajo girando y se frena suave
   if(introT<1){introT=introAt?Math.min(1,(now-introAt)/4500):0;const k=1-Math.pow(1-introT,2);
     pivot.rotation.set(rotX+(1-k)*.9,rotY+(1-k)*Math.PI*4,(1-k)*-.4);
     pivot.position.y+=(1-k)*-2.2;pivot.scale.setScalar(introAt?.35+.65*k:.001);
     frontMat.emissiveIntensity=.85+(introT>.85?(1-introT)*14:0);
     if(introT>=1){idleAt=performance.now()-1500;flash=.6}}
-  key.position.set(Math.sin(t*.4)*3,3,4);
+  key.position.set(Math.sin(t*.4)*3+tiltY*8,3-tiltX*8,4);
   pivot.rotation.z=mode==="scratch"&&!reduce?(Math.random()-.5)*.012*(1+progress*4):0;   // tiembla más cuanto más raspás
   if(flash>0){flash*=.9;frontMat.emissiveIntensity=.85+flash*3}
   renderer.render(scene,camera);
