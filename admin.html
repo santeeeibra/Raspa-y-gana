@@ -20,9 +20,11 @@ a.card,button.card{display:grid;gap:2px;padding:18px;border-radius:16px;border:1
 .card span{color:var(--muted);font-size:16px}
 .card.main{border-color:#1fa855}
 .out{background:none;border:0;color:var(--muted);font:500 16px var(--f-body);text-decoration:underline;cursor:pointer;margin-top:8px}
+.volver{position:fixed;top:max(10px,env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));z-index:50;display:inline-block;padding:8px 14px;border-radius:99px;background:rgba(20,25,37,.85);border:1px solid rgba(255,255,255,.14);color:#f4f6fa;text-decoration:none;font:700 15px "Barlow Condensed","Arial Narrow",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(6px)}
 </style>
 </head>
 <body>
+<a class="volver" href="index.html">← Inicio</a>
 <main>
   <h1>Accesos directos</h1>
   <p>Panel del local</p>

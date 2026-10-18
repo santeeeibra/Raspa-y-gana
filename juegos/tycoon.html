@@ -26,9 +26,11 @@ p{opacity:.7;font-size:12px;text-align:center}
 body.cap{padding:0;display:block;min-height:0}
 body.cap h1,body.cap #bar,body.cap p,body.cap #ov{display:none}
 body.cap #wrap{border:0;box-shadow:none;width:1280px;max-width:none;height:720px}
+.volver{position:fixed;top:max(10px,env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));z-index:50;display:inline-block;padding:8px 14px;border-radius:99px;background:rgba(20,25,37,.85);border:1px solid rgba(255,255,255,.14);color:#f4f6fa;text-decoration:none;font:700 15px "Barlow Condensed","Arial Narrow",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(6px)}
 </style>
 </head>
 <body>
+<a class="volver" href="../juegos.html">← Volver</a>
 <h1>LAS VEGAS &middot; BARBER TYCOON</h1>
 <div id="wrap"><canvas id="c" width="512" height="288"></canvas><div id="ov"><div class="mn"><button id="gplay">&#9654; JUGAR</button><button id="play" class="sec">VER ANIMACION</button></div></div></div>
 <div id="bar"><i></i></div>

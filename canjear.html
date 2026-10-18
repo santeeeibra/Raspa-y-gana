@@ -27,9 +27,11 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut
 .card .code{font-family:var(--f-head);font-size:28px;letter-spacing:.14em}
 .msg{font-size:20px}.err{color:#ff6b6b}.ok{color:var(--ok)}
 .bono{border:1px dashed var(--gold);border-radius:12px;padding:8px;color:var(--gold)}
+.volver{position:fixed;top:max(10px,env(safe-area-inset-top,0px));left:max(10px,env(safe-area-inset-left,0px));z-index:50;display:inline-block;padding:8px 14px;border-radius:99px;background:rgba(20,25,37,.85);border:1px solid rgba(255,255,255,.14);color:#f4f6fa;text-decoration:none;font:700 15px "Barlow Condensed","Arial Narrow",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;backdrop-filter:blur(6px)}
 </style>
 </head>
 <body>
+<a class="volver" href="admin.html">← Volver</a>
 <main>
   <h1>Canje de tickets</h1>
   <p>Solo para el personal de la barbería.</p>
