@@ -32,7 +32,6 @@ a.card,button.card{display:grid;gap:2px;padding:18px;border-radius:16px;border:1
   <button class="card" id="probar" type="button"><b>Probar mi ticket</b><span>Modo prueba: ticket nuevo cada vez, sin límites</span></button>
   <button class="card" id="gift" type="button"><b id="giftT">Tanda de regalo: ...</b><span id="giftS">Cargando estado</span></button>
   <a class="card" href="monitor.html"><b>Monitor de tickets</b><span>Ver en vivo los tickets que van saliendo</span></a>
-  <button class="card" id="gift" type="button"><b>Oferta regalo 15%: ...</b><span>Cargando estado...</span></button>
   <a class="card" href="guia.html"><b>Guía de cortes</b><span>Descubrí tu corte ideal</span></a>
   <a class="card" href="juegos.html"><b>Juegos</b><span>Cabezones y Las Vegas Tycoon</span></a>
   <button class="out" id="salir" type="button">Cerrar sesión</button>
@@ -55,13 +54,6 @@ gift.onclick=async()=>{if(giftOn===null)return;const nuevo=!giftOn;
   if(!confirm(nuevo?"¿Encender la tanda de regalo (todos 15%)?":"¿Apagar la tanda de regalo y volver al sorteo normal?"))return;
   try{const j=await giftRpc("staff_set_gift",{p_pin:PIN,p_on:nuevo});giftOn=j.gift;giftShow()}catch(e){alert("No se pudo cambiar: "+e.message)}};
 
-const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
-const pin=(()=>{try{return sessionStorage.getItem("lv-pin")||""}catch(e){return ""}})(),gb=document.getElementById("gift");let giftOn=null;
-async function rpc(fn,body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body)});return r.json()}
-function paint(){gb.querySelector("b").textContent="Oferta regalo 15%: "+(giftOn?"ENCENDIDA":"APAGADA");gb.querySelector("span").textContent=giftOn?"Todos los tickets nuevos salen 15%, sin premio mayor. Tocá para apagar":"Sorteo normal. Tocá para encender la oferta";gb.style.borderColor=giftOn?"#1fa855":"var(--line)"}
-function fail(r){gb.querySelector("span").textContent="Error: "+(r&&r.error||"sin conexión");if(r&&(r.error==="clave_incorrecta"))setTimeout(()=>location.replace("index.html"),1500)}
-rpc("staff_get_gift",{p_pin:pin}).then(r=>{if(r&&typeof r.gift==="boolean"){giftOn=r.gift;paint()}else fail(r)}).catch(()=>fail());
-gb.onclick=async()=>{if(giftOn===null)return;gb.disabled=true;try{const r=await rpc("staff_set_gift",{p_pin:pin,p_on:!giftOn});if(r&&typeof r.gift==="boolean"){giftOn=r.gift;paint()}else fail(r)}catch(e){fail()}gb.disabled=false};
 document.getElementById("probar").onclick=()=>{try{sessionStorage.setItem("lv-test","1");sessionStorage.removeItem("lv-keep")}catch(e){}location.href="index.html"};
 document.getElementById("salir").onclick=()=>{try{sessionStorage.removeItem("lv-pin");sessionStorage.removeItem("lv-test");sessionStorage.removeItem("lv-keep");localStorage.removeItem("lv-raspa-v2")}catch(e){}location.href="index.html"};
 </script>
