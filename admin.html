@@ -30,6 +30,7 @@ a.card,button.card{display:grid;gap:2px;padding:18px;border-radius:16px;border:1
   <p>Panel del local</p>
   <a class="card main" href="canjear.html"><b>Canjear tickets</b><span>Buscar un código y marcarlo como canjeado</span></a>
   <button class="card" id="probar" type="button"><b>Probar mi ticket</b><span>Modo prueba: ticket nuevo cada vez, sin límites</span></button>
+  <button class="card" id="gift" type="button"><b id="giftT">Tanda de regalo: ...</b><span id="giftS">Cargando estado</span></button>
   <a class="card" href="guia.html"><b>Guía de cortes</b><span>Descubrí tu corte ideal</span></a>
   <a class="card" href="juegos.html"><b>Juegos</b><span>Cabezones y Las Vegas Tycoon</span></a>
   <button class="out" id="salir" type="button">Cerrar sesión</button>
@@ -38,6 +39,19 @@ a.card,button.card{display:grid;gap:2px;padding:18px;border-radius:16px;border:1
 // Solo se llega logueándose desde el acceso del local en la página principal (la clave se verifica en el servidor)
 let ok=false;try{ok=!!sessionStorage.getItem("lv-pin")}catch(e){}
 if(!ok)location.replace("index.html");
+
+const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
+const PIN=sessionStorage.getItem("lv-pin")||"";
+const gift=document.getElementById("gift");let giftOn=null;
+function giftShow(){document.getElementById("giftT").textContent="Tanda de regalo: "+(giftOn?"ENCENDIDA":"APAGADA");
+  document.getElementById("giftS").textContent=giftOn?"Todos los tickets nuevos salen 15%, sin corte gratis. Tocá para apagar":"Sorteo normal. Tocá para encender la tanda de 15%";
+  gift.style.borderColor=giftOn?"#1fa855":"var(--line)"}
+async function giftRpc(fn,body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const j=await r.json();if(!r.ok||j.error)throw new Error(j.error||"error");return j}
+giftRpc("staff_get_gift",{p_pin:PIN}).then(j=>{giftOn=j.gift;giftShow()}).catch(()=>{document.getElementById("giftS").textContent="No se pudo leer el estado"});
+gift.onclick=async()=>{if(giftOn===null)return;const nuevo=!giftOn;
+  if(!confirm(nuevo?"¿Encender la tanda de regalo (todos 15%)?":"¿Apagar la tanda de regalo y volver al sorteo normal?"))return;
+  try{const j=await giftRpc("staff_set_gift",{p_pin:PIN,p_on:nuevo});giftOn=j.gift;giftShow()}catch(e){alert("No se pudo cambiar: "+e.message)}};
 document.getElementById("probar").onclick=()=>{try{sessionStorage.setItem("lv-test","1");sessionStorage.removeItem("lv-keep")}catch(e){}location.href="index.html"};
 document.getElementById("salir").onclick=()=>{try{sessionStorage.removeItem("lv-pin");sessionStorage.removeItem("lv-test");sessionStorage.removeItem("lv-keep");localStorage.removeItem("lv-raspa-v2")}catch(e){}location.href="index.html"};
 </script>
