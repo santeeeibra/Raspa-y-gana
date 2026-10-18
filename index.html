@@ -253,6 +253,40 @@ function chromeLogo(size){const c=document.createElement("canvas");c.width=c.hei
   for(let i=0;i<p.length;i+=4){const l=.3*p[i]+.59*p[i+1]+.11*p[i+2];const v=l>200?235:70+l*.35;p[i]=v;p[i+1]=v+2;p[i+2]=v+8}
   x.putImageData(d,0,0);return c}
 
+/* ---------- tablero de 9 bolas: 3 iguales = premio (el premio real viene del servidor) ---------- */
+// Siempre hay 2 tijeras de más para que parezca que estuvo cerca del corte gratis (nunca 3 salvo que sea el premio mayor)
+function makeBoard(){
+  let s=0;for(const ch of String(state.code||state.serial))s=(s*31+ch.charCodeAt(0))>>>0;
+  const rnd=()=>(s=(s*1664525+1013904223)>>>0)/4294967296;
+  const win=prize.none?null:prize.jackpot?"CUT":prize.extra?"EXTRA":prize.id;
+  const cnt={},list=[],put=k=>{list.push(k);cnt[k]=(cnt[k]||0)+1};
+  if(win)for(let i=0;i<3;i++)put(win);
+  while((cnt.CUT||0)<2&&win!=="CUT")put("CUT");
+  const pool=["CUT","5","10","15","EXTRA"];
+  while(list.length<9){const k=pool[Math.floor(rnd()*pool.length)];if(k!==win&&(cnt[k]||0)<2)put(k)}
+  for(let i=8;i>0;i--){const j=Math.floor(rnd()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
+  return list;
+}
+function drawBall(ctx,cx,cy,r,k){
+  const cut=k==="CUT",g=ctx.createRadialGradient(cx-r*.35,cy-r*.4,r*.1,cx,cy,r);
+  (cut?["#fff6c2","#ffc83d","#a86f0a"]:["#ffffff","#cfd5e1","#6b7385"]).forEach((c,i)=>g.addColorStop(i/2,c));
+  ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=12;ctx.shadowOffsetY=5;
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.fill();
+  ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.lineWidth=3;ctx.strokeStyle="rgba(255,255,255,.55)";ctx.stroke();
+  ctx.fillStyle=ctx.strokeStyle=cut?"#2a1d00":"#2a3140";
+  if(cut){ctx.lineCap="round";ctx.lineWidth=r*.13;
+    for(const d of [-1,1]){ctx.beginPath();ctx.arc(cx+d*r*.3,cy+r*.4,r*.17,0,7);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(cx+d*r*.3,cy+r*.23);ctx.lineTo(cx-d*r*.32,cy-r*.55);ctx.stroke()}}
+  else{ctx.textAlign="center";ctx.font=`${r*(k==="10"||k==="15"?.95:1.1)}px "Bebas Neue",Impact,sans-serif`;
+    ctx.fillText(k==="EXTRA"?"+1":k+"%",cx,cy+r*.36)}
+}
+function drawBoard(ctx,R,list,head){
+  ctx.textAlign="center";ctx.fillStyle="#f4f6fa";ctx.font=`${R.h*.085}px "Permanent Marker",cursive`;
+  ctx.fillText("¡3 IGUALES Y GANÁS!",R.x+R.w/2,R.y+R.h*.1);
+  const gy=R.y+R.h*.16,ch=(R.h*.82)/3,cw=Math.min(R.w/3,ch*1.35),r=Math.min(ch,cw)*.4;
+  list.forEach((k,i)=>drawBall(ctx,R.x+R.w/2+((i%3)-1)*cw,gy+ch*(Math.floor(i/3)+.5),r,k));
+}
+
 function drawBase(){
   // cromo cepillado
   const g=a.createLinearGradient(0,0,CW,CH);g.addColorStop(0,"#e6e9ef");g.addColorStop(.5,"#cfd4dc");g.addColorStop(1,"#eceef3");
@@ -308,12 +342,8 @@ function drawBase(){
   // zona del premio (debajo de la capa)
   const pg=a.createRadialGradient(R.x+R.w/2,R.y+R.h/2,20,R.x+R.w/2,R.y+R.h/2,R.w*.7);
   pg.addColorStop(0,"#3a414f");pg.addColorStop(.6,"#1a1f29");pg.addColorStop(1,"#0c0f15");   // grafito pulido, mismo metal del ticket
-  for(const ctx of [a,e]){ctx.fillStyle=pg;rr(ctx,R.x,R.y,R.w,R.h,24);ctx.fill();
-    ctx.textAlign="center";ctx.shadowColor="rgba(255,200,61,.7)";ctx.shadowBlur=30;
-    if(prize.jackpot){ctx.fillStyle="#fff";ctx.font=`${R.w*.17}px ${head}`;ctx.fillText("CORTE",R.x+R.w/2,R.y+R.h*.45);ctx.fillText("GRATIS",R.x+R.w/2,R.y+R.h*.45+R.w*.16)}
-    else{ctx.fillStyle="#ffc83d";ctx.font=`${Math.min(R.w*.42,R.h*.6)}px ${head}`;ctx.fillText(prize.big,R.x+R.w/2,R.y+R.h*.62)}
-    ctx.shadowBlur=0;ctx.fillStyle="#f4f6fa";ctx.font=`${R.w*.065}px "Permanent Marker",cursive`;
-    ctx.fillText(prize.lbl,R.x+R.w/2,R.y+R.h*(prize.jackpot?.88:.82))}
+  const board=makeBoard();
+  for(const ctx of [a,e]){ctx.fillStyle=pg;rr(ctx,R.x,R.y,R.w,R.h,24);ctx.fill();drawBoard(ctx,R,board,head)}
   m.fillStyle="rgb(0,150,0)";rr(m,R.x,R.y,R.w,R.h,24);m.fill();      // sin metal: se ve el color real
   a.save();rr(a,R.x,R.y,R.w,R.h,24);a.clip();a.globalAlpha=.22;a.globalCompositeOperation="screen";a.fillStyle=rainbow(a,R.x,R.y,R.w,R.h);a.fillRect(R.x,R.y,R.w,R.h);
     a.globalAlpha=.06;a.globalCompositeOperation="source-over";a.strokeStyle="#fff";a.lineWidth=8;for(let k=R.x-R.h;k<R.x+R.w;k+=40){a.beginPath();a.moveTo(k,R.y);a.lineTo(k+R.h*.6,R.y+R.h);a.stroke()}a.restore();
