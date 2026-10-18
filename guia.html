@@ -47,6 +47,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .card.top::before{display:none}
 .card h3{font-family:var(--f-head);font-weight:400;font-size:28px;letter-spacing:.03em}
 .card p{color:#c3c9d6}
+.foto{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:12px;margin-bottom:12px;background:var(--night)}
 .tag{font-family:var(--f-tag);color:var(--gold);font-size:15px}
 .cta{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-size:24px;letter-spacing:.08em;padding:14px;border-radius:99px;margin-top:12px;color:#fff;transition:transform .15s}
 .cta:active{transform:scale(.97)}
@@ -111,6 +112,9 @@ const CORTES = [
    p:{redondo:3,triangular:3,alargado:1,moda:2,prolijo:1,poco:2,lacio:1,rulo:1}}
 ];
 
+// Foto de cada corte: imagenes/cortes/<nombre-sin-tildes-con-guiones>.jpg
+const foto = n => "imagenes/cortes/" + n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") + ".jpg";
+
 const app = document.getElementById("app");
 const bar = document.getElementById("bar");
 let paso = 0, resp = {};
@@ -132,7 +136,7 @@ function resultado(){
                     .sort((a,b) => b.s - a.s).slice(0,3);
   const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].n}*. Quiero reservar turno`;
   app.innerHTML = `<h2>Tus cortes recomendados</h2>` +
-    top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
+    top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<img class="foto" src="${foto(c.n)}" alt="${c.n}" loading="lazy" onerror="this.remove()"><h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
     `<p class="sub" style="text-align:center;margin-top:8px">Corte <b style="color:var(--gold)">${PRECIO}</b> · incluye ticket Raspá y Ganá de regalo</p>
      <a class="cta wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Reservar por WhatsApp</a>
      <a class="cta gift" href="index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:8px"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18M12 8v13M12 8S10 3 7.5 4.5 9 8 12 8zm0 0s2-5 4.5-3.5S15 8 12 8z"/></svg>Raspá y ganá tu premio</a>
