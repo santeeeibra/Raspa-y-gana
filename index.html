@@ -77,16 +77,16 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 #intro{position:fixed;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;gap:22px;background:var(--night);transition:opacity .6s,visibility .6s}
 #intro.out{opacity:0;visibility:hidden}
 #intro img{width:min(240px,60vw);opacity:0;animation:inUp .7s .25s cubic-bezier(.2,.8,.2,1) forwards}
-.pole{width:22px;height:120px;border-radius:11px;position:relative;overflow:hidden;box-shadow:0 0 0 3px #d9dde5,0 0 0 4px #000,0 0 30px color-mix(in srgb,var(--blue) 50%,transparent);
-  background:repeating-linear-gradient(-45deg,var(--red) 0 10px,#fff 10px 18px,var(--blue) 18px 28px,#fff 28px 36px);background-size:100% 51px;animation:pole .6s linear infinite}
+.pole{width:22px;height:120px;border-radius:11px;position:relative;overflow:hidden;box-shadow:0 0 0 3px #d9dde5,0 0 0 4px #000,0 0 30px color-mix(in srgb,var(--blue) 50%,transparent)}
+.pole::before{content:"";position:absolute;left:0;right:0;top:-51px;bottom:0;will-change:transform;
+  background:repeating-linear-gradient(-45deg,var(--red) 0 10px,#fff 10px 18px,var(--blue) 18px 28px,#fff 28px 36px);animation:pole .6s linear infinite}
 .pole::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.45),transparent 40%,rgba(255,255,255,.35) 55%,transparent 70%,rgba(0,0,0,.4))}
-@keyframes pole{to{background-position:0 51px}}
+@keyframes pole{to{transform:translateY(51px)}}
 @keyframes inUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 #dim{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .5s;background:radial-gradient(circle at 50% 42%,transparent 18%,rgba(0,0,0,.88) 60%)}
 #dim.on{opacity:1}
 #razor{position:fixed;left:0;top:0;z-index:8;width:92px;pointer-events:none;opacity:0;transition:opacity .15s;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6));transform-origin:12% 82%}
 #razor.on{opacity:1}
-@media (prefers-reduced-motion:reduce){.pole{animation:none}}
 #mute{position:fixed;top:14px;right:14px;z-index:7;padding:0;display:grid;place-items:center;color:var(--white);width:40px;height:40px;font-size:17px;background:rgba(20,25,37,.7);border:1px solid var(--line);backdrop-filter:blur(8px)}
 </style>
 </head>
