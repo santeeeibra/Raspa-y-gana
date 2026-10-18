@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tu Corte Ideal | Las Vegas</title>
 <meta name="description" content="Respondé 4 preguntas y descubrí el corte que mejor te queda. Las Vegas Barbería.">
-<meta property="og:title" content="Encontrá tu corte ideal 💈">
+<meta property="og:title" content="Encontrá tu corte ideal">
 <meta property="og:description" content="4 preguntas, 30 segundos. Incluye ticket Raspá y Ganá de regalo.">
 <meta property="og:image" content="imagenes/logo-las-vegas.jpg">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Bebas+Neue&family=Barlow+Condensed:wght@500;700&display=swap">
@@ -38,7 +38,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .opt{background:var(--steel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;text-align:left;display:flex;gap:14px;align-items:center;transition:border-color .2s,transform .15s}
 .opt:hover,.opt:focus-visible{border-color:rgba(255,255,255,.35);outline:none}
 .opt:active{transform:scale(.98)}
-.opt b{font-size:28px}
+.opt b{display:grid;place-items:center;width:46px;height:46px;flex:none;border-radius:12px;background:rgba(255,255,255,.05);color:var(--white)}
 .opt small{display:block;color:var(--muted)}
 .back{background:none;border:0;color:var(--muted);margin-top:18px;font-size:15px;letter-spacing:.1em;text-transform:uppercase}
 .card{background:var(--steel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
@@ -66,6 +66,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 </div>
 
 <script>
+const ICON={"🥚": "<ellipse cx=\"12\" cy=\"12\" rx=\"6.5\" ry=\"8.5\"/>", "🟠": "<circle cx=\"12\" cy=\"12\" r=\"8\"/>", "🟥": "<rect x=\"4.5\" y=\"4.5\" width=\"15\" height=\"15\" rx=\"3\"/>", "📏": "<ellipse cx=\"12\" cy=\"12\" rx=\"5\" ry=\"9.5\"/>", "🔻": "<path d=\"M4 5h16l-6.5 13.5a1.7 1.7 0 0 1-3 0z\"/>", "〰️": "<path d=\"M7 3v18M12 3v18M17 3v18\"/>", "🌊": "<path d=\"M3 8c3-3 6 3 9 0s6-3 9 0M3 16c3-3 6 3 9 0s6-3 9 0\"/>", "🌀": "<path d=\"M12 12a1.5 1.5 0 1 1 1.5 1.5A3.5 3.5 0 0 1 10 10a5 5 0 0 1 5-5 6.5 6.5 0 0 1 6.5 6.5A8 8 0 0 1 13.5 19.5 9 9 0 0 1 3 11\"/>", "🧢": "<path d=\"M5 20v-8a7 7 0 0 1 14 0v8\"/><path d=\"M8 8l1 2M12 6v2.5M16 8l-1 2\" stroke-dasharray=\"1 2\"/>", "👔": "<path d=\"M9 3h6l-1.5 3 2 11L12 21l-3.5-4 2-11z\"/><path d=\"M10.5 6h3\"/>", "🔥": "<path d=\"M12 21a6 6 0 0 0 6-6c0-4-3-6-4-10-1 3-3 4-3 4s-1-1-1-3c-2 2-4 5-4 9a6 6 0 0 0 6 6z\"/>", "⚡": "<path d=\"M13 2 4 14h7l-1 8 9-12h-7z\"/>", "🎩": "<path d=\"M7 17V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v11M3 17h18M7 13h10\"/>", "⏱️": "<circle cx=\"12\" cy=\"13\" r=\"8\"/><path d=\"M12 9v4l2.5 2.5M10 2h4\"/>", "🪮": "<path d=\"M3 8h18v3H3zM5 11v8M8 11v8M11 11v8M14 11v8M17 11v8M20 11v8\"/>", "💈": "<circle cx=\"6\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><path d=\"M8.5 7.5 20 18M8.5 16.5 20 6\"/>"};
+const svg=k=>`<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]||""}</svg>`;
 // CAMBIAR: tu número de WhatsApp con código de país, sin + ni espacios (ej: 5491112345678)
 const WHATSAPP = "5492920605208";
 const PRECIO = "$18.000";
@@ -117,7 +119,7 @@ function pregunta(){
   const q = PREGUNTAS[paso];
   bar.style.width = (paso / PREGUNTAS.length * 100) + "%";
   app.innerHTML = `<h2>${q.t}</h2><div class="opts">` +
-    q.o.map(([v,e,l,s]) => `<button class="opt" data-v="${v}"><b>${e}</b><span>${l}${s?`<small>${s}</small>`:""}</span></button>`).join("") +
+    q.o.map(([v,e,l,s]) => `<button class="opt" data-v="${v}"><b>${svg(e)}</b><span>${l}${s?`<small>${s}</small>`:""}</span></button>`).join("") +
     `</div>` + (paso ? `<button class="back">← Volver</button>` : "");
   app.querySelectorAll(".opt").forEach(b => b.onclick = () => { resp[q.id] = b.dataset.v; paso++; paso < PREGUNTAS.length ? pregunta() : resultado(); });
   const back = app.querySelector(".back"); if (back) back.onclick = () => { paso--; pregunta(); };
@@ -128,12 +130,12 @@ function resultado(){
   const vals = Object.values(resp);
   const top = CORTES.map(c => ({...c, s: vals.reduce((a,v) => a + (c.p[v]||0), 0)}))
                     .sort((a,b) => b.s - a.s).slice(0,3);
-  const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].n}*. Quiero reservar turno 💈`;
+  const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].n}*. Quiero reservar turno`;
   app.innerHTML = `<h2>Tus cortes recomendados</h2>` +
     top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
-    `<p class="sub" style="text-align:center;margin-top:8px">Corte <b style="color:var(--gold)">${PRECIO}</b> · incluye ticket Raspá y Ganá de regalo 🎁</p>
+    `<p class="sub" style="text-align:center;margin-top:8px">Corte <b style="color:var(--gold)">${PRECIO}</b> · incluye ticket Raspá y Ganá de regalo</p>
      <a class="cta wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Reservar por WhatsApp</a>
-     <a class="cta gift" href="index.html">🎁 Raspá y ganá tu premio</a>
+     <a class="cta gift" href="index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:8px"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18M12 8v13M12 8S10 3 7.5 4.5 9 8 12 8zm0 0s2-5 4.5-3.5S15 8 12 8z"/></svg>Raspá y ganá tu premio</a>
      <button class="back">Volver a empezar</button>`;
   app.querySelector(".back").onclick = () => { paso = 0; resp = {}; pregunta(); };
 }

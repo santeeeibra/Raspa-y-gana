@@ -66,7 +66,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
   padding:13px 22px;border-radius:99px;border:1px solid transparent;background:linear-gradient(var(--night),var(--night)) padding-box,var(--split) border-box;transition:transform .15s}
 .guia-btn:active{transform:scale(.97)}
 .result .guia-btn{margin-top:6px;background:#1fa855;border:0}
-#mute{position:fixed;top:14px;right:14px;z-index:7;padding:0;width:40px;height:40px;font-size:17px;background:rgba(20,25,37,.7);border:1px solid var(--line);backdrop-filter:blur(8px)}
+#mute{position:fixed;top:14px;right:14px;z-index:7;padding:0;display:grid;place-items:center;color:var(--white);width:40px;height:40px;font-size:17px;background:rgba(20,25,37,.7);border:1px solid var(--line);backdrop-filter:blur(8px)}
 </style>
 </head>
 <body>
@@ -74,7 +74,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 <div class="bg"></div>
 <canvas id="fx"></canvas><div id="flash"></div>
 <label id="hapt" aria-hidden="true" style="position:fixed;left:-99px;opacity:0"><input type="checkbox" switch></label>
-<button id="mute" aria-label="Sonido">🔊</button>
+<button id="mute" aria-label="Sonido"></button>
 <main>
   <img class="wordmark" src="wordmark.png" alt="Las Vegas Barbería">
   <h1>Raspá y Ganá</h1>
@@ -87,7 +87,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
     <div><b>15%</b><span>off</span></div>
     <div class="jp"><b>CORTE</b><span>gratis</span></div>
   </div>
-  <a class="guia-btn" href="guia.html">💈 Descubrí tu corte ideal</a>
+  <a class="guia-btn" href="guia.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:10px"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 7.5 20 18M8.5 16.5 20 6"/></svg>Descubrí tu corte ideal</a>
   <button class="demo" id="demo" hidden>Modo prueba: jugar de nuevo</button>
 </main>
 
@@ -354,8 +354,9 @@ function haptic(ms){try{if(navigator.vibrate)return navigator.vibrate(ms)}catch(
 
 /* ---------- sonido ---------- */
 let ac,noise,scrG,muted=false;try{muted=localStorage.getItem("muted")==="1"}catch(e){}
-$("mute").textContent=muted?"🔇":"🔊";
-$("mute").onclick=()=>{muted=!muted;$("mute").textContent=muted?"🔇":"🔊";try{localStorage.setItem("muted",muted?"1":"0")}catch(e){}if(scrG)scrG.gain.value=0};
+const SPK_ON='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',SPK_OFF='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="m17 9 5 6m0-6-5 6"/></svg>';
+$("mute").innerHTML=muted?SPK_OFF:SPK_ON;
+$("mute").onclick=()=>{muted=!muted;$("mute").innerHTML=muted?SPK_OFF:SPK_ON;try{localStorage.setItem("muted",muted?"1":"0")}catch(e){}if(scrG)scrG.gain.value=0};
 function audioOn(){if(ac){ac.resume();return}try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
   const b=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
   noise=ac.createBufferSource();noise.buffer=b;noise.loop=true;
@@ -400,7 +401,7 @@ function showResult(){const b=$("resultBox");b.className="result";b.hidden=false
    <p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>
    <div class="code" id="code">${state.code}</div><button id="copy">Copiar código</button>
    <p style="font-size:13px;color:var(--muted)">Sacale captura de pantalla para no perderlo.</p>
-   <a class="guia-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("💈 Te regalo un ticket de Raspá y Ganá de Las Vegas Barbería. Podés ganar hasta un corte gratis: "+location.origin+location.pathname)}">📲 Pasale un ticket a un amigo</a>`;
+   <a class="guia-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("Te regalo un ticket de Raspá y Ganá de Las Vegas Barbería. Podés ganar hasta un corte gratis: "+location.origin+location.pathname)}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:10px"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v12M7.5 7.5 12 3l4.5 4.5"/></svg>Pasale un ticket a un amigo</a>`;
   $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(state.code);$("copy").textContent="Copiado"}catch(e){getSelection().selectAllChildren($("code"))}}}
 if(state.done)showResult();
 
