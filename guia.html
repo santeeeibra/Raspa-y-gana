@@ -64,6 +64,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 .thumbs div{position:relative;width:72px;height:90px}
 .thumbs img{width:100%;height:100%;object-fit:cover;border-radius:8px}
 .thumbs button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:14px;line-height:1;padding:0}
+.scan{display:block;width:100%;margin-top:14px;padding:14px;border-radius:14px;border:1px dashed rgba(255,255,255,.3);background:none;color:var(--gold);font-size:17px;letter-spacing:.06em;text-transform:uppercase}
+.cam{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:3/4}
+.cam video,.cam canvas{width:100%;height:100%;object-fit:cover;display:block}
+.cam video{transform:scaleX(-1)}
+.cam i{position:absolute;inset:12% 18%;border:2px dashed rgba(255,255,255,.55);border-radius:50%;pointer-events:none}
+.res{background:var(--steel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:12px;text-align:center}
+.res b{font-family:var(--f-head);font-weight:400;font-size:30px;letter-spacing:.04em;color:var(--gold)}
+.res .cta{margin-top:10px}
 </style>
 </head>
 <body>
@@ -149,6 +157,7 @@ function pregunta(){
     `</div>` + (paso ? `<button class="back">← Volver</button>` : "");
   app.querySelectorAll(".opt").forEach(b => b.onclick = () => { resp[q.id] = b.dataset.v; paso++; paso < PREGUNTAS.length ? pregunta() : resultado(); });
   const back = app.querySelector(".back"); if (back) back.onclick = () => { paso--; pregunta(); };
+  if (q.id === "rostro") { app.insertAdjacentHTML("beforeend", `<button class="scan">📷 No sé mi forma de rostro · escanear con la cámara</button>`); app.querySelector(".scan").onclick = escanear; }
 }
 
 function resultado(){
@@ -156,9 +165,9 @@ function resultado(){
   const vals = Object.values(resp);
   const top = CORTES.map(c => ({...c, s: vals.reduce((a,v) => a + (c.p[v]||0), 0)}))
                     .sort((a,b) => b.s - a.s).slice(0,3);
-  const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].n}*. Quiero reservar turno (sé que es con 2 horas de anticipación mínimo)`;
+  const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].nombre||top[0].n}*. Quiero reservar turno (sé que es con 2 horas de anticipación mínimo)`;
   app.innerHTML = `<h2>Tus cortes recomendados</h2>` +
-    top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<div class="fotos" data-c="${c.n}"></div><h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
+    top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<div class="fotos" data-c="${c.n}" data-t="${c.nombre||c.n}"></div><h3>${c.nombre||c.n}</h3><p>${c.d}</p></div>`).join("") +
     `<p class="sub" style="text-align:center;margin-top:8px">Corte <b style="color:var(--gold)">${PRECIO}</b> · incluye ticket Raspá y Ganá de regalo</p>
      <a class="cta wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Reservar por WhatsApp</a>
      <p class="sub" style="text-align:center;margin-top:6px">👥 <b style="color:var(--gold)">Traé un amigo: 2 cortes por $32.000</b> ($16.000 c/u)</p>
@@ -181,6 +190,62 @@ async function rpc(fn, body){
 }
 const cache = {};
 const fotosDe = async n => { if (cache[n]) return cache[n]; try { return cache[n] = await rpc("get_corte_fotos", {p_corte:n}) } catch(e) { return [] } };
+// ---- Escáner de rostro (corre en el celular: la foto no se envía ni se guarda) ----
+const FORMA = {ovalado:"Ovalada", redondo:"Redonda", cuadrado:"Cuadrada", alargado:"Alargada", triangular:"Corazón / diamante"};
+const MP = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+let landmarker = null, stream = null;
+async function cargarModelo(){
+  if (landmarker) return landmarker;
+  const m = await import(MP + "/+esm"), fs = await m.FilesetResolver.forVisionTasks(MP + "/wasm");
+  return landmarker = await m.FaceLandmarker.createFromOptions(fs, {
+    baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"},
+    runningMode:"IMAGE", numFaces:1});
+}
+// Mide proporciones con los puntos de la cara y elige la forma más cercana
+function clasificar(p, w, h){
+  const d = (a, b) => Math.hypot((p[a].x-p[b].x)*w, (p[a].y-p[b].y)*h);
+  const ancho = d(234, 454), mand = d(132, 361)/ancho, frente = d(103, 332)/ancho, largo = d(10, 152)/ancho;
+  const giro = Math.abs(d(1, 234) - d(1, 454)) / (d(1, 234) + d(1, 454));
+  let f;
+  if (largo >= 1.48) f = "alargado";
+  else if (mand < .8 && frente / mand > 1.2) f = "triangular";
+  else if (largo < 1.32) f = mand >= .88 ? "cuadrado" : "redondo";
+  else if (mand >= .9) f = "cuadrado";
+  else if (frente / mand > 1.25) f = "triangular";
+  else f = "ovalado";
+  return {f, giro};
+}
+function cerrarCam(){ if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; }
+async function escanear(){
+  app.innerHTML = `<h2>Escanear rostro</h2><p class="sub" style="margin:-6px 0 12px">Mirá de frente, con buena luz y el pelo apartado de la frente.</p>
+    <div class="cam"><video playsinline muted></video><i></i></div><button class="cta wa" id="cap" disabled>Cargando…</button><button class="back">← Volver</button>`;
+  const vid = app.querySelector("video"), cap = app.querySelector("#cap");
+  app.querySelector(".back").onclick = () => { cerrarCam(); pregunta(); };
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user", width:{ideal:720}}, audio:false});
+    vid.srcObject = stream; await vid.play();
+    await cargarModelo(); cap.disabled = false; cap.textContent = "Capturar";
+  } catch(e) { cerrarCam(); app.querySelector(".cam").outerHTML = `<p class="res">No se pudo usar la cámara (${e.name||"error"}). Revisá el permiso del navegador o elegí tu forma a mano.</p>`; cap.remove(); return; }
+  cap.onclick = () => {
+    const c = document.createElement("canvas"); c.width = vid.videoWidth; c.height = vid.videoHeight; c.getContext("2d").drawImage(vid, 0, 0);
+    const r = landmarker.detect(c), p = r.faceLandmarks && r.faceLandmarks[0];
+    if (!p) return aviso("No se ve la cara. Acercate un poco y mirá de frente.");
+    const {f, giro} = clasificar(p, c.width, c.height);
+    if (giro > .14) return aviso("Girá la cara para mirar de frente a la cámara.");
+    cerrarCam();
+    app.innerHTML = `<h2>Tu rostro</h2><div class="res"><p>Parece que tenés cara</p><b>${FORMA[f]}</b>
+      <p class="sub" style="margin-top:8px">Es una estimación por la cámara.</p>
+      <button class="cta wa" id="usar">Usar este resultado</button><button class="back" id="otra">Elegir otra forma a mano</button><button class="back" id="re">Volver a escanear</button></div>`;
+    app.querySelector("#usar").onclick = () => { resp.rostro = f; paso = 1; pregunta(); };
+    app.querySelector("#otra").onclick = () => pregunta();
+    app.querySelector("#re").onclick = escanear;
+  };
+}
+function aviso(t){ let m = app.querySelector(".aviso"); if (!m) { m = document.createElement("p"); m.className = "sub aviso"; m.style.cssText = "text-align:center;color:var(--gold);margin-top:10px"; app.querySelector("#cap").after(m); } m.textContent = t; }
+
+// ---- Nombres de cortes editables desde el editor ----
+rpc("get_corte_nombres", {}).then(m => { CORTES.forEach(c => { if (m[c.n]) c.nombre = m[c.n] }); }).catch(() => {});
+
 pregunta();
 </script>
 <a href="https://wa.me/5492920605208?text=Hola!%20Quiero%20reservar%20un%20turno" target="_blank" rel="noopener" aria-label="Reservar por WhatsApp" title="Reservar turno (mín. 2 hs de anticipación)" style="position:fixed;right:16px;bottom:16px;z-index:999;width:56px;height:56px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.35)"><svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.8-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.5-.3z"/></svg></a>

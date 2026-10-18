@@ -17,6 +17,7 @@ h1{font-family:var(--f-head);font-weight:400;font-size:40px;letter-spacing:.06em
 .sub{color:var(--muted);text-align:center;margin:6px 0 18px}
 .card{background:var(--steel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
 .card h3{font-family:var(--f-head);font-weight:400;font-size:26px;letter-spacing:.04em;margin:0}
+.nom{display:flex;gap:8px}.nom input{flex:1;min-width:0;font:inherit;font-family:var(--f-head);font-size:24px;letter-spacing:.04em;color:var(--white);background:var(--night);border:1px solid var(--line);border-radius:10px;padding:6px 10px}.nom button{font:inherit;font-size:15px;color:var(--white);background:var(--blue);border:0;border-radius:10px;padding:0 12px;cursor:pointer}
 .drop{border:2px dashed rgba(255,255,255,.25);border-radius:12px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;margin-top:10px}
 .drop.on{border-color:var(--gold);color:var(--gold)}
 .thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
@@ -54,7 +55,8 @@ async function achicar(file){
   const k=Math.min(1,900/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");
   c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);
   URL.revokeObjectURL(url);return c.toDataURL("image/jpeg",.8)}
-$("lista").innerHTML=CORTES.map(n=>`<div class="card"><h3>${n}</h3><div class="thumbs"></div><div class="drop">+ Arrastrá fotos acá o tocá para elegir</div><input type="file" accept="image/*" multiple hidden></div>`).join("");
+const NOMBRES=rpc("get_corte_nombres",{}).catch(()=>({}));
+$("lista").innerHTML=CORTES.map(n=>`<div class="card"><div class="nom"><input type="text" maxlength="60" value="${n}" aria-label="Nombre del corte"><button type="button">Guardar nombre</button></div><div class="thumbs"></div><div class="drop">+ Arrastrá fotos acá o tocá para elegir</div><input type="file" accept="image/*" multiple hidden></div>`).join("");
 document.querySelectorAll(".card").forEach((card,i)=>{
   const n=CORTES[i],th=card.querySelector(".thumbs"),dz=card.querySelector(".drop"),inp=card.querySelector("input"),txt=dz.textContent;
   async function pintar(){let f=[];try{f=await rpc("get_corte_fotos",{p_corte:n})}catch(e){aviso("No se pudieron leer las fotos: "+e.message,1)}
@@ -68,6 +70,9 @@ document.querySelectorAll(".card").forEach((card,i)=>{
   dz.onclick=()=>inp.click();inp.onchange=()=>{subir([...inp.files]);inp.value=""};
   dz.ondragover=e=>{e.preventDefault();dz.classList.add("on")};dz.ondragleave=()=>dz.classList.remove("on");
   dz.ondrop=e=>{e.preventDefault();dz.classList.remove("on");subir([...e.dataTransfer.files])};
+  const nin=card.querySelector(".nom input"),nbtn=card.querySelector(".nom button");
+  NOMBRES.then(m=>{if(m[n])nin.value=m[n]});
+  nbtn.onclick=async()=>{try{await rpc("staff_set_corte_nombre",{p_pin:PIN,p_original:n,p_nombre:nin.value});aviso("Nombre guardado")}catch(er){aviso("No se pudo guardar el nombre: "+er.message,1)}};
   pintar()});
 </script>
 </body>
