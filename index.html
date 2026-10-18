@@ -333,7 +333,8 @@ function showResult(){const b=$("resultBox");b.className="result";b.hidden=false
   b.innerHTML=`<div class="rar r${prize.id}">${{"5":"★ COMÚN","10":"★★ RARA","15":"★★★ ÉPICA","JP":"★★★★ LEGENDARIA"}[prize.id]}</div><h2>${prize.jackpot?"¡Ganaste un corte gratis!":"¡Ganaste "+prize.big+" de descuento!"}</h2>
    <p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>
    <div class="code" id="code">${state.code}</div><button id="copy">Copiar código</button>
-   <p style="font-size:13px;color:#4a505b">Sacale captura de pantalla para no perderlo.</p>`;
+   <p style="font-size:13px;color:#4a505b">Sacale captura de pantalla para no perderlo.</p>
+   <a class="guia-btn" style="background:#1fa855;border-color:#1fa855" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("💈 Te regalo un ticket de Raspá y Ganá de Las Vegas Barbería. Podés ganar hasta un corte gratis: "+location.origin+location.pathname)}">📲 Pasale un ticket a un amigo</a>`;
   $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(state.code);$("copy").textContent="Copiado"}catch(e){getSelection().selectAllChildren($("code"))}}}
 if(state.done)showResult();
 
