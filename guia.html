@@ -66,9 +66,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .thumbs button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:14px;line-height:1;padding:0}
 .scan{display:block;width:100%;margin-top:14px;padding:14px;border-radius:14px;border:1px dashed rgba(255,255,255,.3);background:none;color:var(--gold);font-size:17px;letter-spacing:.06em;text-transform:uppercase}
 .cam{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:3/4}
-.cam video,.cam canvas{width:100%;height:100%;object-fit:cover;display:block}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
 .cam video{transform:scaleX(-1)}
-.cam i{position:absolute;inset:12% 18%;border:2px dashed rgba(255,255,255,.55);border-radius:50%;pointer-events:none}
+.cam .ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.estado{text-align:center;font-size:20px;margin:10px 0 0;color:var(--gold);min-height:28px}.estado.ok{color:#3ddc84}
 .res{background:var(--steel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:12px;text-align:center}
 .res b{font-family:var(--f-head);font-weight:400;font-size:30px;letter-spacing:.04em;color:var(--gold)}
 .res .cta{margin-top:10px}
@@ -199,7 +200,7 @@ async function cargarModelo(){
   const m = await import(MP + "/+esm"), fs = await m.FilesetResolver.forVisionTasks(MP + "/wasm");
   return landmarker = await m.FaceLandmarker.createFromOptions(fs, {
     baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"},
-    runningMode:"IMAGE", numFaces:1});
+    runningMode:"VIDEO", numFaces:1});
 }
 // Mide proporciones con los puntos de la cara y elige la forma más cercana
 function clasificar(p, w, h){
@@ -215,23 +216,26 @@ function clasificar(p, w, h){
   else f = "ovalado";
   return {f, giro};
 }
-function cerrarCam(){ if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; }
+let camOn = false;
+function cerrarCam(){ camOn = false; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; }
+const med = (p, a, b) => ({x:(p[a].x+p[b].x)/2, y:(p[a].y+p[b].y)/2});
 async function escanear(){
-  app.innerHTML = `<h2>Escanear rostro</h2><p class="sub" style="margin:-6px 0 12px">Mirá de frente, con buena luz y el pelo apartado de la frente.</p>
-    <div class="cam"><video playsinline muted></video><i></i></div><button class="cta wa" id="cap" disabled>Cargando…</button><button class="back">← Volver</button>`;
-  const vid = app.querySelector("video"), cap = app.querySelector("#cap");
+  app.innerHTML = `<h2>Escanear rostro</h2><p class="sub" style="margin:-6px 0 10px">Mirá de frente, con buena luz y el pelo apartado de la frente.</p>
+    <div class="cam"><video playsinline muted></video><canvas class="ov"></canvas></div>
+    <p class="estado" id="estado">Iniciando cámara…</p>
+    <button class="cta wa" id="cap" disabled>Capturar ahora</button><button class="back">← Volver</button>`;
+  const cam = app.querySelector(".cam"), vid = cam.querySelector("video"), cv = cam.querySelector("canvas"), cap = app.querySelector("#cap"), est = app.querySelector("#estado");
   app.querySelector(".back").onclick = () => { cerrarCam(); pregunta(); };
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user", width:{ideal:720}}, audio:false});
-    vid.srcObject = stream; await vid.play();
-    await cargarModelo(); cap.disabled = false; cap.textContent = "Capturar";
-  } catch(e) { cerrarCam(); app.querySelector(".cam").outerHTML = `<p class="res">No se pudo usar la cámara (${e.name||"error"}). Revisá el permiso del navegador o elegí tu forma a mano.</p>`; cap.remove(); return; }
-  cap.onclick = () => {
-    const c = document.createElement("canvas"); c.width = vid.videoWidth; c.height = vid.videoHeight; c.getContext("2d").drawImage(vid, 0, 0);
-    const r = landmarker.detect(c), p = r.faceLandmarks && r.faceLandmarks[0];
-    if (!p) return aviso("No se ve la cara. Acercate un poco y mirá de frente.");
-    const {f, giro} = clasificar(p, c.width, c.height);
-    if (giro > .14) return aviso("Girá la cara para mirar de frente a la cámara.");
+  try { stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user", width:{ideal:720}}, audio:false}); vid.srcObject = stream; await vid.play(); }
+  catch(e) { cerrarCam(); cam.outerHTML = `<p class="res">No se pudo usar la cámara (${e.name||"error"}). Revisá el permiso del navegador o elegí tu forma a mano.</p>`; cap.remove(); est.remove(); return; }
+  try { est.textContent = "Cargando detector…"; await cargarModelo(); }
+  catch(e) { cerrarCam(); cam.outerHTML = `<p class="res">No se pudo cargar el detector de rostro. Revisá tu conexión e intentá de nuevo, o elegí tu forma a mano.</p>`; cap.remove(); est.remove(); return; }
+  cap.disabled = false; camOn = true;
+  const ctx = cv.getContext("2d"), dpr = devicePixelRatio || 1;
+  let ultimo = null, okDesde = 0, lastT = -1, hecho = false;
+  const finalizar = () => {
+    if (hecho || !ultimo) return; hecho = true;
+    const {f, giro} = clasificar(ultimo.p, vid.videoWidth, vid.videoHeight);
     cerrarCam();
     app.innerHTML = `<h2>Tu rostro</h2><div class="res"><p>Parece que tenés cara</p><b>${FORMA[f]}</b>
       <p class="sub" style="margin-top:8px">Es una estimación por la cámara.</p>
@@ -240,8 +244,56 @@ async function escanear(){
     app.querySelector("#otra").onclick = () => pregunta();
     app.querySelector("#re").onclick = escanear;
   };
+  cap.onclick = () => { if (!ultimo) { est.textContent = "No veo tu cara todavía. Acercate y mirá de frente."; return } finalizar(); };
+  (function loop(){
+    if (!camOn) return;
+    const cw = cam.clientWidth, ch = cam.clientHeight;
+    if (cv.width !== cw*dpr) { cv.width = cw*dpr; cv.height = ch*dpr; }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cw, ch);
+    const vw = vid.videoWidth, vh = vid.videoHeight;
+    if (vw && vid.currentTime !== lastT) {
+      lastT = vid.currentTime;
+      const r = landmarker.detectForVideo(vid, performance.now()), p = r.faceLandmarks && r.faceLandmarks[0];
+      ultimo = p ? {p} : null;
+    }
+    // guía fija: óvalo + línea central + niveles de ojos, nariz y boca
+    const cx = cw/2, cy = ch*.47, rx = cw*.33, ry = ch*.4, dx = cx, S = (x, y) => [x, y];
+    let ok = false, msg = "No veo tu cara. Ponela dentro del óvalo.";
+    const s = vw ? Math.max(cw/vw, ch/vh) : 1, ox = vw ? (cw - vw*s)/2 : 0, oy = vw ? (ch - vh*s)/2 : 0;
+    const X = q => cw - (q.x*vw*s + ox), Y = q => q.y*vh*s + oy;   // espejado, igual que el video
+    if (ultimo) {
+      const p = ultimo.p, top = med(p,10,10), chin = p[152], eyeL = med(p,33,133), eyeR = med(p,362,263), nose = p[1], mouth = med(p,13,14);
+      const fx = (X(p[234]) + X(p[454]))/2, fy = (Y(top) + Y(chin))/2, alto = Math.abs(Y(chin) - Y(top));
+      const tilt = Math.atan2(Y(eyeR) - Y(eyeL), X(eyeR) - X(eyeL)) * 180/Math.PI;
+      const {giro} = clasificar(p, vw, vh);
+      if (alto < ry*2*.62) msg = "Acercate un poco";
+      else if (alto > ry*2*1.05) msg = "Alejate un poco";
+      else if (fx < dx - cw*.06) msg = "Movete a la derecha";
+      else if (fx > dx + cw*.06) msg = "Movete a la izquierda";
+      else if (fy < cy - ch*.07) msg = "Bajá un poco el celu";
+      else if (fy > cy + ch*.07) msg = "Subí un poco el celu";
+      else if (Math.abs(Math.abs(tilt) > 90 ? 180 - Math.abs(tilt) : tilt) > 6) msg = "Enderezá la cabeza";
+      else if (giro > .12) msg = "Mirá de frente a la cámara";
+      else { ok = true; msg = "¡Perfecto! No te muevas…"; }
+      // puntos detectados
+      ctx.fillStyle = ok ? "#1fa855" : "#ffc83d";
+      [eyeL, eyeR, nose, mouth, chin].forEach(q => { ctx.beginPath(); ctx.arc(X(q), Y(q), 4, 0, 7); ctx.fill(); });
+      ctx.strokeStyle = ok ? "rgba(31,168,85,.9)" : "rgba(255,200,61,.8)"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(X(eyeL), Y(eyeL)); ctx.lineTo(X(eyeR), Y(eyeR)); ctx.moveTo(X(nose) - 40, Y(nose)); ctx.lineTo(X(nose) + 40, Y(nose)); ctx.moveTo(X(mouth) - 28, Y(mouth)); ctx.lineTo(X(mouth) + 28, Y(mouth)); ctx.stroke();
+    }
+    ctx.lineWidth = 2; ctx.strokeStyle = ok ? "#1fa855" : "rgba(255,255,255,.65)";
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.stroke();
+    ctx.setLineDash([6, 6]); ctx.strokeStyle = "rgba(255,255,255,.4)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx, cy - ry); ctx.lineTo(cx, cy + ry);                                   // eje central
+    [[-.30], [.02], [.22]].forEach(([k]) => { const y = cy + ry*k; ctx.moveTo(cx - rx*.7, y); ctx.lineTo(cx + rx*.7, y) }); // ojos, nariz, boca
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = "13px sans-serif"; ctx.textAlign = "left";
+    [["ojos", -.30], ["nariz", .02], ["boca", .22]].forEach(([t, k]) => ctx.fillText(t, cx + rx*.72, cy + ry*k + 4));
+    est.textContent = msg; est.classList.toggle("ok", ok);
+    if (ok) { okDesde = okDesde || performance.now(); if (performance.now() - okDesde > 1200) { finalizar(); return } } else okDesde = 0;
+    requestAnimationFrame(loop);
+  })();
 }
-function aviso(t){ let m = app.querySelector(".aviso"); if (!m) { m = document.createElement("p"); m.className = "sub aviso"; m.style.cssText = "text-align:center;color:var(--gold);margin-top:10px"; app.querySelector("#cap").after(m); } m.textContent = t; }
 
 // ---- Nombres de cortes editables desde el editor ----
 rpc("get_corte_textos", {}).then(m => { CORTES.forEach(c => { const t = m[c.n]; if (t) { if (t.nombre) c.nombre = t.nombre; if (t.descripcion) c.d = t.descripcion } }); }).catch(() => {});
