@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tu Corte Ideal | Las Vegas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Bebas+Neue&family=Barlow+Condensed:wght@500;700&display=swap">
+<style>
+/* Mismo estilo que el ticket: fondo oscuro, acentos rojo/azul/dorado */
+:root{
+  --night:#06080f; --steel:#1a1f2b; --blue:#1d4ea3; --red:#e3262a; --white:#f4f6fa; --gold:#ffc83d; --muted:#8e98b3;
+  --f-tag:"Permanent Marker",cursive;
+  --f-head:"Bebas Neue",Impact,sans-serif;
+  --f-body:"Barlow Condensed",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+body{background:radial-gradient(circle at 50% 0,#14203d,var(--night) 70%);color:var(--white);font-family:var(--f-body);font-size:19px;min-height:100vh;padding:24px 16px 48px}
+.wrap{max-width:560px;margin:0 auto}
+header{text-align:center;margin-bottom:20px}
+header img{width:90px;border-radius:50%}
+h1{font-family:var(--f-head);font-size:44px;letter-spacing:1px;line-height:1}
+h1 span{color:var(--gold)}
+.sub{color:var(--muted)}
+.bar{height:6px;background:var(--steel);border-radius:3px;margin:16px 0;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--gold));transition:width .3s}
+h2{font-family:var(--f-head);font-size:32px;margin-bottom:12px}
+.opts{display:grid;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+.opt{background:var(--steel);border:2px solid transparent;border-radius:12px;padding:14px 16px;text-align:left;display:flex;gap:12px;align-items:center}
+.opt:hover,.opt:focus-visible{border-color:var(--gold);outline:none}
+.opt b{font-size:28px}
+.opt small{display:block;color:var(--muted)}
+.back{background:none;border:0;color:var(--muted);margin-top:16px;text-decoration:underline}
+.card{background:var(--steel);border-radius:14px;padding:16px;margin-bottom:12px;border-left:5px solid var(--blue)}
+.card.top{border-color:var(--gold)}
+.card h3{font-family:var(--f-head);font-size:28px}
+.card p{color:#c9cfdd}
+.tag{font-family:var(--f-tag);color:var(--gold);font-size:15px}
+.cta{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-size:28px;padding:14px;border-radius:12px;margin-top:12px;color:#fff}
+.wa{background:#1fa855}
+.gift{background:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="imagenes/logo-las-vegas.jpg" alt="Las Vegas Barbería">
+    <h1>Encontrá tu <span>corte ideal</span></h1>
+    <p class="sub">4 preguntas · 30 segundos</p>
+  </header>
+  <div class="bar"><i id="bar"></i></div>
+  <main id="app"></main>
+</div>
+
+<script>
+// CAMBIAR: tu número de WhatsApp con código de país, sin + ni espacios (ej: 5491112345678)
+const WHATSAPP = "5490000000000";
+
+const PREGUNTAS = [
+  {id:"rostro", t:"¿Qué forma tiene tu cara?", o:[
+    ["ovalado","🥚","Ovalada","Frente un poco más ancha que el mentón"],
+    ["redondo","🟠","Redonda","Ancho y largo parecidos, mejillas llenas"],
+    ["cuadrado","🟥","Cuadrada","Mandíbula marcada y recta"],
+    ["alargado","📏","Alargada","Bastante más larga que ancha"],
+    ["triangular","🔻","Corazón / diamante","Mentón fino, pómulos o frente anchos"]]},
+  {id:"pelo", t:"¿Cómo es tu pelo?", o:[
+    ["lacio","〰️","Lacio",""],["ondulado","🌊","Ondulado",""],["rulo","🌀","Rulos / afro",""],["poco","🧢","Fino o con entradas",""]]},
+  {id:"objetivo", t:"¿Qué buscás?", o:[
+    ["prolijo","👔","Look prolijo","Trabajo, eventos"],["moda","🔥","A la moda","Lo que se usa ahora"],["juvenil","⚡","Atrevido","Que llame la atención"],["clasico","🎩","Clásico","Que nunca pase de moda"]]},
+  {id:"mant", t:"¿Cuánto tiempo le dedicás al peinado?", o:[
+    ["nada","⏱️","Nada","Me levanto y salgo"],["poco","🪮","5 minutos","Un poco de cera"],["mucho","💈","Lo que haga falta","Me encanta peinarme"]]}
+];
+
+// Cada corte suma puntos según las respuestas
+const CORTES = [
+  {n:"Low Fade + Texturizado", d:"Degradado bajo con arriba texturizado y desordenado. Moderno y fácil.",
+   p:{ovalado:2,redondo:2,cuadrado:2,triangular:1,lacio:2,ondulado:2,moda:3,juvenil:1,poco:2,nada:1}},
+  {n:"Mid Fade + Crop francés", d:"Flequillo corto hacia adelante. Disimula entradas y frentes amplias.",
+   p:{ovalado:2,redondo:1,cuadrado:2,alargado:2,triangular:2,lacio:2,poco:3,moda:2,nada:3}},
+  {n:"Pompadour / Quiff", d:"Volumen arriba con costados cortos. Alarga y estiliza la cara.",
+   p:{redondo:3,cuadrado:2,ovalado:2,lacio:2,ondulado:2,prolijo:2,juvenil:2,mucho:3}},
+  {n:"Side Part clásico", d:"Raya al costado con tijera. Elegante, ideal para el trabajo.",
+   p:{ovalado:2,cuadrado:3,redondo:1,triangular:2,lacio:3,ondulado:1,prolijo:3,clasico:3,poco:2}},
+  {n:"Buzz Cut / Rapado con fade", d:"Máquina pareja con degradado. Cero mantenimiento, resalta la mandíbula.",
+   p:{ovalado:3,cuadrado:3,poco:3,rulo:1,nada:3,juvenil:1,clasico:1}},
+  {n:"Taper + Rulos definidos", d:"Costados limpios en degradado y rulos con volumen arriba.",
+   p:{rulo:4,ondulado:2,ovalado:2,redondo:1,alargado:1,moda:2,juvenil:2,poco:1,nada:1}},
+  {n:"Mullet moderno", d:"Corto adelante y a los costados, largo atrás. Para animarse.",
+   p:{ondulado:2,rulo:2,lacio:1,ovalado:2,triangular:1,alargado:1,juvenil:4,moda:1,poco:1}},
+  {n:"Corte medio con flequillo lateral", d:"Más largo en los costados: equilibra caras alargadas.",
+   p:{alargado:4,triangular:2,lacio:2,ondulado:2,clasico:1,moda:1,poco:2,prolijo:1}},
+  {n:"Ivy League", d:"Versión prolija del crew cut, apenas más largo arriba.",
+   p:{cuadrado:2,ovalado:2,alargado:1,lacio:2,poco:1,prolijo:3,clasico:2,nada:2,}},
+  {n:"Fade + Barba perfilada", d:"Degradado con barba marcada: da forma a caras redondas o mentón fino.",
+   p:{redondo:3,triangular:3,alargado:1,moda:2,prolijo:1,poco:2,lacio:1,rulo:1}}
+];
+
+const app = document.getElementById("app");
+const bar = document.getElementById("bar");
+let paso = 0, resp = {};
+
+function pregunta(){
+  const q = PREGUNTAS[paso];
+  bar.style.width = (paso / PREGUNTAS.length * 100) + "%";
+  app.innerHTML = `<h2>${q.t}</h2><div class="opts">` +
+    q.o.map(([v,e,l,s]) => `<button class="opt" data-v="${v}"><b>${e}</b><span>${l}${s?`<small>${s}</small>`:""}</span></button>`).join("") +
+    `</div>` + (paso ? `<button class="back">← Volver</button>` : "");
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => { resp[q.id] = b.dataset.v; paso++; paso < PREGUNTAS.length ? pregunta() : resultado(); });
+  const back = app.querySelector(".back"); if (back) back.onclick = () => { paso--; pregunta(); };
+}
+
+function resultado(){
+  bar.style.width = "100%";
+  const vals = Object.values(resp);
+  const top = CORTES.map(c => ({...c, s: vals.reduce((a,v) => a + (c.p[v]||0), 0)}))
+                    .sort((a,b) => b.s - a.s).slice(0,3);
+  const msg = `Hola! Hice el test en la web y me recomendó: *${top[0].n}*. Quiero reservar turno 💈`;
+  app.innerHTML = `<h2>Tus cortes recomendados</h2>` +
+    top.map((c,i) => `<div class="card ${i?"":"top"}">${i?"":`<span class="tag">★ Tu mejor opción</span>`}<h3>${c.n}</h3><p>${c.d}</p></div>`).join("") +
+    `<a class="cta wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Reservar por WhatsApp</a>
+     <a class="cta gift" href="index.html">🎁 Raspá y ganá tu premio</a>
+     <button class="back">Volver a empezar</button>`;
+  app.querySelector(".back").onclick = () => { paso = 0; resp = {}; pregunta(); };
+}
+
+pregunta();
+</script>
+</body>
+</html>
