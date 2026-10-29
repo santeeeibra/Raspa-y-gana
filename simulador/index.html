@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Simulador de corte · LAS VEGAS (prototipo)</title>
+<style>
+  :root{--bg:#07090d;--panel:#10141c;--line:rgba(255,255,255,.12);--muted:#9aa3b5;--blue:#3b6fe0;--fg:#f2f4f8;--r:14px}
+  *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  button{font:inherit;color:inherit;cursor:pointer}
+  .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100dvh}
+  header{padding:14px 16px 8px}header h1{margin:0;font-size:22px;letter-spacing:.06em;text-transform:uppercase}header p{margin:2px 0 0;color:var(--muted);font-size:14px}
+  .proto{display:inline-block;margin-top:6px;font-size:12px;color:#ffd27a;border:1px solid rgba(255,210,122,.4);border-radius:999px;padding:2px 8px}
+  .escena{position:relative;min-height:56vh}
+  #lienzo{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  .vistas{position:absolute;left:12px;right:12px;top:10px;display:flex;gap:6px;justify-content:center}
+  .chip{background:rgba(16,20,28,.85);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:14px;min-height:36px}
+  .chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue)}
+  #prov{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--muted);background:rgba(16,20,28,.85);border-radius:8px;padding:4px 8px}
+  #estado{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--muted)}
+  .panel{background:var(--panel);border-top:1px solid var(--line);padding:14px 16px 18px;display:grid;gap:14px}
+  .ctl label{display:flex;justify-content:space-between;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .ctl output{color:var(--fg);letter-spacing:0;text-transform:none}
+  input[type=range]{width:100%;accent-color:var(--blue);height:32px;margin:0}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+  .seg button{background:transparent;border:1px solid var(--line);border-radius:10px;min-height:40px;font-size:14px}
+  .seg button[aria-pressed=true]{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 22%,transparent)}
+  .acciones{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:transparent;padding:0 14px}
+  .btn.pri{background:var(--blue);border-color:var(--blue);font-weight:600}
+  .glb{font-size:13px;color:var(--muted)}.glb input{display:block;margin-top:4px;color:var(--muted);max-width:100%}
+  #ficha-box{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;font-size:14px}
+  #aviso{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);background:#1b2233;border:1px solid var(--line);border-radius:10px;padding:8px 14px;opacity:0;transition:.2s;pointer-events:none}
+  #aviso.ver{opacity:1;transform:translate(-50%,0)}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+  @media(min-width:900px){.app{grid-template-columns:1fr 380px;grid-template-rows:auto 1fr}header{grid-column:1/-1}.escena{min-height:0}.panel{border-top:0;border-left:1px solid var(--line);overflow:auto}}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="app">
+  <header><h1>Simulador de corte</h1><p>Corte clásico · girá la cabeza con el dedo o el mouse</p><span class="proto">Prototipo: no es la web de producción</span></header>
+  <div class="escena">
+    <canvas id="lienzo" aria-label="Vista 3D de la cabeza con el corte"></canvas>
+    <div class="vistas" role="group" aria-label="Vistas">
+      <button class="chip" data-vista="frente" aria-pressed="false">Frente</button>
+      <button class="chip" data-vista="perfil" aria-pressed="false">Perfil</button>
+      <button class="chip" data-vista="nuca" aria-pressed="false">Nuca</button>
+      <button class="chip" data-vista="tresCuartos" aria-pressed="false">¾</button>
+    </div>
+    <span id="prov">Cabeza provisional (no realista)</span><span id="estado"></span>
+  </div>
+  <section class="panel" aria-label="Ajustes del corte">
+    <div class="ctl"><label for="superior">Largo superior <output id="superior-v"></output></label><input id="superior" type="range" min="1" max="12" step="0.5"></div>
+    <div class="ctl"><label for="alzada">Volumen / alzada <output id="alzada-v"></output></label><input id="alzada" type="range" min="0" max="100" step="5"></div>
+    <div class="ctl"><label for="lateral">Largo de los costados <output id="lateral-v"></output></label><input id="lateral" type="range" min="0.3" max="3" step="0.1"></div>
+    <div class="ctl"><label>Altura del degradado</label><div class="seg" role="group" aria-label="Altura del degradado">
+      <button data-altura="bajo">Bajo</button><button data-altura="medio">Medio</button><button data-altura="alto">Alto</button></div></div>
+    <div class="ctl"><label>Extensión del degradado</label><div class="seg" role="group" aria-label="Extensión del degradado">
+      <button data-extension="comprimido">Comprimido</button><button data-extension="equilibrado">Equilibrado</button><button data-extension="estirado">Estirado</button></div></div>
+    <div class="acciones"><button class="btn" id="reset">Restablecer</button><button class="btn pri" id="guardar">Guardar para el barbero</button></div>
+    <div id="ficha-box" hidden><div id="ficha"></div><button class="btn" id="copiar" style="margin-top:8px">Copiar</button></div>
+    <label class="glb">Probar otra cabeza (GLB calvo, mirando al frente)<input id="glb" type="file" accept=".glb,model/gltf-binary"></label>
+  </section>
+</div>
+<div id="aviso" role="status" aria-live="polite"></div>
+<script type="module" src="sim.js"></script>
+</body>
+</html>
