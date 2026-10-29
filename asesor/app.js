@@ -53,10 +53,15 @@ function pregunta() {
     return p.visual && o.v !== "no_se" ? esquema(p.visual, o.v) : "";
   };
   const hayEsq = p.visual && p.opciones.some(o => o.v !== "no_se");
+  const conFotos = p.opciones.every(o => manifiesto[p.id + ":" + o.v]);
+  // Variantes de referencia (opcionales, no son respuestas): solo para la pregunta de tipo de cabello.
+  const variantes = p.id === "pelo" && conFotos ? `<details class="variantes"><summary>Ver más ejemplos de cada tipo</summary>
+      <p class="nota-esq">Imágenes ilustrativas generadas con IA, solo de referencia. Elegí arriba el tipo que más se parezca.</p>
+      ${p.opciones.map((o, i) => `<div class="var-fila"><b>${esc(o.t)}</b><div class="var-fotos">${"abcd".split("").map(l => `<img src="assets/opciones/pelo/${i + 1}${l}.webp" alt="" loading="lazy" decoding="async" width="444" height="261">`).join("")}</div></div>`).join("")}</details>` : "";
   montar(`<div class="cabecera"><button class="atras" id="atras" aria-label="${paso || editando ? "Volver" : "Volver al inicio"}">←</button>
       <div class="prog"><small id="pp" aria-live="polite">Pregunta ${paso + 1} de ${vis.length}</small><div class="bar" role="progressbar" aria-label="Progreso" aria-valuemin="1" aria-valuemax="${vis.length}" aria-valuenow="${paso + 1}"><i style="width:${Math.round(100 * (paso + 1) / vis.length)}%"></i></div></div></div>
     <div class="pregunta"><h2 id="q">${esc(p.titulo)}</h2>${p.ayuda ? `<p class="ayuda">${esc(p.ayuda)}</p>` : ""}
-    <div class="opts${dosCol ? " dos" : ""}" role="group" aria-labelledby="q">${p.opciones.map(o => `<button class="opt${o.v === "no_se" ? " ns" : ""}" data-v="${esc(o.v)}" aria-pressed="${actual === o.v}">${media(o)}<span class="tx"><b>${esc(o.t)}</b>${o.d ? `<span class="d">${esc(o.d)}</span>` : ""}</span></button>`).join("")}</div>
+    <div class="opts${conFotos ? " con-fotos" : dosCol ? " dos" : ""}" role="group" aria-labelledby="q">${p.opciones.map(o => `<button class="opt${o.v === "no_se" ? " ns" : ""}" data-v="${esc(o.v)}" aria-pressed="${actual === o.v}">${media(o)}<span class="tx"><b>${esc(o.t)}</b>${o.d ? `<span class="d">${esc(o.d)}</span>` : ""}</span></button>`).join("")}</div>${variantes}
     ${hayEsq && !Object.keys(manifiesto).some(k => k.startsWith(p.id + ":")) ? `<p class="nota-esq">Los dibujos son esquemas ilustrativos, no fotografías.</p>` : ""}</div>`);
   app.querySelectorAll(".opt").forEach(b => b.onclick = () => responder(p, b));
   app.querySelector("#atras").onclick = () => { if (editando) return resumen(); if (paso) { paso--; pregunta(); } else inicio(); };

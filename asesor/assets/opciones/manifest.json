@@ -1,0 +1,6 @@
+{
+  "pelo:lacio":      {"src": "assets/opciones/pelo/1a.webp", "alt": "Cabello lacio visto desde atrás", "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas"},
+  "pelo:ondulado":   {"src": "assets/opciones/pelo/2b.webp", "alt": "Cabello ondulado visto desde atrás", "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas"},
+  "pelo:rizado":     {"src": "assets/opciones/pelo/3b.webp", "alt": "Cabello rizado visto desde atrás", "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas"},
+  "pelo:muy_rizado": {"src": "assets/opciones/pelo/4b.webp", "alt": "Cabello muy rizado o afro visto desde atrás", "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas"}
+}

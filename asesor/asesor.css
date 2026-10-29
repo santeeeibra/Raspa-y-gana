@@ -132,3 +132,14 @@ textarea{min-height:96px;resize:vertical}input:focus,textarea:focus,select:focus
 nav.seccion{display:flex;gap:8px;margin:6px 0 14px}nav.seccion button{flex:1;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--steel);font-family:var(--f-head);font-size:20px;letter-spacing:.06em}
 nav.seccion button[aria-current=true]{border-color:var(--white);background:var(--steel2)}
 blockquote{quotes:none}
+/* Opciones con foto grande (p. ej. tipo de cabello): 2 columnas, foto arriba y nombre abajo */
+.opts.con-fotos{grid-template-columns:1fr 1fr}
+.opts.con-fotos .opt{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;min-height:0}
+.opts.con-fotos .opt .foto-op{flex:none;width:100%;height:auto;aspect-ratio:444/261;border-radius:0;display:block}
+.opts.con-fotos .opt .tx{padding:10px 12px 12px}.opts.con-fotos .opt b{font-size:18px}
+.opts.con-fotos .opt[aria-pressed=true]::after{top:8px;right:8px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:var(--blue);color:#fff;font-size:15px}
+.opt:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.variantes{margin-top:16px;border:1px solid var(--line);border-radius:var(--r);padding:10px 14px}
+.variantes summary{cursor:pointer;color:var(--muted);font-size:16px;min-height:32px;display:flex;align-items:center}
+.var-fila{margin-top:12px}.var-fila b{font-size:15px}
+.var-fotos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}.var-fotos img{width:100%;height:auto;border-radius:6px;display:block}
