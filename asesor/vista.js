@@ -1,4 +1,4 @@
-// Piezas visuales compartidas entre el asesor público y la vista previa del gestor.
+// Piezas visuales compartidas entre el asesor público y la vista previa de edición.
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 /** Esquemas ilustrativos (dibujos, NO fotografías) para entender las preguntas técnicas. */
