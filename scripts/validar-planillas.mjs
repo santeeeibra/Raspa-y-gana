@@ -1,9 +1,13 @@
 // Valida datos/planillas/{Cortes,Variantes,Fuentes}.csv. Solo LEE: no toca el motor ni las preguntas.
-// Uso: node scripts/validar-planillas.mjs [carpeta]
+// Uso: node scripts/validar-planillas.mjs [carpeta] [--exigir-publicable]
+// Dos niveles: (1) ESTRUCTURA correcta del CSV (errores) y (2) ficha con información SUFICIENTE para pasar a revisión de
+// publicación (listo). Una ficha puede tener estructura válida y aun así no estar lista. "Lista" no equivale a verificada ni publicada.
 import { readFileSync } from "node:fs";
 import { PREGUNTAS } from "../asesor/engine.js";
 
-const dir = process.argv[2] || new URL("../datos/planillas/", import.meta.url).pathname;
+const args = process.argv.slice(2).filter(a => !a.startsWith("--"));
+const exigir = process.argv.includes("--exigir-publicable");
+const dir = args[0] || new URL("../datos/planillas/", import.meta.url).pathname;
 const errores = [], avisos = [];
 const err = (m) => errores.push(m), avi = (m) => avisos.push(m);
 
@@ -103,6 +107,18 @@ for (const s of F.filas) {
   if (/catalog|shop|product|\/store/i.test(s.url)) avi(`${f("¿catálogo o tienda? no vale como evidencia técnica", s)}`);
 }
 
+// Campos sin los cuales no se debe publicar (vacío NO significa compatible)
+const CRITICOS = ["pelos", "largos", "estilos", "entradas", "laterales", "tiempo_peinado", "mantenimiento", "descripcion"];
+function motivosNoListo(c) {
+  const m = [], vacio = k => !c[k] || c[k] === "?";
+  const conFuente = k => F.filas.some(s => s.slug === c.slug && s.campo === k && s.comprobada_abierta === "si");
+  for (const k of CRITICOS) if (vacio(k)) m.push(`${k} pendiente`);
+  if (c.laterales.split("|").includes("degradado")) for (const k of ["alturas", "transiciones"]) if (vacio(k)) m.push(`${k} pendiente (hay degradado)`);
+  for (const k of DATOS) if (c[k] && !MARCAS.has(c[k]) && !conFuente(k)) m.push(`${k} sin fuente comprobada (${(c.campos_deducidos || "").split("|").includes(k) ? "deducido" : "sin respaldo"})`);
+  if (!F.filas.some(s => s.slug === c.slug && s.comprobada_abierta === "si")) m.push("ninguna fuente comprobada");
+  return m;
+}
+
 function salir() {
   console.log(`\nCortes: ${C.filas.length} · Variantes: ${V.filas.length} · Fuentes: ${F.filas.length}`);
   if (avisos.length) console.log("\nAVISOS (" + avisos.length + ")\n" + avisos.map(x => " · " + x).join("\n"));
@@ -115,6 +131,13 @@ function salir() {
     const resp = DATOS.filter(k => c[k] && !MARCAS.has(c[k]) && respaldado.has(c.slug + "|" + k));
     console.log(` ${c.nombre} [${c.estado}, publicado=${c.publicado}]\n   con fuente: ${resp.join(", ") || "(ninguno)"}\n   deducido, hay que aprobar: ${ded.join(", ") || "(ninguno)"}\n   pendiente (?): ${pend.join(", ") || "(ninguno)"}`);
   }
-  process.exit(errores.length ? 1 : 0);
+  console.log("\nNIVEL 2 · ¿INFORMACIÓN SUFICIENTE PARA REVISIÓN DE PUBLICACIÓN? (no verifica ni publica nada)");
+  let noListas = 0;
+  for (const c of (C?.filas || [])) {
+    const m = errores.length ? ["corregir primero los errores"] : motivosNoListo(c);
+    if (m.length) noListas++;
+    console.log(` ${m.length ? "✗ PENDIENTE" : "✓ lista para revisión"} · ${c.nombre}${m.length ? "\n     " + m.join("\n     ") : ""}`);
+  }
+  process.exit(errores.length || (exigir && noListas) ? 1 : 0);
 }
 salir();
