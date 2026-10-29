@@ -1,5 +1,6 @@
 import { PREGUNTAS, preguntasVisibles, recomendar, esRecomendable } from "./engine.js";
 import { esc, esquema, tarjeta, fuentes } from "./vista.js";
+import { abrirFicha, cargarMedia, mediaDe, referenciasPrivadas } from "./ficha.js";
 
 const app = document.getElementById("app");
 const config = await fetch("config.json").then(r => (r.ok ? r.json() : {})).catch(() => ({}));
@@ -94,6 +95,7 @@ function resumen() {
 // ---- resultados ----
 function resultado() {
   const r = recomendar(respuestas, cortes); resultados = r.recomendaciones; comparar.clear();
+  const conPortada = x => { const p = mediaDe(x.corte)?.principal; return p && !(x.corte.imagenes || []).length ? { ...x, corte: { ...x.corte, imagenes: [{ url: p.src, alt: p.alt }] } } : x; };
   if (r.estado !== "ok") {
     return montar(`<h2>${r.estado === "sin_verificadas" ? "Todavía no hay recomendaciones" : "Sin coincidencias"}</h2><div class="aviso">${esc(r.mensaje)}</div>
       <button class="cta" id="cat">Explorar el catálogo</button><button class="ghost block" id="rep">Volver a empezar</button>`)
@@ -102,7 +104,7 @@ function resultado() {
   const g = leerG().map(x => x.slug);
   montar(`<h2>${resultados.length === 1 ? "Tu opción" : `Tus ${resultados.length} opciones`}</h2>
     <p class="ayuda">Ordenadas de la que más se ajusta a la que menos. Es una orientación: tu barbero te confirma el resultado.</p>
-    ${resultados.map((x, i) => tarjeta(x, { demo, indice: i + 1, controles: `<div class="acciones"><button class="ghost guardar" data-s="${esc(x.corte.slug)}" aria-pressed="${g.includes(x.corte.slug)}">${g.includes(x.corte.slug) ? "♥ Guardado" : "♡ Guardar"}</button>
+    ${resultados.map((x, i) => tarjeta(conPortada(x), { demo, indice: i + 1, controles: `<button class="cta ficha-btn" data-i="${i}">Ver ficha completa</button><div class="acciones"><button class="ghost guardar" data-s="${esc(x.corte.slug)}" aria-pressed="${g.includes(x.corte.slug)}">${g.includes(x.corte.slug) ? "♥ Guardado" : "♡ Guardar"}</button>
       ${resultados.length > 1 ? `<label><input type="checkbox" class="cmp" data-s="${esc(x.corte.slug)}"> Comparar</label>` : ""}</div>` })).join("")}
     ${resultados.length > 1 ? `<button class="cta comparar" id="cmp" hidden>Comparar seleccionados</button>` : ""}
     <p class="footer-nota">Guardar solo marca el corte en este dispositivo. No enviamos nada a ningún servidor.</p>
@@ -115,6 +117,7 @@ function resultado() {
   const bc = app.querySelector("#cmp");
   app.querySelectorAll(".cmp").forEach(c => c.onchange = () => { c.checked ? comparar.add(c.dataset.s) : comparar.delete(c.dataset.s); bc.hidden = comparar.size < 2; bc.textContent = `Comparar ${comparar.size} cortes`; });
   if (bc) bc.onclick = tablaComparar;
+  app.querySelectorAll(".ficha-btn").forEach(b => b.onclick = () => abrirFicha({ x: resultados[+b.dataset.i], montar, app, demo, volver: resultado, textoVolver: "Volver a mis opciones" }));
   app.querySelector("#mod").onclick = resumen; app.querySelector("#cat").onclick = catalogo; app.querySelector("#rep").onclick = inicio;
 }
 function tablaComparar() {
@@ -131,12 +134,16 @@ function tablaComparar() {
 // ---- catálogo ----
 function catalogo() {
   const etq = { verificado: "Verificada", pendiente: "En revisión", borrador: "En preparación" };
+  const refs = referenciasPrivadas(cortes);
   montar(`<div class="cabecera"><button class="atras" id="atras" aria-label="Volver al inicio">←</button><h2 style="margin-left:6px">Catálogo</h2></div>
     ${hayVerificadas() ? "" : `<div class="aviso">Las fichas están en revisión: por ahora mostramos solo los nombres.</div>`}
     <div class="lista-cat">${cortes.map(c => `<div class="card"><div class="row"><b>${esc(c.nombre)}</b><span class="badge ${esc(c.estado)}">${etq[c.estado] || ""}</span></div>
-      ${esRecomendable(c) ? `<details><summary>Ver ficha</summary>${c.descripcion ? `<p>${esc(c.descripcion)}</p>` : ""}${c.caracteristicas ? `<p class="small">${esc(c.caracteristicas)}</p>` : ""}${fuentes(c.fuentes)}</details>` : ""}</div>`).join("")}</div>`);
+      ${esRecomendable(c) ? `<details><summary>Ver ficha</summary>${c.descripcion ? `<p>${esc(c.descripcion)}</p>` : ""}${c.caracteristicas ? `<p class="small">${esc(c.caracteristicas)}</p>` : ""}${fuentes(c.fuentes)}<button class="ghost block ficha-cat" data-s="${esc(c.slug)}">Ver ficha completa</button></details>` : mediaDe(c) ? `<button class="ghost block ficha-cat" data-s="${esc(c.slug)}">Ver fotos y clip</button>` : ""}</div>`).join("")}</div>
+    ${refs.length ? `<h3 class="sub-cat">Referencias visuales · prueba privada</h3><div class="lista-cat">${refs.map(c => `<div class="card"><div class="row"><b>${esc(c.nombre)}</b><span class="badge borrador">Sin verificar</span></div>
+      <p class="small muted">Solo referencia visual generada con IA. No se usa para recomendar.</p><button class="ghost block ficha-cat" data-s="${esc(c.slug)}">Ver fotos y clip</button></div>`).join("")}</div>` : ""}`);
   app.querySelector("#atras").onclick = inicio;
+  app.querySelectorAll(".ficha-cat").forEach(b => b.onclick = () => abrirFicha({ x: { corte: [...cortes, ...refs].find(c => c.slug === b.dataset.s) }, montar, app, demo, volver: catalogo, textoVolver: "Volver al catálogo" }));
 }
 
-await Promise.all([cargar(), cargarManifiesto()]);
+await Promise.all([cargar(), cargarManifiesto(), cargarMedia()]);
 inicio();

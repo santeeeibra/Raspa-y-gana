@@ -1,0 +1,24 @@
+{
+  "mullet-moderno": {
+    "corte": { "slug": "mullet-moderno", "nombre": "Mullet moderno", "estado": "borrador" },
+    "principal": { "src": "privado/cortes/mullet-moderno/perfil.webp", "alt": "Mullet moderno visto de perfil", "w": 640, "h": 800 },
+    "vistas": [
+      { "id": "tres_cuartos", "src": "privado/cortes/mullet-moderno/tres_cuartos.webp", "alt": "Mullet moderno visto de tres cuartos por detrás", "w": 640, "h": 800 },
+      { "id": "nuca", "src": "privado/cortes/mullet-moderno/nuca.webp", "alt": "Nuca del mullet moderno", "w": 640, "h": 800 }
+    ],
+    "clip": { "src": "privado/cortes/mullet-moderno/showcase.webm", "mp4": "privado/cortes/mullet-moderno/showcase.mp4", "poster": "privado/cortes/mullet-moderno/poster.webp", "duracion": 8, "w": 540, "h": 720 },
+    "derechos": "Generado con IA (Google Flow) para Las Vegas. Uso comercial por confirmar.",
+    "registro": {
+      "origen": "generado_ia",
+      "herramienta": "Google Flow (Veo)",
+      "fecha": "2026-10-29",
+      "archivo_original": "recursos-originales/mullet-moderno/flow-original.mp4",
+      "licencia": "Términos de Google Flow / Google Labs — sin confirmar para uso comercial",
+      "uso_comercial": "por_confirmar",
+      "publicable": false,
+      "marca_agua": "SynthID invisible (según Google)",
+      "persona_real": false,
+      "notas": "Referencia visual, no evidencia técnica. Sin vista frontal en el clip."
+    }
+  }
+}

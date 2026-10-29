@@ -18,12 +18,15 @@ const env = {
   ADMIN_PASSWORD_HASH: await crearHash(PASS), SESSION_SECRET: crypto.randomUUID() + crypto.randomUUID(),
   IMAGENES: { // R2 simulado en disco
     async put(k, v) { const p = join(local, "r2", k.replaceAll("/", "__")); writeFileSync(p, v); },
-    async get(k) { const p = join(local, "r2", k.replaceAll("/", "__")); return existsSync(p) ? { body: readFileSync(p), httpMetadata: { contentType: "image/" + (k.endsWith("png") ? "png" : k.endsWith("webp") ? "webp" : "jpeg") } } : null; },
+    async get(k, o) { const p = join(local, "r2", k.replaceAll("/", "__")); if (!existsSync(p)) return null;
+      const d = readFileSync(p), off = o?.range?.offset ?? 0, len = o?.range?.length ?? d.length - off, ext = k.split(".").pop();
+      return { body: d.subarray(off, off + len), size: d.length, range: o?.range ? { offset: off, length: len } : undefined,
+        httpMetadata: { contentType: { png: "image/png", webp: "image/webp", mp4: "video/mp4", webm: "video/webm" }[ext] || "image/jpeg" } }; },
     async delete(k) { try { unlinkSync(join(local, "r2", k.replaceAll("/", "__"))); } catch {} },
   },
 };
 if (process.env.LV_DEMO === "1") console.log(await sembrarDemo(env.DB) ? "Datos de DEMOSTRACIÓN cargados (investigación [DEMO])" : "Datos de demostración ya cargados");
-const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".jpg": "image/jpeg", ".ttf": "font/ttf" };
+const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".jpg": "image/jpeg", ".ttf": "font/ttf", ".webp": "image/webp", ".png": "image/png", ".mp4": "video/mp4", ".webm": "video/webm" };
 const CABECERAS = Object.fromEntries(readFileSync(join(raiz, "_headers"), "utf8").split("\n").filter(l => /^\s+\S+:/.test(l)).map(l => { const i = l.indexOf(":"); return [l.slice(0, i).trim(), l.slice(i + 1).trim()]; }));
 const puerto = +process.env.PORT || 8787;
 

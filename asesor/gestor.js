@@ -140,13 +140,25 @@ function fotosYVariantes(c) {
     <label class="l">Descripción</label><textarea name="descripcion" maxlength="500" style="min-height:64px">${esc(v?.descripcion)}</textarea>
     <div class="fila-btns"><div><label class="l">Laterales</label>${sel("laterales", L, v?.laterales)}</div><div><label class="l">Altura</label>${sel("altura", A, v?.altura)}</div><div><label class="l">Transición</label>${sel("transicion", T, v?.transicion)}</div></div>
     <div class="fila-btns"><button class="btn sec">${v ? "Guardar variante" : "+ Agregar variante"}</button>${v ? `<button type="button" class="btn peligro" data-del="variantes/${v.id}" data-n="${esc(v.nombre)}">Borrar</button>` : ""}</div></form>`;
-  return `<div class="panel-card"><h3>Fotografías</h3><p class="hint">Estos cambios se guardan al instante. Solo subí fotos propias o con permiso. <b>Nunca fotos de clientes sin su consentimiento.</b></p>
-    ${r2Aviso()}<div class="galeria">${c.imagenes.map(i => `<figure><img src="/api/admin/imagenes/${i.id}" alt="${esc(i.alt)}"><figcaption>${esc(i.derechos)}<br><button class="btn peligro" style="min-height:40px;margin-top:6px;width:100%" data-delimg="${i.id}">Borrar</button></figcaption></figure>`).join("") || `<p class="muted">Todavía no hay fotos.</p>`}</div>
-    <form id="subir"><label class="l">Archivo (JPG, PNG o WebP, hasta 2 MB)</label><input type="file" name="archivo" accept="image/jpeg,image/png,image/webp" required>
-    <label class="l">Qué muestra la foto</label><input type="text" name="alt" maxlength="200" placeholder="Ej.: corte visto de costado">
-    <label class="l">De quién es la foto o con qué permiso se usa</label><input type="text" name="derechos" maxlength="300" required placeholder="Ej.: foto propia de Las Vegas">
-    <div class="chips" style="margin-top:12px"><label><input type="checkbox" name="confirmo_sin_clientes" value="1" required>Confirmo que NO es una foto de un cliente sin su consentimiento</label></div>
-    <button class="btn sec" style="width:100%;margin-top:10px" ${S.r2 ? "" : "disabled"}>Subir foto</button></form></div>
+  const VIS = { principal: "Principal", frente: "Frente", perfil: "Perfil", tres_cuartos: "¾ posterior", nuca: "Nuca" }, ORI = { propia: "Propia", generado_ia: "Generado con IA", tercero_con_permiso: "De terceros con permiso" };
+  const recurso = i => `<figure>${i.tipo === "video" ? `<video src="/api/admin/imagenes/${i.id}" controls muted playsinline preload="metadata" aria-label="${esc(i.alt || "Video")}"></video>` : `<img src="/api/admin/imagenes/${i.id}" alt="${esc(i.alt)}">`}
+    <figcaption>${i.tipo === "video" ? "Video" : VIS[i.vista] || "Foto"} · ${esc(ORI[i.origen] || "Propia")}${i.herramienta ? ` (${esc(i.herramienta)})` : ""}<br>${esc(i.derechos)}${i.licencia ? `<br><span class="muted">Licencia: ${esc(i.licencia)}</span>` : ""}
+    <br><span class="badge ${i.publicable === 0 ? "borrador" : "verificado"}">${i.publicable === 0 ? (i.uso_comercial === "confirmado" ? "No publicado" : "Uso comercial por confirmar") : "Publicable"}</span>
+    ${i.publicable === 0 ? `<button class="btn sec" style="min-height:40px;margin-top:6px;width:100%" data-pub="${i.id}" data-on="1">Confirmar licencia y permitir publicar</button>` : `<button class="btn sec" style="min-height:40px;margin-top:6px;width:100%" data-pub="${i.id}" data-on="0">Dejar de publicar</button>`}
+    <button class="btn peligro" style="min-height:40px;margin-top:6px;width:100%" data-delimg="${i.id}">Borrar</button></figcaption></figure>`;
+  return `<div class="panel-card"><h3>Fotos y videos</h3><p class="hint">Estos cambios se guardan al instante. Solo subí material propio, generado con IA o con permiso. <b>Nunca fotos de clientes sin su consentimiento.</b> Nada se muestra al público sin licencia de uso comercial confirmada. Los videos generados con IA son referencias visuales, no evidencia técnica.</p>
+    ${r2Aviso()}<div class="galeria">${c.imagenes.map(recurso).join("") || `<p class="muted">Todavía no hay fotos ni videos.</p>`}</div>
+    <form id="subir"><label class="l">Archivo (foto JPG, PNG o WebP hasta 2 MB · video MP4 o WebM hasta 12 MB, sin sonido)</label><input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" required>
+    <label class="l">Vista (fotos)</label><select name="vista"><option value="">Sin indicar</option>${Object.entries(VIS).map(([v, t]) => `<option value="${v}">${t}</option>`).join("")}</select>
+    <label class="l">Qué muestra</label><input type="text" name="alt" maxlength="200" placeholder="Ej.: corte visto de costado">
+    <label class="l">Origen</label><select name="origen" required>${Object.entries(ORI).map(([v, t]) => `<option value="${v}">${t}</option>`).join("")}</select>
+    <label class="l">Herramienta de IA (si corresponde)</label><input type="text" name="herramienta" maxlength="120" placeholder="Ej.: Google Flow (Veo)">
+    <label class="l">Licencia o permiso</label><input type="text" name="licencia" maxlength="300" placeholder="Ej.: términos de Google Flow, plan …">
+    <label class="l">De quién es o con qué permiso se usa</label><input type="text" name="derechos" maxlength="300" required placeholder="Ej.: foto propia de Las Vegas">
+    <label class="l">Uso comercial</label><select name="uso_comercial"><option value="por_confirmar">Por confirmar (no se publica)</option><option value="confirmado">Confirmado</option></select>
+    <div class="chips" style="margin-top:12px"><label><input type="checkbox" name="publicable" value="1">Permitir publicarlo cuando la ficha esté publicada (requiere uso comercial confirmado)</label>
+    <label><input type="checkbox" name="confirmo_sin_clientes" value="1" required>Confirmo que NO es material de un cliente sin su consentimiento</label></div>
+    <button class="btn sec" style="width:100%;margin-top:10px" ${S.r2 ? "" : "disabled"}>Subir</button></form></div>
     <div class="panel-card"><h3>Variantes</h3><p class="hint">Versiones del corte (por ejemplo, con degradado bajo o alto). El asesor elige la más cercana a lo que pidió la persona.</p>${c.variantes.map(fila).join("")}${fila(null)}</div>`;
 }
 const r2Aviso = () => S.r2 ? "" : `<div class="aviso">El almacenamiento de fotos todavía no está activado en este entorno.</div>`;
@@ -210,7 +222,12 @@ function enlazarEditor(c) {
     accion(() => id ? api("PUT", `/${tipo}/${id}`, d) : api("POST", `/cortes/${c.id}/${tipo}`, d), id ? "Guardado" : "Agregado"); });
   app.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => { if (await confirmar({ titulo: "Borrar", texto: `Vas a borrar «${b.dataset.n}». No se puede deshacer.`, ok: "Borrar", peligro: true })) accion(() => api("DELETE", "/" + b.dataset.del), "Borrado"); });
   app.querySelectorAll("[data-delimg]").forEach(b => b.onclick = async () => { if (await confirmar({ titulo: "Borrar foto", texto: "La foto se elimina para siempre.", ok: "Borrar", peligro: true })) accion(() => api("DELETE", "/imagenes/" + b.dataset.delimg), "Foto borrada"); });
-  app.querySelector("#subir").onsubmit = e => { e.preventDefault(); accion(() => api("POST", `/cortes/${c.id}/imagenes`, new FormData(e.target)), "Foto subida"); };
+  app.querySelector("#subir").onsubmit = e => { e.preventDefault(); accion(() => api("POST", `/cortes/${c.id}/imagenes`, new FormData(e.target)), "Archivo subido"); };
+  app.querySelectorAll("[data-pub]").forEach(b => b.onclick = async () => {
+    const on = b.dataset.on === "1";
+    if (on && !(await confirmar({ titulo: "Permitir publicar", texto: "Confirmás que la licencia permite el uso comercial de este material (por ejemplo, revisaste los términos de la herramienta de IA).", ok: "Confirmo" }))) return;
+    accion(() => api("PATCH", `/imagenes/${b.dataset.pub}`, on ? { publicable: true, uso_comercial: "confirmado" } : { publicable: false, uso_comercial: "confirmado" }), on ? "Se podrá publicar" : "Ya no se publica");
+  });
 }
 function vistaPrevia(c) {
   const corte = { ...c, imagenes: c.imagenes.map(i => ({ url: `/api/admin/imagenes/${i.id}`, alt: i.alt })) };

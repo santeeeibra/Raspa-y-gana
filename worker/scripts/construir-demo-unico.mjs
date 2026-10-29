@@ -1,5 +1,5 @@
 // Empaqueta la DEMO del asesor en UN solo archivo HTML (sin servidor, sin API, sin gestor).
-// Reutiliza tal cual engine.js, vista.js, app.js y asesor.css; solo incrusta demo.json, el logo y la tipografía.
+// Reutiliza tal cual engine.js, vista.js, ficha.js, app.js y asesor.css; solo incrusta demo.json, el logo y la tipografía.
 //   node scripts/construir-demo-unico.mjs <archivo-de-salida.html>
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -10,7 +10,7 @@ export function construirUnico() {
   const demo = JSON.stringify(JSON.parse(txt("demo.json")));
   const css = txt("asesor.css").replace("url(assets/Mostwasted.ttf)", `url(data:font/ttf;base64,${b64("assets/Mostwasted.ttf")})`);
   const sinModulos = s => s.replace(/^import .*$/gm, "").replace(/^export /gm, "");
-  const js = [txt("engine.js"), txt("vista.js"), txt("app.js")].map(sinModulos).join("\n");
+  const js = [txt("engine.js"), txt("vista.js"), txt("ficha.js"), txt("app.js")].map(sinModulos).join("\n");
   const logo = `data:image/jpeg;base64,${b64("assets/logo.jpg")}`;
   const shim = `const DEMO_JSON = ${demo};
 const _fetch = window.fetch.bind(window), _json = (o, st = 200) => Promise.resolve(new Response(JSON.stringify(o), { status: st, headers: { "content-type": "application/json" } }));

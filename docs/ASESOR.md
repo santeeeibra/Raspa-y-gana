@@ -59,7 +59,7 @@ npx wrangler whoami
 npx wrangler d1 migrations list lasvegas-asesor-demo --remote
 npx wrangler d1 migrations apply lasvegas-asesor-demo --remote
 ```
-`whoami` debe mostrar TU cuenta. `migrations apply` lista las 4 migraciones y pide confirmar: ninguna borra ni reemplaza datos. Resultado esperado: 13 tablas y 16 cortes en borrador.
+`whoami` debe mostrar TU cuenta. `migrations apply` lista las 5 migraciones y pide confirmar: ninguna borra ni reemplaza datos. Resultado esperado: 13 tablas y 16 cortes en borrador.
 
 ### Primer despliegue (esperar confirmación)
 ```bash
@@ -72,3 +72,16 @@ No se habilita en la demo. Para usarlo: crear un Worker privado (otro nombre), `
 
 ## Pendiente
 Reglas de limitación de Cloudflare, fotos reales autorizadas para las preguntas y el inicio, Chat con biblioteca verificada y límites anti-abuso, varios usuarios en el gestor (o Cloudflare Access), vincular fotos a variantes desde el gestor, migrar las fotos actuales de Supabase a R2 y enlazar desde `guia.html`.
+
+## Fotos y videos de cada corte (ficha completa)
+
+Cada resultado y cada ficha del catálogo tienen **«Ver ficha completa»**: galería (principal + frente / perfil / ¾ posterior / nuca), botón **«Ver desde otros ángulos»**, botón **«Ver corte en movimiento»** (clip corto, sin sonido, se descarga recién al tocarlo), datos técnicos, mantenimiento y variantes.
+
+Hay dos formas de cargar el material:
+
+1. **Desde el gestor** (pestaña «Fotos y videos»): fotos JPG/PNG/WebP hasta 2 MB y videos MP4/WebM hasta 12 MB. Cada archivo guarda **origen** (propio, generado con IA, de terceros), **herramienta de IA**, **licencia**, **uso comercial** (confirmado / por confirmar) y si es **publicable**. Nada sale al público sin uso comercial confirmado, aunque la ficha esté publicada (lo impide también la base de datos, migración `0005`).
+2. **Archivos locales** con `asesor/assets/cortes/media.json` (mismo registro; solo se muestran los que tienen `"publicable": true`).
+
+**Material en prueba privada** (`asesor/privado/`): solo se ve abriendo el asesor con `?privado` en una copia local. Esa carpeta no entra en la demo ni en producción. Hoy contiene el **Mullet moderno** generado con Google Flow, que no está verificado, no se recomienda y espera confirmar la licencia (ver `recursos-originales/mullet-moderno/REGISTRO.md`).
+
+Los videos generados con IA son referencias visuales, no evidencia técnica: la ficha lo aclara siempre.

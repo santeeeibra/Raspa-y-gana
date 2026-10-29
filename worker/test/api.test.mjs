@@ -230,6 +230,48 @@ test("fotos: carga excesiva rechazada antes de leerla; sin Content-Length; máxi
   for (let i = 0; i < 12; i++) assert.equal((await b.call("POST", `/api/admin/cortes/${cid}/imagenes`, formFoto())).status, 201);
   assert.equal((await b.call("POST", `/api/admin/cortes/${cid}/imagenes`, formFoto())).status, 409);
 });
+// ---------- videos y registro de derechos ----------
+const mp4 = () => new Blob([new Uint8Array([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d, 1, 2, 3, 4])]);
+test("videos: MP4 aceptado, registro de origen obligatorio y nada publicable sin licencia confirmada", async () => {
+  const b = cliente(); await b.login(PASS); const blobs = new Map();
+  env.IMAGENES = { put: async (k, v) => blobs.set(k, v), delete: async k => blobs.delete(k), get: async () => null };
+  const c = await nuevoCorte(b, "Mullet Prueba");
+  const ia = formFoto({ origen: "generado_ia", uso_comercial: "por_confirmar", publicable: "1" }); ia.set("archivo", mp4(), "m.mp4");
+  assert.equal((await b.call("POST", `/api/admin/cortes/${c.id}/imagenes`, ia)).status, 400, "IA sin herramienta");
+  ia.set("herramienta", "Google Flow (Veo)");
+  const r = await b.call("POST", `/api/admin/cortes/${c.id}/imagenes`, ia); assert.equal(r.status, 201);
+  const v = r.data.imagenes.at(-1);
+  assert.equal(v.tipo, "video"); assert.equal(v.mime, "video/mp4"); assert.equal(v.origen, "generado_ia"); assert.equal(v.publicable, 0, "publicable sin licencia confirmada se ignora");
+  assert.equal((await b.call("PATCH", `/api/admin/imagenes/${v.id}`, { publicable: true, uso_comercial: "por_confirmar" })).status, 409);
+  const t = formFoto({ origen: "tercero_con_permiso" });
+  assert.equal((await b.call("POST", `/api/admin/cortes/${c.id}/imagenes`, t)).status, 400, "tercero sin licencia");
+  const foto = formFoto({ vista: "nuca", uso_comercial: "confirmado", publicable: "1" });
+  const rf = await b.call("POST", `/api/admin/cortes/${c.id}/imagenes`, foto); assert.equal(rf.status, 201);
+  assert.equal(rf.data.imagenes.at(-1).vista, "nuca"); assert.equal(rf.data.imagenes.at(-1).publicable, 1);
+});
+test("videos: la vista pública solo muestra recursos publicables y sirve rangos", async () => {
+  const b = cliente(); await b.login(PASS); const rev = b; const blobs = new Map();
+  env.IMAGENES = { put: async (k, v) => blobs.set(k, v), delete: async k => blobs.delete(k),
+    get: async (k, o) => { const d = blobs.get(k); if (!d) return null; const off = o?.range?.offset ?? 0, len = o?.range?.length ?? d.length - off;
+      return { body: d.slice(off, off + len), size: d.length, range: o?.range ? { offset: off, length: len } : undefined, httpMetadata: { contentType: k.endsWith(".mp4") ? "video/mp4" : "image/jpeg" } }; } };
+  const c = await nuevoCorte(b, "Con Video Publico"); await completar(b, c.id);
+  const priv = formFoto({ origen: "generado_ia", herramienta: "Google Flow (Veo)" }); priv.set("archivo", mp4(), "m.mp4");
+  await b.call("POST", `/api/admin/cortes/${c.id}/imagenes`, priv);
+  const pub = formFoto({ vista: "principal", uso_comercial: "confirmado", publicable: "1" }); pub.set("archivo", mp4(), "p.mp4");
+  await b.call("POST", `/api/admin/cortes/${c.id}/imagenes`, pub);
+  const f = (await fuenteOk(b, c.id)).data.fuentes[0];
+  await b.call("POST", `/api/admin/cortes/${c.id}/estado`, { estado: "pendiente" }); await rev.call("POST", `/api/admin/fuentes/${f.id}/revisar`, { revisada: true });
+  await rev.call("POST", `/api/admin/cortes/${c.id}/estado`, { estado: "verificado", confirmo_revision: true });
+  assert.equal((await rev.call("POST", `/api/admin/cortes/${c.id}/publicar`, { publicado: true, confirmo: true })).status, 200);
+  const lista = await (await worker.fetch(new Request("http://x.test/api/cortes"), env)).json();
+  const ims = lista.find(x => x.slug === c.slug).imagenes;
+  assert.equal(ims.length, 1, "el video sin licencia confirmada no sale al público"); assert.equal(ims[0].tipo, "video");
+  const adm = (await b.call("GET", `/api/admin/cortes/${c.id}`)).data.imagenes; const oculto = adm.find(i => i.publicable === 0);
+  assert.equal((await worker.fetch(new Request(`http://x.test/api/imagenes/${oculto.id}`), env)).status, 404);
+  const parcial = await worker.fetch(new Request("http://x.test" + ims[0].url, { headers: { Range: "bytes=4-7" } }), env);
+  assert.equal(parcial.status, 206); assert.equal(parcial.headers.get("content-range"), "bytes 4-7/16");
+  assert.equal(new TextDecoder().decode(await parcial.arrayBuffer()), "ftyp");
+});
 test("cerrar sesión", async () => {
   const b = cliente(); await b.login(PASS);
   assert.equal((await b.call("POST", "/api/admin/logout", {})).status, 200);

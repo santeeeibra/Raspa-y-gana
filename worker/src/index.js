@@ -12,11 +12,22 @@ const SEG = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-orig
 const json = (data, status = 200, extra = {}) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json; charset=utf-8", ...SEG, ...extra } });
 const err = (m, status = 400, extra = {}) => json({ error: m }, status, extra);
-const MAX_IMG = 2 * 1024 * 1024, MAX_MULTIPART = MAX_IMG + 64 * 1024, MAX_JSON = 64 * 1024, MAX_FOTOS = 12;
+const MAX_IMG = 2 * 1024 * 1024, MAX_VIDEO = 12 * 1024 * 1024, MAX_MULTIPART = MAX_VIDEO + 64 * 1024, MAX_JSON = 64 * 1024, MAX_FOTOS = 12;
 const MAX_INTENTOS = 5, MAX_INTENTOS_GLOBAL = 30, VENTANA_MIN = 10;
 const ipDe = req => req.headers.get("CF-Connecting-IP") || req.headers.get("X-Forwarded-For") || "local";
 const lista = v => String(v || "").split(",").map(x => x.trim()).filter(Boolean);
 const soloRevisor = s => s.rol === "revisor" ? null : err("Esta acción la hace una persona con rol revisor", 403);
+
+// Sirve un objeto de R2 con soporte de rangos (los videos en iPhone lo necesitan para reproducirse).
+async function servirR2(env, req, key, cache, extra = {}) {
+  const rango = /^bytes=(\d+)-(\d*)$/.exec(req.headers.get("Range") || "");
+  const obj = await env.IMAGENES.get(key, rango ? { range: { offset: +rango[1], ...(rango[2] ? { length: +rango[2] - +rango[1] + 1 } : {}) } } : undefined);
+  if (!obj) return null;
+  const h = { "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream", "X-Content-Type-Options": "nosniff", "Cache-Control": cache, "Accept-Ranges": "bytes", ...extra };
+  if (rango && obj.range && obj.size) { const ini = obj.range.offset || 0, fin = ini + (obj.range.length ?? obj.size - ini) - 1;
+    return new Response(obj.body, { status: 206, headers: { ...h, "Content-Range": `bytes ${ini}-${fin}/${obj.size}` } }); }
+  return new Response(obj.body, { headers: h });
+}
 
 // ---------- lectura de fichas ----------
 const parse = (c) => { for (const k of CAMPOS_LISTA) c[k] = JSON.parse(c[k] || "[]"); return c; };
@@ -37,7 +48,8 @@ function vistaPublica(c) {
   return { ...pick(c, CAMPOS_PUBLICOS),
     variantes: c.variantes.map(v => pick(v, ["nombre", "descripcion", "laterales", "altura", "transicion"])),
     fuentes: c.fuentes.map(f => pick(f, ["autor", "titulo", "url", "afirmacion", "consultada_en"])),
-    imagenes: c.imagenes.map(i => ({ url: `/api/imagenes/${i.id}`, alt: i.alt })) };
+    imagenes: c.imagenes.filter(i => i.publicable !== 0).map(i => ({ url: `/api/imagenes/${i.id}`, alt: i.alt, tipo: i.tipo || "imagen", vista: i.vista || null, mime: i.mime || null,
+      derechos: i.derechos, registro: { origen: i.origen, herramienta: i.herramienta } })) };
 }
 const publico = async env => (await cargarCortes(env)).map(vistaPublica).filter(Boolean);
 
@@ -209,33 +221,55 @@ async function admin(req, env, url, ruta) {
     const cid = +r[1];
     const decl = req.headers.get("Content-Length");
     if (decl === null) return err("Falta Content-Length", 411);
-    if (+decl > MAX_MULTIPART) return err("La imagen supera 2 MB", 413);
+    if (+decl > MAX_MULTIPART) return err("El archivo supera 12 MB", 413);
     if (!/^multipart\/form-data\b/i.test(req.headers.get("Content-Type") || "")) return err("Debe enviarse como multipart/form-data", 415);
     if (!(await env.DB.prepare("SELECT 1 FROM cortes WHERE id=?1").bind(cid).first())) return err("No existe", 404);
-    if ((await env.DB.prepare("SELECT COUNT(*) n FROM imagenes WHERE corte_id=?1").bind(cid).first()).n >= MAX_FOTOS) return err(`Máximo ${MAX_FOTOS} fotos por corte`, 409);
+    if ((await env.DB.prepare("SELECT COUNT(*) n FROM imagenes WHERE corte_id=?1").bind(cid).first()).n >= MAX_FOTOS) return err(`Máximo ${MAX_FOTOS} fotos o videos por corte`, 409);
     const f = await req.formData(), file = f.get("archivo");
     if (f.get("confirmo_sin_clientes") !== "1") return err("Confirmá que la foto no es de un cliente sin consentimiento");
     const derechos = String(f.get("derechos") || "").trim();
     if (!derechos) return err("Indicá de quién es la foto o con qué permiso se usa");
     if (!file || typeof file === "string") return err("Falta el archivo");
-    if (file.size > MAX_IMG) return err("La imagen supera 2 MB", 413);
+    if (file.size > MAX_VIDEO) return err("El archivo supera 12 MB", 413);
     const bytes = new Uint8Array(await file.arrayBuffer()), h = [...bytes.slice(0, 12)];
-    const ext = h[0] === 0xFF && h[1] === 0xD8 ? "jpg" : h.slice(0, 4).join() === "137,80,78,71" ? "png" : (h.slice(0, 4).join() === "82,73,70,70" && h.slice(8, 12).join() === "87,69,66,80") ? "webp" : null;
-    if (!ext) return err("Solo se aceptan imágenes JPG, PNG o WebP", 415);
+    const esVideo = String.fromCharCode(...h.slice(4, 8)) === "ftyp" ? "mp4" : h.slice(0, 4).join() === "26,69,223,163" ? "webm" : null;
+    if (!esVideo && file.size > MAX_IMG) return err("La imagen supera 2 MB", 413);
+    const ext = esVideo || (h[0] === 0xFF && h[1] === 0xD8 ? "jpg" : h.slice(0, 4).join() === "137,80,78,71" ? "png" : (h.slice(0, 4).join() === "82,73,70,70" && h.slice(8, 12).join() === "87,69,66,80") ? "webp" : null);
+    if (!ext) return err("Solo se aceptan imágenes JPG, PNG o WebP y videos MP4 o WebM", 415);
+    // Registro de origen y derechos de publicación
+    const origen = ["propia", "generado_ia", "tercero_con_permiso"].includes(f.get("origen")) ? f.get("origen") : "propia";
+    const herramienta = String(f.get("herramienta") || "").trim().slice(0, 120), licencia = String(f.get("licencia") || "").trim().slice(0, 300);
+    if (origen === "generado_ia" && !herramienta) return err("Indicá con qué herramienta de IA se generó");
+    if (origen === "tercero_con_permiso" && !licencia) return err("Indicá la licencia o el permiso del tercero");
+    const usoComercial = f.get("uso_comercial") === "confirmado" ? "confirmado" : "por_confirmar";
+    const publicable = usoComercial === "confirmado" && f.get("publicable") === "1" ? 1 : 0;
+    const vista = ["principal", "frente", "perfil", "tres_cuartos", "nuca"].includes(f.get("vista")) ? f.get("vista") : null;
+    const MIME = { jpg: "image/jpeg", png: "image/png", webp: "image/webp", mp4: "video/mp4", webm: "video/webm" };
     const key = `cortes/${cid}/${crypto.randomUUID()}.${ext}`;
-    await env.IMAGENES.put(key, bytes, { httpMetadata: { contentType: { jpg: "image/jpeg", png: "image/png", webp: "image/webp" }[ext] } });
+    await env.IMAGENES.put(key, bytes, { httpMetadata: { contentType: MIME[ext] } });
     const vid = +f.get("variante_id") || null;
     try {
-      const ins = await env.DB.prepare("INSERT INTO imagenes (corte_id, variante_id, r2_key, alt, derechos) VALUES (?1,?2,?3,?4,?5)")
-        .bind(cid, vid, key, String(f.get("alt") || "").slice(0, 200), derechos.slice(0, 300)).run();
+      const ins = await env.DB.prepare(`INSERT INTO imagenes (corte_id, variante_id, r2_key, alt, derechos, tipo, vista, origen, herramienta, licencia, uso_comercial, publicable, mime, creado_en)
+        VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,datetime('now'))`)
+        .bind(cid, vid, key, String(f.get("alt") || "").slice(0, 200), derechos.slice(0, 300), esVideo ? "video" : "imagen", esVideo ? null : vista,
+          origen, herramienta || null, licencia || null, usoComercial, publicable, MIME[ext]).run();
       await env.DB.batch([reabrir(env, cid), audit(env, "crear", "imagen", ins.meta.last_row_id)]);
     } catch (e) { await env.IMAGENES.delete(key); throw e; }
     return json((await cargarCortes(env, cid))[0], 201);
   }
   if ((r = m(/^\/api\/admin\/imagenes\/(\d+)$/)) && req.method === "GET") { // vista previa para el gestor (incluye fichas sin verificar)
     const im = await env.DB.prepare("SELECT r2_key FROM imagenes WHERE id=?1").bind(+r[1]).first();
-    const obj = im && env.IMAGENES && await env.IMAGENES.get(im.r2_key);
-    return obj ? new Response(obj.body, { headers: { "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream", "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store" } }) : err("No encontrado", 404);
+    return (im && env.IMAGENES && await servirR2(env, req, im.r2_key, "private, no-store")) || err("No encontrado", 404);
+  }
+  if ((r = m(/^\/api\/admin\/imagenes\/(\d+)$/)) && req.method === "PATCH") { // registro de derechos (no cambia el archivo)
+    const b = await body(req);
+    const im = await env.DB.prepare("SELECT corte_id FROM imagenes WHERE id=?1").bind(+r[1]).first();
+    if (!im) return err("No existe", 404);
+    const uso = b.uso_comercial === "confirmado" ? "confirmado" : "por_confirmar", pub = b.publicable === true ? 1 : 0;
+    if (pub && uso !== "confirmado") return err("Para publicar hay que confirmar primero el uso comercial", 409);
+    await env.DB.batch([env.DB.prepare("UPDATE imagenes SET uso_comercial=?2, publicable=?3, licencia=COALESCE(?4, licencia) WHERE id=?1")
+      .bind(+r[1], uso, pub, typeof b.licencia === "string" && b.licencia.trim() ? b.licencia.trim().slice(0, 300) : null), audit(env, "editar", "imagen", +r[1])]);
+    return json((await cargarCortes(env, im.corte_id))[0]);
   }
   if ((r = m(/^\/api\/admin\/imagenes\/(\d+)$/)) && req.method === "DELETE") {
     const im = await env.DB.prepare("SELECT corte_id, r2_key FROM imagenes WHERE id=?1").bind(+r[1]).first();
@@ -286,10 +320,8 @@ export default {
       let r;
       if (req.method === "GET" && (r = ruta.match(/^\/api\/imagenes\/(\d+)$/))) {
         if (!env.IMAGENES) return err("No encontrado", 404);
-        const im = await env.DB.prepare("SELECT i.r2_key FROM imagenes i JOIN cortes c ON c.id=i.corte_id WHERE i.id=?1 AND c.publicado=1 AND c.estado='verificado'").bind(+r[1]).first();
-        const obj = im && await env.IMAGENES.get(im.r2_key);
-        if (!obj) return err("No encontrado", 404);
-        return new Response(obj.body, { headers: { "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream", "X-Content-Type-Options": "nosniff", "Cache-Control": "public, max-age=3600", "Cross-Origin-Resource-Policy": "cross-origin" } });
+        const im = await env.DB.prepare("SELECT i.r2_key FROM imagenes i JOIN cortes c ON c.id=i.corte_id WHERE i.id=?1 AND i.publicable=1 AND c.publicado=1 AND c.estado='verificado'").bind(+r[1]).first();
+        return (im && await servirR2(env, req, im.r2_key, "public, max-age=3600", { "Cross-Origin-Resource-Policy": "cross-origin" })) || err("No encontrado", 404);
       }
       return err("No encontrado", 404);
     } catch (e) {

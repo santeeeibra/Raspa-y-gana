@@ -22,9 +22,9 @@ test("wrangler.toml apunta SOLO a la base lasvegas-asesor-demo y no toca dominio
   assert.doesNotMatch(toml, /gh3/i); assert.match(toml, /GESTOR_HABILITADO = "0"/);
   assert.doesNotMatch(toml, /(PASSWORD|SECRET|TOKEN)[A-Z_]*\s*=\s*"[^"]{8,}"/, "sin secretos en el archivo");
 });
-test("migraciones: orden 0001..0004 correlativo, sin sentencias destructivas", () => {
+test("migraciones: orden 0001..0005 correlativo, sin sentencias destructivas", () => {
   const f = readdirSync(new URL("../migrations/", import.meta.url)).filter(x => x.endsWith(".sql")).sort();
-  assert.deepEqual(f.map(x => x.slice(0, 4)), ["0001", "0002", "0003", "0004"]);
+  assert.deepEqual(f.map(x => x.slice(0, 4)), ["0001", "0002", "0003", "0004", "0005"]);
   for (const x of f) { const sql = leer("../migrations/" + x).replace(/--.*$/gm, "");
     assert.doesNotMatch(sql, /\bDROP\s+(TABLE|INDEX|TRIGGER|VIEW)\b/i, x); assert.doesNotMatch(sql, /\bTRUNCATE\b/i, x);
     assert.doesNotMatch(sql, /\bDELETE\s+FROM\b/i, x); assert.doesNotMatch(sql, /\bALTER\s+TABLE\s+\w+\s+(DROP|RENAME)\b/i, x); assert.doesNotMatch(sql, /\bPRAGMA\b/i, x); }

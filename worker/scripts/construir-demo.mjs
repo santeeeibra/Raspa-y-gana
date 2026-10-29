@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 
 const origen = fileURLToPath(new URL("../../asesor/", import.meta.url));
-export const ARCHIVOS_DEMO = ["index.html", "app.js", "engine.js", "vista.js", "asesor.css", "demo.json", "_headers", "assets"];
+export const ARCHIVOS_DEMO = ["index.html", "app.js", "engine.js", "vista.js", "ficha.js", "asesor.css", "demo.json", "_headers", "assets"];
 
 export function construir(destino = fileURLToPath(new URL("../dist-demo/", import.meta.url))) {
   rmSync(destino, { recursive: true, force: true }); mkdirSync(destino, { recursive: true });
