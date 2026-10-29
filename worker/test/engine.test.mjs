@@ -50,3 +50,12 @@ test("devuelve como máximo tres", () => {
   const muchos = Array.from({ length: 6 }, (_, i) => ({ ...demo[0], slug: "c" + i, nombre: "C" + i }));
   assert.equal(recomendar(base, muchos).recomendaciones.length, 3);
 });
+
+test("«No estoy seguro» en tipo de cabello no descarta ni suma", async () => {
+  const { PREGUNTAS, recomendar } = await import("../../asesor/engine.js");
+  assert.ok(PREGUNTAS[0].opciones.some(o => o.v === "no_se"));
+  const fichas = JSON.parse((await import("node:fs")).readFileSync(new URL("../../asesor/demo.json", import.meta.url))).cortes;
+  const base = { largo: "corto", estilo: "natural" };
+  const ids = r => JSON.stringify(r.recomendaciones.map(x => [x.id ?? x.corte?.id, x.puntaje]));
+  assert.equal(ids(recomendar({ ...base, pelo: "no_se" }, fichas)), ids(recomendar(base, fichas)));
+});
