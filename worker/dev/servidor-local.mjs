@@ -22,6 +22,7 @@ const env = {
   },
 };
 const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".jpg": "image/jpeg", ".ttf": "font/ttf" };
+const CABECERAS = Object.fromEntries(readFileSync(join(raiz, "_headers"), "utf8").split("\n").filter(l => /^\s+\S+:/.test(l)).map(l => { const i = l.indexOf(":"); return [l.slice(0, i).trim(), l.slice(i + 1).trim()]; }));
 const puerto = +process.env.PORT || 8787;
 
 createServer(async (rq, rs) => {
@@ -37,5 +38,5 @@ createServer(async (rq, rs) => {
   let ruta = normalize(url.pathname === "/" ? "/index.html" : url.pathname).replace(/^(\.\.[/\\])+/, "");
   const archivo = join(raiz, ruta);
   if (!archivo.startsWith(raiz) || !existsSync(archivo)) { rs.writeHead(404); return rs.end("No encontrado"); }
-  rs.writeHead(200, { "Content-Type": TIPOS[extname(archivo)] || "application/octet-stream" }); rs.end(readFileSync(archivo));
+  rs.writeHead(200, { ...CABECERAS, "Content-Type": TIPOS[extname(archivo)] || "application/octet-stream" }); rs.end(readFileSync(archivo));
 }).listen(puerto, () => console.log(`Asesor:  http://localhost:${puerto}/\nGestor:  http://localhost:${puerto}/gestor.html  (contraseña local: ${PASS})`));

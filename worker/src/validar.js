@@ -33,7 +33,6 @@ export function validarCorte(b, { crear = false } = {}) {
     if (bad !== undefined) falla(`Valor no permitido en ${campo}: ${bad}`);
     o[campo] = JSON.stringify([...new Set(b[campo])]);
   }
-  if ("publicado" in b) o.publicado = b.publicado ? 1 : 0;
   return o;
 }
 export function validarVariante(b) {

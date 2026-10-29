@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07090f">
 <title>Asesor de Imagen | Las Vegas</title>
 <meta name="description" content="Descubrí cortes de cabello pensados para vos, respaldados por información profesional. Sin registrarte.">
 <link rel="icon" href="assets/logo.jpg">
@@ -10,10 +11,11 @@
 <link rel="stylesheet" href="asesor.css">
 </head>
 <body>
-<div id="demo" class="demo" hidden>DATOS DE DEMOSTRACIÓN · inventados para probar · NO son información profesional</div>
-<div class="wrap" id="raiz">
-  <header><img src="assets/logo.jpg" alt="Las Vegas Barbería"><h1>Asesor de Imagen</h1><p class="sub">Las Vegas Haircuts</p></header>
-  <main id="app" aria-live="polite"></main>
+<a class="saltar" href="#app">Saltar al contenido</a>
+<div id="demo" class="demo" role="note" hidden>MODO DEMO · datos inventados para probar · NO son información profesional ni están aprobados</div>
+<div class="wrap">
+  <div class="barra"><img src="assets/logo.jpg" alt=""><b>LAS VEGAS</b></div>
+  <main id="app" tabindex="-1"></main>
 </div>
 <noscript><p style="text-align:center">Necesitás activar JavaScript para usar el asesor.</p></noscript>
 <script type="module" src="app.js"></script>

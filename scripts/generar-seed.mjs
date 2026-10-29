@@ -15,7 +15,7 @@ if (cortes.length !== 16) throw new Error("Se esperaban 16 cortes y se encontrar
 const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const q = s => "'" + s.replace(/'/g, "''") + "'";
 const sql = ["-- Generado por scripts/generar-seed.mjs · 16 cortes importados como BORRADOR (sin datos técnicos ni fuentes)"]
-  .concat(cortes.map(c => `INSERT INTO cortes (slug, nombre, estado, publicado, notas_internas) VALUES (${q(slug(c.nombre))}, ${q(c.nombre)}, 'borrador', 1, ${q("Texto heredado de guia.html (sin verificar): " + c.heredado)});`));
+  .concat(cortes.map(c => `INSERT INTO cortes (slug, nombre, estado, publicado, notas_internas) VALUES (${q(slug(c.nombre))}, ${q(c.nombre)}, 'borrador', 0, ${q("Texto heredado de guia.html (sin verificar): " + c.heredado)});`));
 writeFileSync(new URL("../worker/migrations/0002_seed_borradores.sql", import.meta.url), sql.join("\n") + "\n");
 const catalogo = { fuente: "estatico", cortes: cortes.map(c => ({ slug: slug(c.nombre), nombre: c.nombre, estado: "borrador" })) };
 writeFileSync(new URL("../asesor/catalogo.json", import.meta.url), JSON.stringify(catalogo, null, 1) + "\n");

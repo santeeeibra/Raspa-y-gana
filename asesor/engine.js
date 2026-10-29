@@ -9,19 +9,19 @@ export const PREGUNTAS = [
     { v: "lacio", t: "Lacio" }, { v: "ondulado", t: "Ondulado" }, { v: "rizado", t: "Rizado" }, { v: "muy_rizado", t: "Muy rizado / afro" }] },
   { id: "largo", titulo: "¿Qué largo tenés hoy?", campo: "largos", opciones: [
     { v: "muy_corto", t: "Muy corto", d: "casi rapado" }, { v: "corto", t: "Corto" }, { v: "medio", t: "Medio", d: "tapa las orejas" }, { v: "largo", t: "Largo", d: "pasa el cuello" }] },
-  { id: "estilo", titulo: "¿Qué estilo buscás?", campo: "estilos", opciones: [
+  { id: "estilo", titulo: "¿Qué estilo buscás?", campo: "estilos", ayuda: "Pensá en cómo querés verte todos los días.", opciones: [
     { v: "clasico", t: "Clásico y prolijo" }, { v: "moderno", t: "Moderno" }, { v: "natural", t: "Natural, sin esfuerzo" }, { v: "atrevido", t: "Distinto, que se note" }] },
-  { id: "entradas", titulo: "¿Qué hacemos con las entradas?", campo: "entradas", opciones: [
-    { v: "cuidar", t: "Quiero cuidarlas / disimularlas" }, { v: "volumen", t: "Prefiero conservar el volumen" }, { v: "indiferente", t: "No me preocupan" }] },
-  { id: "densidad", titulo: "¿Qué tan espeso es tu cabello?", campo: "densidades", tecnica: true, opciones: [
+  { id: "entradas", titulo: "¿Qué hacemos con las entradas?", campo: "entradas", ayuda: "Las entradas son los huecos a los costados de la frente. Contanos qué es más importante para vos.", opciones: [
+    { v: "cuidar", t: "Quiero cuidarlas / disimularlas", d: "Que el corte las tenga en cuenta" }, { v: "volumen", t: "Prefiero conservar el volumen", d: "Mantener cuerpo arriba y adelante" }, { v: "indiferente", t: "No me preocupan", d: "Que decida el estilo" }] },
+  { id: "densidad", titulo: "¿Qué tan espeso es tu cabello?", campo: "densidades", tecnica: true, ayuda: "Cuánto pelo tenés por zona: se nota al mirar el cuero cabelludo.", opciones: [
     { v: "rala", t: "Poco denso" }, { v: "normal", t: "Normal" }, { v: "espesa", t: "Muy denso" }] },
-  { id: "volumen", titulo: "¿Cuánto volumen querés arriba?", campo: "volumenes", tecnica: true, opciones: [
+  { id: "volumen", titulo: "¿Cuánto volumen querés arriba?", campo: "volumenes", tecnica: true, ayuda: "El volumen es la altura y el cuerpo del pelo en la parte de arriba.", opciones: [
     { v: "bajo", t: "Poco" }, { v: "medio", t: "Medio" }, { v: "alto", t: "Mucho" }] },
-  { id: "laterales", titulo: "¿Cómo querés los laterales?", campo: "laterales", tecnica: true, opciones: [
+  { id: "laterales", titulo: "¿Cómo querés los laterales?", campo: "laterales", tecnica: true, visual: "laterales", ayuda: "Degradado: la máquina deja el pelo cada vez más corto hacia abajo. Tijera: el largo cambia de forma pareja, sin ese efecto.", opciones: [
     { v: "degradado", t: "Degradado", d: "con máquina" }, { v: "tijera", t: "Con tijera", d: "sin degradado" }] },
-  { id: "altura", titulo: "¿A qué altura va el degradado?", campo: "alturas", tecnica: true, cuando: r => r.laterales !== "tijera", opciones: [
+  { id: "altura", titulo: "¿A qué altura va el degradado?", campo: "alturas", tecnica: true, visual: "altura", ayuda: "Es el punto donde el pelo empieza a acortarse a los costados.", cuando: r => r.laterales !== "tijera", opciones: [
     { v: "bajo", t: "Bajo", d: "cerca de la oreja" }, { v: "medio", t: "Medio" }, { v: "alto", t: "Alto", d: "casi en la sien" }] },
-  { id: "transicion", titulo: "¿Cómo querés la transición del degradado?", campo: "transiciones", tecnica: true, cuando: r => r.laterales !== "tijera", opciones: [
+  { id: "transicion", titulo: "¿Cómo querés la transición del degradado?", campo: "transiciones", tecnica: true, visual: "transicion", ayuda: "Es qué tan rápido o gradual pasa del pelo largo al corto.", cuando: r => r.laterales !== "tijera", opciones: [
     { v: "comprimida", t: "Comprimida", d: "cambio rápido y marcado" }, { v: "equilibrada", t: "Equilibrada" }, { v: "estirada", t: "Estirada", d: "cambio suave y gradual" }] },
   { id: "tiempo", titulo: "¿Cuánto tiempo tenés para peinarte?", campo: "tiempo_peinado", opciones: [
     { v: "poco", t: "Menos de 5 minutos" }, { v: "medio", t: "Entre 5 y 15 minutos" }, { v: "mucho", t: "Más de 15 minutos" }] },
