@@ -1,7 +1,9 @@
+> **Estado:** ya integradas (recortes de la referencia ilustrativa provista por Las Vegas, 400 × 330 px). Este documento sirve para reemplazarlas.
+
 # Fotos para la pregunta «¿Qué largo tenés actualmente?»
 
 Hacen falta 4 archivos, uno por tarjeta, en `asesor/assets/opciones/largo/`:
-`muy_corto.webp`, `corto.webp`, `medio.webp`, `largo.webp` (formato 480 × 291 px, WebP, calidad ~78).
+`muy_corto.webp`, `corto.webp`, `medio.webp`, `largo.webp` (formato 400 × 330 px, WebP, calidad ~78).
 
 ## Indicación para el generador (usar la misma base en las 4 y cambiar solo el largo)
 > Fotografía realista de estudio de la cabeza de un hombre vista desde atrás (sin rostro visible),

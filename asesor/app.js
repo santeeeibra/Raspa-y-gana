@@ -49,7 +49,7 @@ function pregunta() {
   const dosCol = p.opciones.length >= 4 && !p.visual && p.opciones.every(o => o.t.length < 22 && !o.d);
   const media = o => {
     const f = manifiesto[p.id + ":" + o.v];
-    if (f) return `<img class="foto-op" src="${esc(f.src)}" alt="${esc(f.alt)}" width="480" height="291" decoding="async">`;
+    if (f) return `<img class="foto-op" src="${esc(f.src)}" alt="${esc(f.alt)}" width="${+f.w || 480}" height="${+f.h || 291}" decoding="async">`;
     return p.visual && o.v !== "no_se" ? esquema(p.visual, o.v) : "";
   };
   const hayEsq = p.visual && p.opciones.some(o => o.v !== "no_se");
