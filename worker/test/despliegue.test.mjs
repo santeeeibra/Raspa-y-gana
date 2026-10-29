@@ -96,3 +96,8 @@ test("generador de secretos: largo suficiente y distinto cada vez", () => { cons
 test("el worker no contiene contraseñas ni claves de desarrollo escritas a mano", () => {
   for (const f of ["../src/index.js", "../src/auth.js", "../src/investigacion.js", "../src/proveedores.js"]) assert.doesNotMatch(leer(f), /las-vegas-dev|eyJhbGci|sk-[A-Za-z0-9]{20}/, f);
 });
+test("la demo en un solo archivo no incluye gestor, tickets ni Supabase y solo usa datos DEMO", async () => {
+  const { construirUnico } = await import("../scripts/construir-demo-unico.mjs"); const h = construirUnico();
+  assert.doesNotMatch(h, /supabase|fabakotf|\/api\/admin|gestor\.|investigacion\.js|claim_ticket|lv-pin/i);
+  assert.match(h, /MODO DEMO/); assert.match(h, /\[DEMO\] Corte A/); assert.doesNotMatch(h, /Raspá|canjear/i);
+});
