@@ -54,5 +54,33 @@
     "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
     "w": 400,
     "h": 330
+  },
+  "estilo:clasico": {
+    "src": "assets/opciones/estilo/clasico.webp",
+    "alt": "Corte clásico peinado con raya al costado",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "estilo:moderno": {
+    "src": "assets/opciones/estilo/moderno.webp",
+    "alt": "Corte moderno con degradado y textura arriba",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "estilo:natural": {
+    "src": "assets/opciones/estilo/natural.webp",
+    "alt": "Pelo natural con textura, sin producto",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "estilo:atrevido": {
+    "src": "assets/opciones/estilo/atrevido.webp",
+    "alt": "Corte llamativo tipo mohicano",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
   }
 }
