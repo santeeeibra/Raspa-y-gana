@@ -5,10 +5,10 @@ export const CAMPOS_LISTA = ["pelos", "largos", "estilos", "entradas", "densidad
 const NS = "no_se";
 
 export const PREGUNTAS = [
-  { id: "pelo", titulo: "¿Cómo es tu cabello?", campo: "pelos", opciones: [
+  { id: "pelo", titulo: "¿Cómo es tu cabello?", campo: "pelos", ayuda: "Elegí el tipo que más se parece a tu pelo natural, sin peinar.", opciones: [
     { v: "lacio", t: "Lacio" }, { v: "ondulado", t: "Ondulado" }, { v: "rizado", t: "Rizado" }, { v: "muy_rizado", t: "Muy rizado / afro" }] },
-  { id: "largo", titulo: "¿Qué largo tenés hoy?", campo: "largos", opciones: [
-    { v: "muy_corto", t: "Muy corto", d: "casi rapado" }, { v: "corto", t: "Corto" }, { v: "medio", t: "Medio", d: "tapa las orejas" }, { v: "largo", t: "Largo", d: "pasa el cuello" }] },
+  { id: "largo", titulo: "¿Qué largo tenés actualmente?", campo: "largos", ayuda: "Elegí la imagen que más se parece al largo de tu pelo hoy. Las medidas son orientativas.", opciones: [
+    { v: "muy_corto", t: "Muy corto", d: "aprox. 0 a 2 cm" }, { v: "corto", t: "Corto", d: "aprox. 2 a 5 cm" }, { v: "medio", t: "Medio", d: "aprox. 5 a 12 cm" }, { v: "largo", t: "Largo", d: "más de 12 cm" }] },
   { id: "estilo", titulo: "¿Qué estilo buscás?", campo: "estilos", ayuda: "Pensá en cómo querés verte todos los días.", opciones: [
     { v: "clasico", t: "Clásico y prolijo" }, { v: "moderno", t: "Moderno" }, { v: "natural", t: "Natural, sin esfuerzo" }, { v: "atrevido", t: "Distinto, que se note" }] },
   { id: "entradas", titulo: "¿Qué hacemos con las entradas?", campo: "entradas", ayuda: "Las entradas son los huecos a los costados de la frente. Contanos qué es más importante para vos.", opciones: [
