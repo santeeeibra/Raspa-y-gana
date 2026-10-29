@@ -27,6 +27,18 @@ node worker/dev/servidor-local.mjs
 - **Cargas**: JSON máx. 64 KB; fotos máx. 2 MB, `Content-Length` obligatorio y comprobado antes de leer, tipo real por firma (JPG/PNG/WebP), máx. 12 fotos por corte.
 - **Información interna**: la vista pública usa lista blanca; notas internas, quién verificó, derechos de fotos, ids y claves de R2 no salen nunca.
 
+## Investigación asistida (fase 3)
+Gestor → pestaña **Investigación asistida**. Pantallas: Biblioteca de cortes → Nueva investigación → (1) Fuentes encontradas → (2) Revisión de afirmaciones → (3) Vista previa → (4) Aprobar y publicar.
+- **Estados**: pendiente → investigando → propuesta preparada → en revisión → aprobada / rechazada.
+- **Fuentes**: *encontrada* (apareció) → *leída* (una persona la leyó o se guardó su texto) → *validada* (un revisor la aceptó). Solo las leídas respaldan afirmaciones; solo las validadas permiten aprobar.
+- **Afirmaciones**: cada una lleva fuente, URL y fragmento/referencia. Se aceptan, editan (queda el valor original) o rechazan. La base exige evidencia de una fuente leída para aceptar. Si la fuente tiene texto guardado, la cita debe aparecer literalmente en él.
+- **Aprobar ≠ verificar ≠ publicar**: aprobar aplica solo lo aceptado a la ficha (guarda una versión anterior, deja la ficha en «pendiente»); verificar y publicar siguen siendo pasos aparte con confirmación. La IA no puede ejecutar ninguno (los endpoints exigen sesión + CSRF + rol revisor).
+- **Historial**: tabla `revisiones` (quién, cuándo, antes/después) y `versiones_ficha`. Responsable = `ADMIN_NOMBRE` o el rol. Identidad individual real queda pendiente (varios usuarios / Cloudflare Access).
+- **Proveedores** (`worker/src/proveedores.js`): interfaz `Buscador` y `Redactor`. Workers AI se activa con el binding `AI`; el buscador (adaptador Brave, **no probado con el servicio real**) con `SEARCH_PROVIDER=brave` + secreto `SEARCH_API_KEY`. Sin ellos: «Investigación automática no disponible» y se trabaja a mano. Si un proveedor falla o se agotan los créditos, el contenido en revisión se conserva.
+- **Defensas**: las páginas externas son datos no confiables (se pasan a la IA delimitadas, se descarta toda propuesta cuyo campo/valor no sea válido o cuya cita no aparezca literal en el documento); lector solo https público (sin IPs, puertos ni redirecciones inseguras), máx. 200 KB de texto y 3 documentos por propuesta; topes diarios (`LIMITE_INVESTIGACIONES_DIARIAS`=10, `LIMITE_BUSQUEDAS_DIARIAS`=5, `LIMITE_PROPUESTAS_DIARIAS`=5).
+- **Demostración**: `LV_DEMO=1 node worker/dev/servidor-local.mjs` carga una investigación `[DEMO]` (datos inventados, URLs `.invalid`); la API se niega a aplicarla a una ficha.
+- El motor de recomendaciones no cambió ni usa IA: solo lee fichas verificadas y publicadas.
+
 ## Fotos de las preguntas (opcional)
 Si querés fotos en las opciones técnicas, copiá las imágenes (propias o con permiso) a `asesor/assets/opciones/` y creá `manifest.json`:
 `{"altura:bajo": {"src": "assets/opciones/altura-bajo.jpg", "alt": "…", "derechos": "Foto propia de Las Vegas"}}`.

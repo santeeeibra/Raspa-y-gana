@@ -5,6 +5,7 @@ import { validarCorte, validarVariante, validarFuente, slugDe, ErrorValidacion }
 import { PREGUNTAS } from "../../asesor/engine.js";
 import { verificarPassword, crearSesion, leerSesion, cookie, leerCookie, csrfValido } from "./auth.js";
 import { limitar, leerLimitado } from "./limites.js";
+import { investigacion } from "./investigacion.js";
 
 const SEG = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin", "Cache-Control": "no-store",
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'", "Cross-Origin-Resource-Policy": "same-site" };
@@ -47,10 +48,10 @@ const auditar = (env, accion, entidad, id, detalle = "") =>
 const reabrir = (env, corteId) => // (al perder la verificación, un trigger también la retira del público)
   env.DB.prepare("UPDATE cortes SET estado = CASE WHEN estado='verificado' THEN 'pendiente' ELSE estado END, actualizado_en = datetime('now') WHERE id = ?1").bind(corteId);
 
-async function body(req) {
+async function body(req, max = MAX_JSON) {
   if (!/^application\/json\b/i.test(req.headers.get("Content-Type") || "")) throw new ErrorValidacion("Content-Type debe ser application/json");
-  const bytes = await leerLimitado(req, MAX_JSON);
-  if (!bytes) throw new ErrorTamano("El cuerpo supera 64 KB");
+  const bytes = await leerLimitado(req, max);
+  if (!bytes) throw new ErrorTamano(`El cuerpo supera ${Math.round(max / 1024)} KB`);
   try { const b = JSON.parse(new TextDecoder().decode(bytes)); return b && typeof b === "object" && !Array.isArray(b) ? b : {}; }
   catch { throw new ErrorValidacion("El cuerpo debe ser JSON válido"); }
 }
@@ -100,6 +101,9 @@ async function admin(req, env, url, ruta) {
   if (ruta === "/api/admin/me") return json({ ok: true, rol: ses.rol, csrf: ses.csrf, r2: !!env.IMAGENES, modo_unico: !env.REVISOR_PASSWORD_HASH });
   if (req.method === "POST" && ruta === "/api/admin/logout") return json({ ok: true }, 200, { "Set-Cookie": cookie("", env, 0) });
   const quien = ses.rol, audit = (_e, accion, entidad, id, detalle = "") => auditar(env, accion, entidad, id, `[${quien}] ${detalle}`.trim());
+
+  if (ruta.startsWith("/api/admin/investigaciones") || /^\/api\/admin\/cortes\/\d+\/versiones$/.test(ruta))
+    return investigacion(req, env, { ruta, ses, json, err, body, soloRevisor });
 
   if (ruta === "/api/admin/cortes") {
     if (req.method === "GET") return json(await cargarCortes(env));

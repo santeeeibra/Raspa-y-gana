@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import worker from "../src/index.js";
 import { crearHash } from "../src/auth.js";
 import { crearD1 } from "./d1-shim.mjs";
+import { sembrarDemo } from "./sembrar-demo.mjs";
 
 const raiz = fileURLToPath(new URL("../../asesor/", import.meta.url));
 const local = fileURLToPath(new URL("../.local/", import.meta.url));
@@ -21,6 +22,7 @@ const env = {
     async delete(k) { try { unlinkSync(join(local, "r2", k.replaceAll("/", "__"))); } catch {} },
   },
 };
+if (process.env.LV_DEMO === "1") console.log(await sembrarDemo(env.DB) ? "Datos de DEMOSTRACIÓN cargados (investigación [DEMO])" : "Datos de demostración ya cargados");
 const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".jpg": "image/jpeg", ".ttf": "font/ttf" };
 const CABECERAS = Object.fromEntries(readFileSync(join(raiz, "_headers"), "utf8").split("\n").filter(l => /^\s+\S+:/.test(l)).map(l => { const i = l.indexOf(":"); return [l.slice(0, i).trim(), l.slice(i + 1).trim()]; }));
 const puerto = +process.env.PORT || 8787;

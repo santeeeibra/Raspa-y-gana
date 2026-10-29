@@ -128,3 +128,7 @@ textarea{min-height:96px;resize:vertical}input:focus,textarea:focus,select:focus
 .fila-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.fila-btns>*{flex:1 1 140px}
 .rev{display:inline-block;font-size:14px;padding:2px 10px;border-radius:20px;border:1px solid var(--gold);color:var(--gold)}.rev.ok{border-color:var(--ok);color:var(--ok)}
 @media(min-width:860px){.g-cuerpo{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}.g-cuerpo[data-vista] .g-lista,.g-cuerpo[data-vista] .g-editor{display:block}.g-volver{display:none}.g-lista{position:sticky;top:8px;max-height:calc(100vh - 16px);overflow:auto}.tabs button{flex-direction:row;gap:8px;font-size:17px}}
+
+nav.seccion{display:flex;gap:8px;margin:6px 0 14px}nav.seccion button{flex:1;min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--steel);font-family:var(--f-head);font-size:20px;letter-spacing:.06em}
+nav.seccion button[aria-current=true]{border-color:var(--white);background:var(--steel2)}
+blockquote{quotes:none}

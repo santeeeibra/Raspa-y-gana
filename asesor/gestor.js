@@ -1,6 +1,7 @@
 // Gestor privado. La sesión vive en una cookie HttpOnly del servidor; el token CSRF solo se guarda en memoria.
 import { PREGUNTAS } from "./engine.js";
 import { esc, tarjeta } from "./vista.js";
+import { crearInvestigacion } from "./investigacion.js";
 
 const app = document.getElementById("app"), $msg = document.getElementById("msg");
 const LISTAS = [
@@ -17,7 +18,7 @@ const OPC = Object.fromEntries(PREGUNTAS.map(p => [p.campo, p.opciones.filter(o 
 OPC.entradas = [{ v: "cuidar", t: "Sirve para cuidar las entradas" }, { v: "volumen", t: "Sirve para conservar volumen" }];
 const ETQ = { borrador: "Borrador", pendiente: "Pendiente de revisión", verificado: "Verificado" };
 const TABS = ["Información", "Compatibilidad", "Fotos y variantes", "Fuentes y publicación"];
-let S = { cortes: [], id: null, rol: "", csrf: "", r2: false, unico: false, filtro: "todos", q: "", tab: 0, sucio: false, vista: "lista" };
+let S = { seccion: "cortes", cortes: [], id: null, rol: "", csrf: "", r2: false, unico: false, filtro: "todos", q: "", tab: 0, sucio: false, vista: "lista" };
 
 // ---------- utilidades ----------
 let tMsg;
@@ -39,9 +40,16 @@ async function api(metodo, ruta, cuerpo) {
   if (cuerpo instanceof FormData) init.body = cuerpo; else if (cuerpo !== undefined) { init.body = JSON.stringify(cuerpo); init.headers["Content-Type"] = "application/json"; }
   const res = await fetch("/api/admin" + ruta, init), data = await res.json().catch(() => ({}));
   if (res.status === 401 && ruta !== "/login") { S.sucio = false; login("Tu sesión venció. Ingresá de nuevo."); throw new Error("Sesión vencida"); }
-  if (!res.ok) { const e = new Error(data.error || "Error " + res.status); e.faltan = data.faltan; throw e; }
+  if (!res.ok) { const e = new Error(data.error || "Error " + res.status); e.faltan = data.faltan; e.status = res.status; throw e; }
   return data;
 }
+const nav = () => `<nav class="seccion" aria-label="Secciones del gestor"><button data-seccion="cortes" aria-current="${S.seccion === "cortes"}">Fichas</button><button data-seccion="inv" aria-current="${S.seccion === "inv"}">Investigación asistida</button></nav>`;
+app.addEventListener("click", async e => {
+  const b = e.target.closest("[data-seccion]"); if (!b || b.dataset.seccion === S.seccion) return;
+  if (!(await confirmarSalir())) return; S.sucio = false; S.seccion = b.dataset.seccion;
+  if (S.seccion === "inv") { await invUI.iniciar(); } else pintar();
+});
+let invUI;
 const actual = () => S.cortes.find(c => c.id === S.id);
 const guardarEn = c => { const i = S.cortes.findIndex(x => x.id === c.id); i >= 0 ? S.cortes[i] = c : S.cortes.push(c); S.cortes.sort((a, b) => a.nombre.localeCompare(b.nombre, "es")); S.id = c.id; };
 /** Ejecuta un cambio en el servidor. Los cambios sin guardar de las pestañas 1-2 no se pueden perder por accidente. */
@@ -83,10 +91,11 @@ function lista() {
     <form id="nuevo" class="panel-card"><label class="l" for="nn" style="margin-top:0">Crear un corte nuevo</label><input id="nn" type="text" maxlength="80" required placeholder="Nombre del corte"><button class="btn sec" style="width:100%;margin-top:8px">+ Crear borrador</button></form></aside>`;
 }
 function pintar() {
+  if (S.seccion === "inv") return invUI.pintar();
   const c = actual(), foco = document.activeElement?.id;
   document.getElementById("salir").hidden = false;
   document.getElementById("rol").innerHTML = `<span class="badge ${S.rol === "revisor" ? "verificado" : "pendiente"}">${S.rol === "revisor" ? (S.unico ? "Acceso completo" : "Revisor") : "Editor"}</span>`;
-  app.innerHTML = `<div class="g-cuerpo" data-vista="${S.vista}">${lista()}<section class="g-editor" aria-label="Edición">${c ? editor(c) : `<div class="panel-card muted">Elegí un corte de la lista o creá uno nuevo.</div>`}</section></div>`;
+  app.innerHTML = `${nav()}<div class="g-cuerpo" data-vista="${S.vista}">${lista()}<section class="g-editor" aria-label="Edición">${c ? editor(c) : `<div class="panel-card muted">Elegí un corte de la lista o creá uno nuevo.</div>`}</section></div>`;
   enlazarLista(); if (c) enlazarEditor(c);
   if (foco === "bq") { const b = app.querySelector("#bq"); b.focus(); b.setSelectionRange(b.value.length, b.value.length); }
 }
@@ -212,7 +221,7 @@ function vistaPrevia(c) {
 }
 
 async function iniciar() {
-  try { const m = await api("GET", "/me"); Object.assign(S, { csrf: m.csrf, rol: m.rol, r2: m.r2, unico: m.modo_unico }); S.cortes = await api("GET", "/cortes"); S.id ??= null; S.vista = "lista"; pintar(); }
+  try { const m = await api("GET", "/me"); Object.assign(S, { csrf: m.csrf, rol: m.rol, r2: m.r2, unico: m.modo_unico }); S.cortes = await api("GET", "/cortes"); S.id ??= null; S.vista = "lista"; invUI ??= crearInvestigacion({ api, aviso, confirmar, S, app, nav }); pintar(); }
   catch { login(); }
 }
 iniciar();
