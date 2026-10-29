@@ -1,0 +1,27 @@
+# LAS VEGAS · Asesor de Imagen — entorno de DEMO (independiente de la web principal y de cualquier otro proyecto).
+# Este archivo NO contiene secretos. Todavía no se creó ni se desplegó ningún Worker.
+name = "lasvegas-asesor-demo"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+workers_dev = true                 # solo la URL *.workers.dev; sin dominios propios ni rutas (no toca la web principal)
+
+# Se construye una carpeta pública SOLO con lo necesario para la demo (sin gestor ni investigación).
+[build]
+command = "node scripts/construir-demo.mjs"
+
+[assets]
+directory = "./dist-demo"
+run_worker_first = ["/api/*"]
+
+[vars]
+GESTOR_HABILITADO = "0"            # "0": el gestor y toda la API privada responden 404. Ver docs/ASESOR.md para habilitarlo en un entorno privado.
+
+# Base de datos creada desde el panel de Cloudflare (única base que usa este Worker).
+[[d1_databases]]
+binding = "DB"
+database_name = "lasvegas-asesor-demo"
+database_id = "ea9dc45d-6a44-400d-9407-7ea9d1b5e095"
+migrations_dir = "migrations"
+
+# No hay R2 ni Workers AI configurados en la demo (no se consumen servicios adicionales).
+# Secretos (solo si se habilita el gestor): ver worker/scripts/configurar-secretos.mjs. Nunca van en este archivo.

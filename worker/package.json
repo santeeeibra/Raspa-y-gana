@@ -1,0 +1,16 @@
+{
+  "name": "las-vegas-asesor-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev/servidor-local.mjs",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.mjs",
+    "seed": "node ../scripts/generar-seed.mjs",
+    "build:demo": "node scripts/construir-demo.mjs",
+    "dev:wrangler": "wrangler dev --local --port 8788",
+    "d1:local": "wrangler d1 migrations apply lasvegas-asesor-demo --local"
+  },
+  "devDependencies": {
+    "wrangler": "^4.156.0"
+  }
+}

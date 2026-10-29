@@ -1,0 +1,31 @@
+PLANILLAS DE CORTES DE LAS VEGAS  (todo es BORRADOR; nada verificado ni publicado)
+Archivos: Cortes.csv, Variantes.csv, Fuentes.csv. Las columnas coinciden con las tablas cortes, variantes y fuentes del gestor.
+Para revisar:  node scripts/validar-planillas.mjs
+
+SIGNIFICADO DE LOS MARCADORES (en cualquier campo de lista o valor)
+  ?      desconocido: pendiente de fuente o del barbero. Se carga vacio; el motor lo ignora.
+  n/a    no aplica (ej: altura de degradado en un corte con tijera). Se carga vacio.
+  todos  sin restriccion: sirve con todas las opciones. Solo si esta justificado (fuente u observacion del barbero).
+Varios valores en una celda se separan con |   (ej: lacio|ondulado)
+
+VALORES PERMITIDOS
+  pelos         lacio | ondulado | rizado | muy_rizado
+  largos        muy_corto (0-2 cm) | corto (2-5) | medio (5-12) | largo (+12). Es el largo ACTUAL del cliente: listar todos los largos
+                desde los que se puede hacer el corte (un cliente con pelo largo puede hacerse un corte corto).
+  estilos       clasico | moderno | natural | atrevido
+  entradas      cuidar (el corte las disimula) | volumen (conserva volumen) | indiferente
+  densidades    rala | normal | espesa
+  volumenes     bajo | medio | alto
+  laterales     degradado | tijera
+  alturas       bajo | medio | alto           (solo con degradado)
+  transiciones  comprimida | equilibrada | estirada   (solo con degradado)
+  tiempo_peinado  poco (<5 min) | medio (5-15) | mucho (+15)
+  mantenimiento texto: "Peinado diario: ... Retoque: cada ..."
+  estado = borrador, publicado = 0 (siempre; verificar y publicar se hace en el gestor)
+
+COMO SE RESPALDA UN DATO
+  Cada dato cargado necesita una fila en Fuentes.csv (campo = columna que respalda, fragmento = frase o minuto que lo demuestra,
+  comprobada_abierta = si cuando se abrio el enlace y se leyo). Si no hay fuente, el campo debe figurar en campos_deducidos
+  (queda para aprobacion del barbero) o quedar en ?.
+VARIANTES: cada fila es una combinacion completa (laterales + altura + transicion). Sin duplicados ni contradicciones
+  (tijera no lleva altura ni transicion). El motor mezcla las alturas/transiciones de todas las variantes: pocas variantes, solo reales.

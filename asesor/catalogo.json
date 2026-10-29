@@ -1,0 +1,85 @@
+{
+ "fuente": "estatico",
+ "cortes": [
+  {
+   "slug": "low-fade-texturizado",
+   "nombre": "Low Fade + Texturizado",
+   "estado": "borrador"
+  },
+  {
+   "slug": "mid-fade-crop-frances",
+   "nombre": "Mid Fade + Crop francés",
+   "estado": "borrador"
+  },
+  {
+   "slug": "pompadour-quiff",
+   "nombre": "Pompadour / Quiff",
+   "estado": "borrador"
+  },
+  {
+   "slug": "side-part-clasico",
+   "nombre": "Side Part clásico",
+   "estado": "borrador"
+  },
+  {
+   "slug": "buzz-cut-rapado-con-fade",
+   "nombre": "Buzz Cut / Rapado con fade",
+   "estado": "borrador"
+  },
+  {
+   "slug": "taper-rulos-definidos",
+   "nombre": "Taper + Rulos definidos",
+   "estado": "borrador"
+  },
+  {
+   "slug": "mullet-moderno",
+   "nombre": "Mullet moderno",
+   "estado": "borrador"
+  },
+  {
+   "slug": "corte-medio-con-flequillo-lateral",
+   "nombre": "Corte medio con flequillo lateral",
+   "estado": "borrador"
+  },
+  {
+   "slug": "ivy-league",
+   "nombre": "Ivy League",
+   "estado": "borrador"
+  },
+  {
+   "slug": "fade-barba-perfilada",
+   "nombre": "Fade + Barba perfilada",
+   "estado": "borrador"
+  },
+  {
+   "slug": "textured-crop",
+   "nombre": "Textured Crop",
+   "estado": "borrador"
+  },
+  {
+   "slug": "crew-cut",
+   "nombre": "Crew Cut",
+   "estado": "borrador"
+  },
+  {
+   "slug": "undercut",
+   "nombre": "Undercut",
+   "estado": "borrador"
+  },
+  {
+   "slug": "slick-back",
+   "nombre": "Slick Back",
+   "estado": "borrador"
+  },
+  {
+   "slug": "caesar",
+   "nombre": "Caesar",
+   "estado": "borrador"
+  },
+  {
+   "slug": "mohicano",
+   "nombre": "Mohicano",
+   "estado": "borrador"
+  }
+ ]
+}

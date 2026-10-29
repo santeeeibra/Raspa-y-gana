@@ -1,0 +1,86 @@
+{
+  "pelo:lacio": {
+    "src": "assets/opciones/pelo/1a.webp",
+    "alt": "Cabello lacio visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 480,
+    "h": 291
+  },
+  "pelo:ondulado": {
+    "src": "assets/opciones/pelo/2b.webp",
+    "alt": "Cabello ondulado visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 480,
+    "h": 291
+  },
+  "pelo:rizado": {
+    "src": "assets/opciones/pelo/3b.webp",
+    "alt": "Cabello rizado visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 480,
+    "h": 291
+  },
+  "pelo:muy_rizado": {
+    "src": "assets/opciones/pelo/4b.webp",
+    "alt": "Cabello muy rizado o afro visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 480,
+    "h": 291
+  },
+  "largo:muy_corto": {
+    "src": "assets/opciones/largo/muy_corto.webp",
+    "alt": "Pelo muy corto, casi rapado, visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "largo:corto": {
+    "src": "assets/opciones/largo/corto.webp",
+    "alt": "Pelo corto visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "largo:medio": {
+    "src": "assets/opciones/largo/medio.webp",
+    "alt": "Pelo de largo medio visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "largo:largo": {
+    "src": "assets/opciones/largo/largo.webp",
+    "alt": "Pelo largo visto desde atrás",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "estilo:clasico": {
+    "src": "assets/opciones/estilo/clasico.webp",
+    "alt": "Corte clásico peinado con raya al costado",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "estilo:moderno": {
+    "src": "assets/opciones/estilo/moderno.webp",
+    "alt": "Corte moderno con degradado y textura arriba",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "estilo:natural": {
+    "src": "assets/opciones/estilo/natural.webp",
+    "alt": "Pelo natural con textura, sin producto",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  },
+  "estilo:atrevido": {
+    "src": "assets/opciones/estilo/atrevido.webp",
+    "alt": "Corte llamativo tipo mohicano",
+    "derechos": "Imagen ilustrativa generada con IA, provista por Las Vegas",
+    "w": 400,
+    "h": 330
+  }
+}
