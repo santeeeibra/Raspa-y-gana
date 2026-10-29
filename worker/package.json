@@ -1,0 +1,10 @@
+{
+  "name": "las-vegas-asesor-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev/servidor-local.mjs",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.mjs",
+    "seed": "node ../scripts/generar-seed.mjs"
+  }
+}

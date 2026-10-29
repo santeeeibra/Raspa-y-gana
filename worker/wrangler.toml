@@ -1,0 +1,25 @@
+# Configuración de Cloudflare para LAS VEGAS · Asesor de Imagen.
+# IMPORTANTE: todavía NO se creó ningún recurso remoto. Los valores de abajo son marcadores.
+name = "las-vegas-asesor"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# La web (carpeta asesor/) y la API salen del mismo dominio: así la cookie de sesión es Strict.
+[assets]
+directory = "../asesor"
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "las-vegas-asesor"
+database_id = "00000000-0000-0000-0000-000000000000"   # PENDIENTE: se reemplaza al crear la base real (solo sirve para `wrangler dev` local)
+migrations_dir = "migrations"
+
+# Descomentar cuando se active R2 (requiere autorización):
+# [[r2_buckets]]
+# binding = "IMAGENES"
+# bucket_name = "las-vegas-asesor-imagenes"
+
+# Secretos (NO van en este archivo). Se cargan con:
+#   npx wrangler secret put ADMIN_PASSWORD_HASH   (salida de dev/hash-password.mjs)
+#   npx wrangler secret put SESSION_SECRET        (texto aleatorio de 32+ caracteres)
