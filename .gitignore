@@ -2,3 +2,4 @@ worker/.local/
 node_modules/
 .dev.vars
 .wrangler/
+dist-demo/

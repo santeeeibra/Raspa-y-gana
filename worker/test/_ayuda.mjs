@@ -3,7 +3,7 @@ import { crearHash } from "../src/auth.js";
 import { crearD1 } from "../dev/d1-shim.mjs";
 
 export const PASS = "contraseña-de-prueba-123", PASS_REV = "otra-contraseña-revisor-456";
-export const nuevoEnv = async (extra = {}) => ({ DB: crearD1(), DEV: "1", ADMIN_PASSWORD_HASH: await crearHash(PASS, 1000), SESSION_SECRET: "x".repeat(40), ...extra });
+export const nuevoEnv = async (extra = {}) => ({ DB: crearD1(), DEV: "1", GESTOR_HABILITADO: "1", ADMIN_PASSWORD_HASH: await crearHash(PASS, 1000), SESSION_SECRET: "x".repeat(40), ...extra });
 export const cliente = (e) => {
   const c = { cookie: "", csrf: "" };
   c.call = async (m, p, b, extra = {}) => {

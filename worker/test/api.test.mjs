@@ -6,7 +6,7 @@ import { _reiniciarLimites } from "../src/limites.js";
 import { crearD1 } from "../dev/d1-shim.mjs";
 
 const PASS = "contraseña-de-prueba-123", PASS_REV = "otra-contraseña-revisor-456";
-const nuevoEnv = async (extra = {}) => ({ DB: crearD1(), DEV: "1", ADMIN_PASSWORD_HASH: await crearHash(PASS, 1000), SESSION_SECRET: "x".repeat(40), ...extra });
+const nuevoEnv = async (extra = {}) => ({ DB: crearD1(), DEV: "1", GESTOR_HABILITADO: "1", ADMIN_PASSWORD_HASH: await crearHash(PASS, 1000), SESSION_SECRET: "x".repeat(40), ...extra });
 const env = await nuevoEnv();
 
 /** Cliente de prueba: guarda cookie y token CSRF como lo hace el navegador. */

@@ -2,16 +2,175 @@
   "AVISO": "DATOS DE DEMOSTRACIÓN. Inventados solo para probar el programa. NO son información profesional ni están verificados. Los enlaces son ficticios (.invalid).",
   "demo": true,
   "cortes": [
-    { "slug": "demo-corte-a", "nombre": "[DEMO] Corte A", "estado": "verificado", "publicado": 1,
-      "descripcion": "Ficha de prueba.", "mantenimiento": "Dato de prueba.", "tiempo_peinado": "poco",
-      "pelos": ["lacio","ondulado"], "largos": ["corto","medio"], "estilos": ["moderno","natural"], "entradas": ["cuidar"],
-      "densidades": [], "volumenes": ["bajo","medio"], "laterales": ["degradado"], "alturas": ["bajo","medio"], "transiciones": ["estirada"],
-      "variantes": [{ "nombre": "[DEMO] Variante baja", "laterales": "degradado", "altura": "bajo", "transicion": "estirada", "descripcion": "" }],
-      "fuentes": [{ "autor": "Autor ficticio", "titulo": "Fuente de prueba", "url": "https://ejemplo.invalid/a", "afirmacion": "Dato de prueba" }], "imagenes": [] },
-    { "slug": "demo-corte-b", "nombre": "[DEMO] Corte B", "estado": "verificado", "publicado": 1,
-      "descripcion": "Ficha de prueba.", "mantenimiento": "Dato de prueba.", "tiempo_peinado": "mucho",
-      "pelos": ["rizado","muy_rizado"], "largos": ["medio","largo"], "estilos": ["atrevido"], "entradas": ["volumen"],
-      "densidades": [], "volumenes": ["alto"], "laterales": ["tijera"], "alturas": [], "transiciones": [],
-      "variantes": [], "fuentes": [{ "autor": "Autor ficticio", "titulo": "Fuente de prueba", "url": "https://ejemplo.invalid/b", "afirmacion": "Dato de prueba" }], "imagenes": [] }
+    {
+      "slug": "demo-corte-a",
+      "nombre": "[DEMO] Corte A",
+      "estado": "verificado",
+      "publicado": 1,
+      "descripcion": "[DEMO] Texto de ejemplo para probar la pantalla. No es información profesional.",
+      "mantenimiento": "[DEMO] Consejo de mantenimiento de ejemplo.",
+      "tiempo_peinado": "poco",
+      "pelos": [
+        "lacio",
+        "ondulado",
+        "rizado"
+      ],
+      "largos": [
+        "muy_corto",
+        "corto",
+        "medio",
+        "largo"
+      ],
+      "estilos": [
+        "moderno",
+        "natural"
+      ],
+      "entradas": [
+        "cuidar"
+      ],
+      "densidades": [],
+      "volumenes": [
+        "bajo",
+        "medio"
+      ],
+      "laterales": [
+        "degradado"
+      ],
+      "alturas": [
+        "bajo",
+        "medio"
+      ],
+      "transiciones": [
+        "estirada"
+      ],
+      "variantes": [
+        {
+          "nombre": "[DEMO] Variante baja",
+          "laterales": "degradado",
+          "altura": "bajo",
+          "transicion": "estirada",
+          "descripcion": ""
+        }
+      ],
+      "fuentes": [
+        {
+          "autor": "[DEMO] Autor ficticio",
+          "titulo": "[DEMO] Fuente de prueba (no existe)",
+          "url": "https://ejemplo.invalid/a",
+          "afirmacion": "[DEMO] Dato de prueba"
+        }
+      ],
+      "imagenes": []
+    },
+    {
+      "slug": "demo-corte-b",
+      "nombre": "[DEMO] Corte B",
+      "estado": "verificado",
+      "publicado": 1,
+      "descripcion": "[DEMO] Texto de ejemplo para probar la pantalla. No es información profesional.",
+      "mantenimiento": "[DEMO] Consejo de mantenimiento de ejemplo.",
+      "tiempo_peinado": "mucho",
+      "pelos": [
+        "lacio",
+        "ondulado",
+        "rizado",
+        "muy_rizado"
+      ],
+      "largos": [
+        "muy_corto",
+        "corto",
+        "medio",
+        "largo"
+      ],
+      "estilos": [
+        "atrevido",
+        "moderno"
+      ],
+      "entradas": [
+        "volumen"
+      ],
+      "densidades": [],
+      "volumenes": [
+        "alto"
+      ],
+      "laterales": [
+        "tijera"
+      ],
+      "alturas": [],
+      "transiciones": [],
+      "variantes": [],
+      "fuentes": [
+        {
+          "autor": "[DEMO] Autor ficticio",
+          "titulo": "[DEMO] Fuente de prueba (no existe)",
+          "url": "https://ejemplo.invalid/b",
+          "afirmacion": "[DEMO] Dato de prueba"
+        }
+      ],
+      "imagenes": []
+    },
+    {
+      "slug": "demo-corte-c",
+      "nombre": "[DEMO] Corte C",
+      "estado": "verificado",
+      "publicado": 1,
+      "descripcion": "[DEMO] Texto de ejemplo para probar la pantalla. No es información profesional.",
+      "mantenimiento": "[DEMO] Consejo de mantenimiento de ejemplo.",
+      "tiempo_peinado": "medio",
+      "pelos": [
+        "lacio",
+        "ondulado",
+        "rizado",
+        "muy_rizado"
+      ],
+      "largos": [
+        "muy_corto",
+        "corto",
+        "medio",
+        "largo"
+      ],
+      "estilos": [
+        "clasico",
+        "natural"
+      ],
+      "entradas": [
+        "cuidar",
+        "volumen"
+      ],
+      "densidades": [],
+      "volumenes": [
+        "medio",
+        "alto"
+      ],
+      "laterales": [
+        "degradado"
+      ],
+      "alturas": [
+        "medio",
+        "alto"
+      ],
+      "transiciones": [
+        "comprimida",
+        "equilibrada"
+      ],
+      "variantes": [
+        {
+          "nombre": "[DEMO] Variante alta",
+          "laterales": "degradado",
+          "altura": "alto",
+          "transicion": "comprimida",
+          "descripcion": ""
+        }
+      ],
+      "fuentes": [
+        {
+          "autor": "[DEMO] Autor ficticio",
+          "titulo": "[DEMO] Fuente de prueba (no existe)",
+          "url": "https://ejemplo.invalid/c",
+          "afirmacion": "[DEMO] Dato de prueba"
+        }
+      ],
+      "imagenes": []
+    }
   ]
 }

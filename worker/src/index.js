@@ -263,7 +263,11 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url), ruta = url.pathname, ip = ipDe(req);
     try {
-      if (ruta.startsWith("/api/admin/")) return await admin(req, env, url, ruta);
+      if (ruta.startsWith("/api/admin/")) {
+        // Entorno público (demo): el gestor y toda la API privada están APAGADOS salvo que se habilite expresamente.
+        if (env.GESTOR_HABILITADO !== "1") return err("No encontrado", 404);
+        return await admin(req, env, url, ruta);
+      }
       const publica = ruta === "/api/cortes" || ruta === "/api/recomendar";
       if (publica && req.method === "OPTIONS")
         return conCors(req, env, new Response(null, { status: 204, headers: { ...SEG, "Access-Control-Allow-Methods": "GET, POST", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Max-Age": "600" } }));

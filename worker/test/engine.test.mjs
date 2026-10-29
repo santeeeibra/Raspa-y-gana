@@ -21,7 +21,7 @@ test("recomienda con explicación y fuentes", () => {
   assert.equal(r.estado, "ok"); assert.equal(r.recomendaciones[0].corte.slug, "demo-corte-a");
   assert.equal(r.recomendaciones[0].puntaje, 100);
   assert.ok(r.recomendaciones[0].razones.every(x => x.texto && x.ok));
-  assert.equal(r.recomendaciones[0].respaldo[0].autor, "Autor ficticio");
+  assert.equal(r.recomendaciones[0].respaldo[0].autor, "[DEMO] Autor ficticio");
   assert.equal(r.recomendaciones[0].variante.nombre, "[DEMO] Variante baja");
 });
 test("descarta cortes incompatibles con el cabello o el largo y explica por qué", () => {

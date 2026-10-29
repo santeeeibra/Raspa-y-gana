@@ -44,12 +44,31 @@ Si querés fotos en las opciones técnicas, copiá las imágenes (propias o con 
 `{"altura:bajo": {"src": "assets/opciones/altura-bajo.jpg", "alt": "…", "derechos": "Foto propia de Las Vegas"}}`.
 Sin `derechos` la foto se ignora. Sin manifiesto se usan esquemas ilustrativos (dibujos). Imagen de inicio: `asesor/assets/hero.jpg` (si no existe, se usa el logo).
 
-## Para pasar a Cloudflare (pendiente, requiere autorización)
-1. `npx wrangler d1 create las-vegas-asesor` y poner el `database_id` en `worker/wrangler.toml`.
-2. `npx wrangler d1 migrations apply las-vegas-asesor --remote`
-3. (Opcional) crear el bucket R2 y descomentar su bloque en `wrangler.toml`.
-4. Secretos: `node worker/dev/hash-password.mjs "contraseña larga"` → `wrangler secret put ADMIN_PASSWORD_HASH` (y `REVISOR_PASSWORD_HASH` si habrá dos personas); `SESSION_SECRET` aleatorio. Variables: `PUBLIC_ORIGINS` (dominio de Vercel).
-5. `npx wrangler deploy` (sirve la web y la API desde el mismo dominio).
+## Cloudflare: demo pública (fase 4)
+**Estado**: configurado y probado en local con Wrangler real (workerd + D1 local). **Nada fue desplegado ni migrado en remoto** (no hay credenciales en el entorno de desarrollo).
+- Worker: `lasvegas-asesor-demo` · D1: `lasvegas-asesor-demo` (`ea9dc45d-6a44-400d-9407-7ea9d1b5e095`, única base configurada) · sin dominios, rutas, R2 ni Workers AI.
+- La demo pública (`worker/dist-demo`, armada por `npm run build:demo` con lista blanca) **no incluye** gestor ni investigación, abre directo en modo DEMO (`config.json`) con contenido ficticio de `demo.json` y no llama a la API. Con `GESTOR_HABILITADO="0"` toda `/api/admin/*` responde 404.
+- Tickets, premios y Supabase no se usan en nada de esto.
+
+### Comandos para tu computadora (en este orden)
+```bash
+git fetch origin && git checkout claude/fervent-ride-fxt7gx && git pull
+cd worker && npm install
+npx wrangler login
+npx wrangler whoami
+npx wrangler d1 migrations list lasvegas-asesor-demo --remote
+npx wrangler d1 migrations apply lasvegas-asesor-demo --remote
+```
+`whoami` debe mostrar TU cuenta. `migrations apply` lista las 4 migraciones y pide confirmar: ninguna borra ni reemplaza datos. Resultado esperado: 13 tablas y 16 cortes en borrador.
+
+### Primer despliegue (esperar confirmación)
+```bash
+npx wrangler deploy
+```
+URL prevista: `https://lasvegas-asesor-demo.<tu-subdominio>.workers.dev`. Consume el plan gratuito de Workers (solicitudes) y D1 (lecturas/escrituras); sin método de pago, sin R2 ni IA. Verificar límites vigentes en el panel de Cloudflare.
+
+### Gestor privado (más adelante, entorno aparte)
+No se habilita en la demo. Para usarlo: crear un Worker privado (otro nombre), `GESTOR_HABILITADO="1"`, cargar secretos con `node scripts/configurar-secretos.mjs <nombre-del-worker>` (pide la contraseña oculta; no imprime nada) y construir con `asesor/` completo. Riesgo a confirmar: el hash de contraseña usa PBKDF2 de 100.000 iteraciones y el plan gratuito tiene un tope de CPU muy bajo por solicitud; si el login falla por CPU, hace falta el plan de pago o bajar iteraciones.
 
 ## Pendiente
 Reglas de limitación de Cloudflare, fotos reales autorizadas para las preguntas y el inicio, Chat con biblioteca verificada y límites anti-abuso, varios usuarios en el gestor (o Cloudflare Access), vincular fotos a variantes desde el gestor, migrar las fotos actuales de Supabase a R2 y enlazar desde `guia.html`.

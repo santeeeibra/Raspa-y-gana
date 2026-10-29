@@ -14,7 +14,7 @@ const local = fileURLToPath(new URL("../.local/", import.meta.url));
 mkdirSync(join(local, "r2"), { recursive: true });
 const PASS = process.env.LV_ADMIN_PASSWORD || "las-vegas-dev";
 const env = {
-  DB: crearD1(join(local, "dev.sqlite")), DEV: "1", ADMIN_NOMBRE: "admin-local",
+  DB: crearD1(join(local, "dev.sqlite")), DEV: "1", GESTOR_HABILITADO: "1", ADMIN_NOMBRE: "admin-local",
   ADMIN_PASSWORD_HASH: await crearHash(PASS), SESSION_SECRET: crypto.randomUUID() + crypto.randomUUID(),
   IMAGENES: { // R2 simulado en disco
     async put(k, v) { const p = join(local, "r2", k.replaceAll("/", "__")); writeFileSync(p, v); },

@@ -2,7 +2,8 @@ import { PREGUNTAS, preguntasVisibles, recomendar, esRecomendable } from "./engi
 import { esc, esquema, tarjeta, fuentes } from "./vista.js";
 
 const app = document.getElementById("app");
-const demo = new URLSearchParams(location.search).has("demo");
+const config = await fetch("config.json").then(r => (r.ok ? r.json() : {})).catch(() => ({}));
+const demo = new URLSearchParams(location.search).has("demo") || config.demo === true;
 let cortes = [], respuestas = {}, paso = 0, editando = false, manifiesto = {}, resultados = [], comparar = new Set();
 
 // ---- datos ----
