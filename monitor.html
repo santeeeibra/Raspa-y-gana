@@ -42,6 +42,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut
 .row .pz.no{color:var(--muted)}
 .row .st{grid-column:2/4;font-size:15px;color:var(--muted)}
 .row .st.ok{color:var(--ok)}
+.row button.rel{grid-column:1/4;font-size:18px;padding:8px;background:transparent;border:1px solid var(--line);color:var(--gold)}
 .upd{color:var(--muted);font-size:15px}
 </style>
 </head>
@@ -68,10 +69,15 @@ async function cargar(){if(busy)return;busy=true;
     if(!r.ok||j.error){if(j.error==="clave_incorrecta"){try{localStorage.removeItem("lv-pin")}catch(e){}location.replace("index.html");return}throw new Error(j.error||"error")}
     document.getElementById("hoy").textContent=j.today;document.getElementById("tot").textContent=j.total;
     document.getElementById("lista").innerHTML=j.tickets.map(t=>{const p=PR[t.prize]||t.prize,no=t.prize==="NO"||t.prize==="EX"||t.prize==="XTRA",ph=String(t.phone).replace(/\D/g,"");
-      return '<div class="row"><span class="t">'+fmt(t.created_at)+'</span><a class="ph" href="https://wa.me/54'+ph+'" target="_blank" rel="noopener">'+esc(t.phone)+'</a><span class="pz'+(no?' no':'')+'">'+esc(p)+'</span><span class="st'+(t.redeemed_at?' ok':'')+'">'+(t.redeemed_at?'✓ Canjeado '+fmt(t.redeemed_at):(no?'—':'Sin canjear'))+'</span></div>'}).join("")||'<p>Todavía no hay tickets.</p>';
+      return '<div class="row"><span class="t">'+fmt(t.created_at)+'</span><a class="ph" href="https://wa.me/54'+ph+'" target="_blank" rel="noopener">'+esc(t.phone)+'</a><span class="pz'+(no?' no':'')+'">'+esc(p)+'</span><span class="st'+(t.redeemed_at?' ok':'')+'">'+(t.redeemed_at?'✓ Canjeado '+fmt(t.redeemed_at):(no?'—':'Sin canjear'))+'</span>'+(t.redeemed_at?'<button class="rel" type="button" data-code="'+esc(t.code)+'">Dar nuevo ticket a este celular</button>':'')+'</div>'}).join("")||'<p>Todavía no hay tickets.</p>';
     document.getElementById("upd").textContent="Actualizado "+new Date().toLocaleTimeString("es-AR",{timeZone:"America/Argentina/Buenos_Aires",hour12:false})+" · se actualiza solo cada 15 s";
   }catch(e){document.getElementById("upd").textContent="No se pudo actualizar ("+e.message+"). Reintentando..."}
   busy=false}
+document.getElementById("lista").onclick=async ev=>{const b=ev.target.closest("button.rel");if(!b)return;
+  if(!confirm("¿Liberar el celular? El cliente va a poder sacar un ticket nuevo."))return;b.disabled=true;
+  try{const r=await fetch(SB+"/rest/v1/rpc/staff_release_phone",{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify({p_code:b.dataset.code,p_pin:PIN})});
+    const j=await r.json();if(!r.ok||j.error)throw new Error(j.error||j.message||"error");
+    busy=false;cargar()}catch(e){b.disabled=false;alert("No se pudo liberar: "+e.message)}};
 document.getElementById("act").onclick=cargar;
 cargar();setInterval(cargar,15000);
 </script>
