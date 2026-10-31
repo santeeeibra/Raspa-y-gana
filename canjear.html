@@ -53,7 +53,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut
 const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
 const $=id=>document.getElementById(id);
 const PRIZE={NO:{big:"SIN PREMIO",lbl:"Solo corresponde el bono de bienvenida"},EXTRA:{big:"+1 INTENTO",lbl:""},"5":{big:"5% OFF",lbl:"de descuento"},"10":{big:"10% OFF",lbl:"de descuento"},"15":{big:"15% OFF",lbl:"de descuento"},JP:{big:"CORTE GRATIS",lbl:"¡Premio mayor!"}};
-const ERR={clave_incorrecta:"Clave incorrecta.",bloqueado:"Demasiados intentos. Esperá 10 minutos.",no_existe:"No encontramos ese código.",ya_canjeado:"Este ticket ya fue canjeado.",vencido:"Este ticket venció (más de 30 días).",es_intento_extra:"Este código es un intento extra: no se canjea en el local."};
+const ERR={clave_incorrecta:"Clave incorrecta.",bloqueado:"Demasiados intentos. Esperá 10 minutos.",no_existe:"No encontramos ese código.",ya_canjeado:"Este ticket ya fue canjeado.",vencido:"Este ticket venció (más de 30 días).",no_canjeado:"Primero hay que canjear este ticket.",ya_liberado:"Este celular ya fue liberado.",es_intento_extra:"Este código es un intento extra: no se canjea en el local."};
 let pin=localStorage.getItem("lv-pin")||"";
 async function rpc(fn,body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body)});
   if(!r.ok){let m="";try{m=(await r.json()).message}catch(e){}throw new Error(m||"red")}const j=await r.json();if(j&&j.error)throw new Error(j.error);return j}
@@ -66,17 +66,20 @@ $("logout").onclick=()=>{pin="";localStorage.removeItem("lv-pin");$("out").inner
 function fail(e){const m=ERR[e.message]||"No pudimos conectar. Probá de nuevo.";
   if(e.message==="clave_incorrecta"||e.message==="bloqueado"){pin="";localStorage.removeItem("lv-pin");show()}
   say(m,"err")}
+function bindRel(code){const b=$("rel");if(!b)return;b.onclick=async()=>{if(!confirm("¿Liberar el celular? El cliente va a poder sacar un ticket nuevo."))return;b.disabled=true;
+  try{await rpc("staff_release_phone",{p_code:code,p_pin:pin});b.outerHTML='<p class="msg ok">Listo: el cliente ya puede sacar un ticket nuevo.</p>'}catch(e){b.disabled=false;fail(e)}}}
 $("codeForm").onsubmit=async ev=>{ev.preventDefault();const code=$("code").value.trim();if(!code)return;say("Buscando…");
   try{const t=await rpc("lookup_ticket",{p_code:code,p_pin:pin}),P=PRIZE[t.prize]||{big:t.prize,lbl:""};
     let est,btn="";
     if(t.prize==="EXTRA")est='<p class="msg err">Es un intento extra: no se canjea en el local.</p>';
-    else if(t.redeemed_at)est='<p class="msg err"><b>Este ticket ya fue canjeado</b> el '+fmt(t.redeemed_at)+'.</p>';
+    else if(t.redeemed_at)est='<p class="msg err"><b>Este ticket ya fue canjeado</b> el '+fmt(t.redeemed_at)+'.</p>';btn='<button class="ghost" id="rel" type="button">Dar nuevo ticket a este celular</button>';
     else if(t.expired)est='<p class="msg err">Ticket vencido (más de 30 días).</p>';
     else{est='<p class="msg ok">Ticket válido</p>';btn='<button class="go" id="redeem" type="button">Canjear ahora</button>'}
     $("out").innerHTML='<div class="card"><div class="big">'+P.big+'</div><p>'+P.lbl+'</p>'+(t.prize==="EXTRA"?"":'<div class="bono">+ Bono de bienvenida: 25% OFF en el primer corte</div>')+
       '<div class="code">'+t.code+'</div><p>Nº '+t.serial+' · emitido '+fmt(t.created_at)+'</p>'+est+btn+'</div>';
-    if(btn)$("redeem").onclick=async()=>{$("redeem").disabled=true;
-      try{const r=await rpc("redeem_ticket",{p_code:t.code,p_pin:pin});$("out").innerHTML='<div class="card"><div class="big">¡CANJEADO!</div><p class="msg ok">'+P.big+' · '+t.code+'</p><p>'+fmt(r.redeemed_at)+'</p></div>';$("code").value="";$("code").focus()}
+    if(t.redeemed_at&&t.prize!=="EXTRA")bindRel(t.code);
+    if(btn&&$("redeem"))$("redeem").onclick=async()=>{$("redeem").disabled=true;
+      try{const r=await rpc("redeem_ticket",{p_code:t.code,p_pin:pin});$("out").innerHTML='<div class="card"><div class="big">¡CANJEADO!</div><p class="msg ok">'+P.big+' · '+t.code+'</p><p>'+fmt(r.redeemed_at)+'</p><button class="ghost" id="rel" type="button">Dar nuevo ticket a este celular</button></div>';bindRel(t.code);$("code").value="";$("code").focus()}
       catch(e){fail(e)}}
   }catch(e){fail(e)}};
 </script>
