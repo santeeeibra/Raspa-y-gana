@@ -73,7 +73,7 @@ $("codeForm").onsubmit=async ev=>{ev.preventDefault();const code=$("code").value
   try{const t=await rpc("lookup_ticket",{p_code:code,p_pin:pin}),P=PRIZE[t.prize]||{big:t.prize,lbl:""};
     let est,btn="";
     if(t.prize==="EXTRA")est='<p class="msg err">Es un intento extra: no se canjea en el local.</p>';
-    else if(t.redeemed_at)est='<p class="msg err"><b>Este ticket ya fue canjeado</b> el '+fmt(t.redeemed_at)+'.</p>';btn='<button class="ghost" id="rel" type="button">Dar nuevo ticket a este celular</button>';
+    else if(t.redeemed_at){est='<p class="msg err"><b>Este ticket ya fue canjeado</b> el '+fmt(t.redeemed_at)+'.</p>';btn='<button class="ghost" id="rel" type="button">Dar nuevo ticket a este celular</button>'}
     else if(t.expired)est='<p class="msg err">Ticket vencido (más de 30 días).</p>';
     else{est='<p class="msg ok">Ticket válido</p>';btn='<button class="go" id="redeem" type="button">Canjear ahora</button>'}
     $("out").innerHTML='<div class="card"><div class="big">'+P.big+'</div><p>'+P.lbl+'</p>'+(t.prize==="EXTRA"?"":'<div class="bono">+ Bono de bienvenida: 25% OFF en el primer corte</div>')+
