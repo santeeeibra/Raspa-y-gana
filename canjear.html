@@ -53,7 +53,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut
 <script>
 const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
 const $=id=>document.getElementById(id);
-const PRIZE={NO:{big:"SIN PREMIO",lbl:"Solo corresponde el bono de bienvenida"},EXTRA:{big:"+1 INTENTO",lbl:""},"5":{big:"5% OFF",lbl:"de descuento"},"10":{big:"10% OFF",lbl:"de descuento"},"15":{big:"15% OFF",lbl:"de descuento"},JP:{big:"CORTE GRATIS",lbl:"¡Premio mayor!"}};
+const PRIZE={NO:{big:"SIN PREMIO",lbl:"Solo corresponde el bono de bienvenida"},EXTRA:{big:"+1 INTENTO",lbl:""},"5":{big:"5% OFF",lbl:"de descuento"},"10":{big:"10% OFF",lbl:"de descuento"},"15":{big:"15% OFF",lbl:"de descuento"},"25":{big:"25% OFF",lbl:"de descuento"},JP:{big:"CORTE GRATIS",lbl:"¡Premio mayor!"}};
 const ERR={clave_incorrecta:"Clave incorrecta.",bloqueado:"Demasiados intentos. Esperá 10 minutos.",no_existe:"No encontramos ese código.",ya_canjeado:"Este ticket ya fue canjeado.",vencido:"Este ticket venció (más de 30 días).",no_canjeado:"Primero hay que canjear este ticket.",ya_liberado:"Este celular ya fue liberado.",es_intento_extra:"Este código es un intento extra: no se canjea en el local."};
 let pin=localStorage.getItem("lv-pin")||"";
 async function rpc(fn,body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"},body:JSON.stringify(body)});

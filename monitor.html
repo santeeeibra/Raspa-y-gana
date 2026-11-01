@@ -59,7 +59,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:var(--mut
 let PIN="";try{PIN=localStorage.getItem("lv-pin")||""}catch(e){}
 if(!PIN)location.replace("index.html");
 const SB="https://fabakotfzxbwyqztrkoy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhYmFrb3Rmenhid3lxenRya295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDI4MzMsImV4cCI6MjEwNzg3ODgzM30.Zdr8kOdavJeyNQmBHILH0Q2i9oH2Y6OgUlKJPPkmWyw";
-const PR={"5":"5%","10":"10%","15":"15%","JP":"Corte gratis","NO":"Sin premio","EX":"Intento extra","XTRA":"Intento extra"};
+const PR={"5":"5%","10":"10%","15":"15%","25":"25%","JP":"Corte gratis","NO":"Sin premio","EX":"Intento extra","XTRA":"Intento extra"};
 const fmt=d=>new Date(d).toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).replace(", "," ");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let busy=false;

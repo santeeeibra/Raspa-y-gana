@@ -75,6 +75,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 @keyframes flash{10%{opacity:1}100%{opacity:0}}
 .rar{align-self:center;font-family:var(--f-head);font-size:16px;letter-spacing:.2em;padding:5px 14px;border-radius:4px;transform:rotate(3deg);box-shadow:0 0 0 2px var(--night),0 0 0 3px currentColor;color:#fff;background:#3a4152}
 .rar.r10{background:var(--blue)}.rar.r15{background:linear-gradient(90deg,var(--blue),var(--red))}
+.rar.r25{color:var(--night);background:linear-gradient(90deg,#ff8a3d,#ffc83d)}
 .rar.rJP{color:var(--night);background:linear-gradient(90deg,#ffc83d,#fff3b0,#ffc83d);box-shadow:0 0 18px color-mix(in srgb,var(--gold) 60%,transparent)}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:5;width:100%;height:100%}
 .guia-btn{display:block;margin:18px auto 0;max-width:340px;text-align:center;text-decoration:none;font-family:var(--f-head);font-size:22px;letter-spacing:.1em;color:var(--white);
@@ -122,9 +123,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
   <p class="hint"><span><b>Arrastrá</b> el borde para girarlo</span><span><b>Raspá</b> el centro para ver tu premio</span></p>
   <div id="resultBox" hidden></div>
   <div class="odds" aria-label="Premios posibles">
-    <div><b>5%</b><span>off</span></div>
     <div><b>10%</b><span>off</span></div>
     <div><b>15%</b><span>off</span></div>
+    <div><b>25%</b><span>off</span></div>
     <div class="jp"><b>CORTE</b><span>gratis</span></div>
     <div><b>+1</b><span>otro ticket</span></div>
   </div>
@@ -156,6 +157,7 @@ const PRIZES=[
   {id:"5",big:"5%",lbl:"DE DESCUENTO",w:35},
   {id:"10",big:"10%",lbl:"DE DESCUENTO",w:21},
   {id:"15",big:"15%",lbl:"DE DESCUENTO",w:11.9},
+  {id:"25",big:"25%",lbl:"DE DESCUENTO",w:3.3},
   {id:"JP",big:"CORTE GRATIS",lbl:"¡PREMIO MAYOR!",w:2.1,jackpot:true},
 ];
 let TEST=false;
@@ -277,13 +279,13 @@ function makeBoard(){
   const cnt={},list=[],put=k=>{list.push(k);cnt[k]=(cnt[k]||0)+1};
   if(win)for(let i=0;i<3;i++)put(win);
   while((cnt.CUT||0)<2&&win!=="CUT")put("CUT");
-  const pool=["CUT","5","10","15","EXTRA"];
+  const pool=["CUT","10","15","25","EXTRA"];
   while(list.length<9){const k=pool[Math.floor(rnd()*pool.length)];if(k!==win&&(cnt[k]||0)<2)put(k)}
   for(let i=8;i>0;i--){const j=Math.floor(rnd()*(i+1));[list[i],list[j]]=[list[j],list[i]]}
   return list;
 }
 // bolitas metálicas con brillo holográfico; cada premio tiene su color
-const BALL={ "5":["#d8fff6","#3fc9b0","#0d4a44"], "10":["#dbe9ff","#4d84ff","#14285e"], "15":["#ffe0f2","#e0559e","#5a1238"],
+const BALL={ "5":["#d8fff6","#3fc9b0","#0d4a44"], "10":["#dbe9ff","#4d84ff","#14285e"], "15":["#ffe0f2","#e0559e","#5a1238"], "25":["#fff0d0","#ff8a3d","#5e2308"],
   CUT:["#fff6c2","#e8b02a","#5c3a02"], EXTRA:["#f0e0ff","#9b5cff","#33115e"] };
 function drawBall(ctx,cx,cy,r,k){
   const cut=k==="CUT",[hi,mid,lo]=BALL[k];
@@ -551,7 +553,7 @@ function reveal(){revealed=true;mode=null;state.done=true;store.set({phone:state
   spin=Math.PI*2*(prize.jackpot?2:1);burst(prize.none?0:prize.jackpot?420:180);showResult();
   setTimeout(()=>$("resultBox").scrollIntoView({behavior:"smooth",block:"center"}),900)}
 function showResult(){const b=$("resultBox");b.className="result";b.hidden=false;
-  const rar=prize.none||prize.extra?"":`<div class="rar r${prize.id}">${{"5":"★ COMÚN","10":"★★ RARA","15":"★★★ ÉPICA","JP":"★★★★ LEGENDARIA"}[prize.id]}</div>`;
+  const rar=prize.none||prize.extra?"":`<div class="rar r${prize.id}">${{"5":"★ COMÚN","10":"★★ RARA","15":"★★★ ÉPICA","25":"★★★★ ÉLITE","JP":"★★★★★ LEGENDARIA"}[prize.id]}</div>`;
   const title=prize.extra?"¡Ganaste un intento más!":prize.none?"Esta vez no hubo premio":prize.jackpot?"¡Ganaste un corte gratis!":"¡Ganaste "+prize.big+" de descuento!";
   const bono=`<div class="bono"><b>Bono de bienvenida: 25% OFF</b><span>en tu primer corte${prize.none?" · ¡tu premio de consuelo!":""}</span></div>`;
   const share=`<a class="guia-btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("Te regalo un ticket de Raspá y Ganá de Las Vegas Barbería: podés ganar hasta un corte gratis. Si venís solo y es tu primera vez, tenés 25% OFF de bienvenida. Y si venimos juntos, 2 cortes por $32.000. "+location.origin+location.pathname)}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:10px"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 3v12M7.5 7.5 12 3l4.5 4.5"/></svg>Pasale un ticket a un amigo</a>`;
