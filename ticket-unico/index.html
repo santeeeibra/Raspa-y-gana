@@ -532,8 +532,14 @@ function suspense(){if(revealed)return;revealed=true;mode=null;rz.classList.remo
 function reveal(){revealed=true;mode=null;state.done=true;store.set({phone:state.phone,done:true});
   for(const c of [coat,coatMR,coatE])c.getContext("2d").clearRect(0,0,CW,CH);dirty=true;
   flash=1;$("flash").classList.add("on");haptic([30,40,80]);setTimeout(()=>haptic(60),180);if(prize.jackpot)setTimeout(()=>haptic(60),360);ding(prize.jackpot);
-  spin=Math.PI*2*(prize.jackpot?2:1);burst(prize.none?0:prize.jackpot?420:180);showResult();
+  spin=Math.PI*2*(prize.jackpot?2:1);burst(prize.none?0:prize.jackpot?420:180);avisar();showResult();
   setTimeout(()=>$("resultBox").scrollIntoView({behavior:"smooth",block:"center"}),900)}
+/* aviso único al dueño por ntfy.sh (no se guarda nada en ningún servidor propio) */
+function avisar(){try{if(localStorage.getItem("lv-avisado"))return}catch(e){}
+  const hora=new Date().toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires"});
+  fetch("https://ntfy.sh/",{method:"POST",body:JSON.stringify({topic:"lv-lOcB7Q86v9xNGLycKcBxrAWR",title:"🎟️ Raspó el ticket",tags:["tada"],
+    message:"Premio: "+(prize.none?"sin premio":prize.big+" de descuento")+"\nCódigo: "+state.code+"\nSerie: "+state.serial+"\nHora: "+hora+"\nDispositivo: "+navigator.userAgent.slice(0,90)})})
+  .then(r=>{if(r.ok)try{localStorage.setItem("lv-avisado","1")}catch(e){}}).catch(()=>{})}
 function showResult(){const b=$("resultBox");b.className="result";b.hidden=false;
   const rar=prize.none||prize.extra?"":`<div class="rar r${prize.id}">${{"5":"★ COMÚN","10":"★★ RARA","15":"★★★ ÉPICA","20":"★★★★ ÉPICA+","25":"★★★★★ LEGENDARIA","JP":"★★★★ LEGENDARIA"}[prize.id]}</div>`;
   const title=prize.extra?"¡Ganaste un intento más!":prize.none?"Esta vez no hubo premio":prize.jackpot?"¡Ganaste un corte gratis!":"¡Ganaste "+prize.big+" de descuento!";
