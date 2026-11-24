@@ -547,6 +547,7 @@ function showResult(){const b=$("resultBox");b.className="result";b.hidden=false
   b.innerHTML=`${rar}<h2>${title}</h2>${prize.none?"<p>Pero no te vas con las manos vacías:</p>":""}${bono}
    ${state.redeemed?`<p><b>Este ticket ya fue canjeado.</b></p>`:`<p>Mostrá este código en <b>Las Vegas Barbería</b> para canjearlo:</p>`}
    <div class="code" id="code">${state.code}</div><button id="copy">Copiar código</button>
+   <a class="guia-btn" target="_blank" rel="noopener" href="https://wa.me/5492920605208?text=${encodeURIComponent("Hola! Ya raspé mi ticket 🎟️ Me tocó "+prize.big+(prize.none?"":" de descuento")+". Código: "+state.code)}">Avisar por WhatsApp que raspé</a>
    <p style="font-size:13px;color:var(--muted)">Sacale captura de pantalla para no perderlo.</p>
    ${state.test?`<button id="again">Probar otro ticket (modo prueba)</button><a class="demo" href="admin.html" style="align-self:center">← Volver al panel de control</a>`:""}`+share;
   if(state.test)$("again").onclick=()=>location.reload();
